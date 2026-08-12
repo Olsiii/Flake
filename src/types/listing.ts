@@ -80,3 +80,65 @@ export interface MapBounds {
   maxLng: number;
   maxLat: number;
 }
+
+export interface Agent {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  photo_url: string | null;
+  bio: string | null;
+}
+
+export interface ListingImage {
+  id: string;
+  url: string;
+  sort_order: number;
+  is_floor_plan: boolean;
+  is_3d_tour: boolean;
+}
+
+export interface Neighborhood {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  description: string | null;
+  crime_score: number | null;
+  walk_score: number | null;
+  local_insights: string[];
+}
+
+export interface ListingDetail {
+  id: string;
+  mls_id: string | null;
+  title: string;
+  description: string | null;
+  price: number;
+  status: ListingStatus;
+  property_type: PropertyType;
+  beds: number | null;
+  baths: number | null;
+  sqft: number | null;
+  lot_size: number | null;
+  year_built: number | null;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  hoa_fee: number | null;
+  days_on_market: number;
+  is_hot_home: boolean;
+  created_at: string;
+  images: ListingImage[];
+  agent: Agent | null;
+  neighborhood: Neighborhood | null;
+}
+
+export interface ValuationResult {
+  estimatedValue: number;
+  confidenceLow: number;
+  confidenceHigh: number;
+  calculatedAt: string;
+  compCount: number;
+}

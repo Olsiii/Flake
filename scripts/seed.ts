@@ -50,6 +50,152 @@ const AGENT_COUNT = 10;
 const HOT_HOME_FRACTION = 0.1;
 const IMAGE_CONCURRENCY = 6;
 
+// Hand-written per-city content for the listing page's neighborhood card —
+// there's no live data source for this yet, so it's "editable seed content"
+// per the brief, matched to a listing by city/state at query time.
+const NEIGHBORHOODS = [
+  {
+    city: "Austin",
+    state: "TX",
+    name: "Central Austin",
+    description:
+      "A dense mix of bungalows and new builds close to downtown, UT, and the greenbelt trail system.",
+    crime_score: 32,
+    walk_score: 68,
+    local_insights: [
+      "Walkable to South Congress shops and restaurants",
+      "Zoned for Austin ISD's highest-rated elementary schools",
+      "Frequent live music venues within a few blocks",
+    ],
+  },
+  {
+    city: "Denver",
+    state: "CO",
+    name: "Central Denver",
+    description:
+      "Tree-lined streets near City Park with quick access to downtown and the Rockies foothills.",
+    crime_score: 38,
+    walk_score: 71,
+    local_insights: [
+      "10-minute drive to downtown Denver",
+      "Light rail station within walking distance",
+      "Home to several highly-rated city parks",
+    ],
+  },
+  {
+    city: "Seattle",
+    state: "WA",
+    name: "Capitol Hill Area",
+    description:
+      "Dense, walkable neighborhood with a mix of historic homes and modern condos near downtown Seattle.",
+    crime_score: 45,
+    walk_score: 89,
+    local_insights: [
+      "One of the most walkable neighborhoods in the city",
+      "Excellent public transit access to downtown",
+      "Active nightlife and dining scene",
+    ],
+  },
+  {
+    city: "Miami",
+    state: "FL",
+    name: "Coral Gables Adjacent",
+    description:
+      "Mediterranean-influenced streets with mature tree canopy, close to shops and top-rated schools.",
+    crime_score: 27,
+    walk_score: 62,
+    local_insights: [
+      "Highly-rated public and private school options nearby",
+      "15 minutes to Miami International Airport",
+      "Frequent flooding advisories during hurricane season",
+    ],
+  },
+  {
+    city: "Chicago",
+    state: "IL",
+    name: "North Side",
+    description:
+      "Classic Chicago bungalows and greystones a short train ride from the Loop.",
+    crime_score: 41,
+    walk_score: 82,
+    local_insights: [
+      "CTA Brown/Red Line access within a few blocks",
+      "Lake Michigan lakefront trail nearby",
+      "Strong farmers market and local business scene",
+    ],
+  },
+  {
+    city: "Nashville",
+    state: "TN",
+    name: "East Nashville",
+    description:
+      "One of the city's fastest-growing areas, known for its mix of historic homes and new construction.",
+    crime_score: 43,
+    walk_score: 58,
+    local_insights: [
+      "Rapidly appreciating home values over the past 5 years",
+      "Walkable pockets around Five Points",
+      "10 minutes from downtown Nashville and the airport",
+    ],
+  },
+  {
+    city: "Phoenix",
+    state: "AZ",
+    name: "Central Phoenix",
+    description:
+      "Established neighborhood with mature landscaping, close to light rail and downtown.",
+    crime_score: 48,
+    walk_score: 54,
+    local_insights: [
+      "Light rail access to downtown and Tempe",
+      "Extreme summer heat — check cooling costs before buying",
+      "Growing restaurant and arts district nearby",
+    ],
+  },
+  {
+    city: "Raleigh",
+    state: "NC",
+    name: "Inside the Beltline",
+    description:
+      "Close-in Raleigh neighborhoods with easy access to downtown, NC State, and greenway trails.",
+    crime_score: 30,
+    walk_score: 49,
+    local_insights: [
+      "Zoned for well-regarded Wake County schools",
+      "Extensive greenway trail network for running/biking",
+      "Short commute to Research Triangle Park",
+    ],
+  },
+  {
+    city: "Portland",
+    state: "OR",
+    name: "Inner Southeast",
+    description:
+      "Bike-friendly streets with a strong independent business scene, minutes from downtown Portland.",
+    crime_score: 35,
+    walk_score: 76,
+    local_insights: [
+      "Extensive dedicated bike lane network",
+      "Walkable to Hawthorne and Division St. shops",
+      "No sales tax in Oregon",
+    ],
+  },
+  {
+    city: "Boston",
+    state: "MA",
+    name: "Greater Boston",
+    description:
+      "Historic housing stock with strong public transit access across Boston's inner neighborhoods.",
+    crime_score: 33,
+    walk_score: 83,
+    local_insights: [
+      "MBTA subway access within walking distance",
+      "Close to multiple top-ranked universities and hospitals",
+      "Older housing stock — budget for maintenance/updates",
+    ],
+  },
+] as const;
+
 async function mapWithConcurrency<T, R>(
   items: T[],
   concurrency: number,
@@ -201,6 +347,13 @@ async function main() {
   await supabase.from("listing_images").delete().neq("id", NIL_UUID);
   await supabase.from("listings").delete().neq("id", NIL_UUID);
   await supabase.from("agents").delete().neq("id", NIL_UUID);
+  await supabase.from("neighborhoods").delete().neq("id", NIL_UUID);
+
+  console.log(`Inserting ${NEIGHBORHOODS.length} neighborhoods...`);
+  const { error: neighborhoodsError } = await supabase
+    .from("neighborhoods")
+    .insert(NEIGHBORHOODS);
+  if (neighborhoodsError) throw neighborhoodsError;
 
   console.log(`Inserting ${AGENT_COUNT} agents...`);
   const { data: agents, error: agentsError } = await supabase
@@ -245,9 +398,12 @@ async function main() {
   }
 
   console.log("\nDone.");
-  console.log(`  agents:   ${agentIds.length}`);
-  console.log(`  listings: ${listings.length} (${hotHomeCount} hot homes)`);
-  console.log(`  images:   ${totalImages}`);
+  console.log(`  neighborhoods: ${NEIGHBORHOODS.length}`);
+  console.log(`  agents:        ${agentIds.length}`);
+  console.log(
+    `  listings:      ${listings.length} (${hotHomeCount} hot homes)`,
+  );
+  console.log(`  images:        ${totalImages}`);
 }
 
 main().catch((err) => {
