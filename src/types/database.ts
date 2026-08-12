@@ -2,13 +2,39 @@ import type { PropertyType, SearchListing, SortBy } from "./listing";
 
 /**
  * Hand-written stub, not `supabase gen types typescript` output — there's
- * no live DB connection to generate against yet. Only covers what the
- * client actually calls (the two search RPCs). Regenerate for real once
- * Supabase creds exist, and this file can go away.
+ * no Supabase CLI in this setup. Only covers what the browser client
+ * actually calls. Worth replacing with real codegen (or an introspection
+ * script against DATABASE_URL) once the table surface stops growing every
+ * feature — right now that's a bigger lift than the payoff.
  */
 export interface Database {
   public: {
-    Tables: Record<string, never>;
+    Tables: {
+      saved_listings: {
+        Row: SavedListingRow;
+        Insert: SavedListingInsert;
+        Update: Partial<SavedListingInsert>;
+        Relationships: [];
+      };
+      saved_searches: {
+        Row: SavedSearchRow;
+        Insert: SavedSearchInsert;
+        Update: Partial<SavedSearchInsert>;
+        Relationships: [];
+      };
+      tour_requests: {
+        Row: TourRequestRow;
+        Insert: TourRequestInsert;
+        Update: Partial<TourRequestInsert>;
+        Relationships: [];
+      };
+      listings: {
+        Row: ListingLookupRow;
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+    };
     Views: Record<string, never>;
     Functions: {
       search_listings_bbox: {
@@ -17,6 +43,10 @@ export interface Database {
       };
       search_listings_polygon: {
         Args: SearchListingsPolygonArgs;
+        Returns: SearchListing[];
+      };
+      my_saved_listings: {
+        Args: Record<string, never>;
         Returns: SearchListing[];
       };
     };
@@ -49,4 +79,77 @@ export interface SearchListingsBboxArgs extends SearchListingsFilterArgs {
 
 export interface SearchListingsPolygonArgs extends SearchListingsFilterArgs {
   p_polygon_geojson: string;
+}
+
+interface SavedListingRow {
+  [key: string]: unknown;
+  id: string;
+  user_id: string;
+  listing_id: string;
+  created_at: string;
+}
+
+interface SavedListingInsert {
+  [key: string]: unknown;
+  id?: string;
+  user_id: string;
+  listing_id: string;
+  created_at?: string;
+}
+
+interface SavedSearchRow {
+  [key: string]: unknown;
+  id: string;
+  user_id: string;
+  name: string;
+  filters: Record<string, unknown>;
+  alert_frequency: "off" | "instant" | "daily" | "weekly";
+  last_checked_at: string | null;
+  created_at: string;
+}
+
+interface SavedSearchInsert {
+  [key: string]: unknown;
+  id?: string;
+  user_id: string;
+  name: string;
+  filters: Record<string, unknown>;
+  alert_frequency?: "off" | "instant" | "daily" | "weekly";
+  last_checked_at?: string | null;
+  created_at?: string;
+}
+
+interface TourRequestRow {
+  [key: string]: unknown;
+  id: string;
+  listing_id: string;
+  user_id: string | null;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  requested_time: string;
+  status: "requested" | "confirmed" | "completed" | "cancelled";
+  created_at: string;
+}
+
+interface TourRequestInsert {
+  [key: string]: unknown;
+  id?: string;
+  listing_id: string;
+  user_id?: string | null;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  requested_time: string;
+  status?: "requested" | "confirmed" | "completed" | "cancelled";
+  created_at?: string;
+}
+
+interface ListingLookupRow {
+  [key: string]: unknown;
+  id: string;
+  title: string;
+  address: string;
+  city: string;
+  state: string;
 }

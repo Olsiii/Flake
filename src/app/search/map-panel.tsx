@@ -19,6 +19,9 @@ interface MapPanelProps {
   onPinHover: (id: string | null) => void;
   onPolygonChange: (geoJson: string | null) => void;
   hasPolygon: boolean;
+  /** Hydrates the initial viewport (e.g. from a saved search). Only read
+   * once, at mount — later changes don't re-fly the map. */
+  initialBounds?: MapBounds | null;
 }
 
 function toFeatureCollection(
@@ -60,6 +63,7 @@ export function MapPanel({
   onPinHover,
   onPolygonChange,
   hasPolygon,
+  initialBounds,
 }: MapPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -67,6 +71,7 @@ export function MapPanel({
   const loadedRef = useRef(false);
   const pendingListingsRef = useRef<SearchListing[]>(listings);
   const highlightedIdsRef = useRef<Set<string>>(new Set());
+  const initialBoundsRef = useRef(initialBounds);
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
   // Callbacks change identity across renders (they close over parent state);
@@ -86,11 +91,18 @@ export function MapPanel({
     if (!token || !containerRef.current) return;
 
     mapboxgl.accessToken = token;
+    const bounds = initialBoundsRef.current;
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: US_CENTER,
-      zoom: 3.8,
+      ...(bounds
+        ? {
+            bounds: [
+              [bounds.minLng, bounds.minLat],
+              [bounds.maxLng, bounds.maxLat],
+            ] as [[number, number], [number, number]],
+          }
+        : { center: US_CENTER, zoom: 3.8 }),
     });
     mapRef.current = map;
 

@@ -5,11 +5,14 @@ import {
   PROPERTY_TYPES,
   SORT_OPTIONS,
   type ListingFilters,
+  type MapBounds,
   type PropertyType,
 } from "@/types/listing";
+import { SaveSearchButton } from "./save-search-button";
 
 interface FilterBarProps {
   filters: ListingFilters;
+  bounds: MapBounds | null;
   onChange: (filters: ListingFilters) => void;
 }
 
@@ -22,7 +25,7 @@ function numberOrNull(value: string): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
-export function FilterBar({ filters, onChange }: FilterBarProps) {
+export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
   function set<K extends keyof ListingFilters>(
     key: K,
     value: ListingFilters[K],
@@ -172,13 +175,16 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         </select>
       </Field>
 
-      <button
-        type="button"
-        onClick={() => onChange(DEFAULT_FILTERS)}
-        className="ml-auto self-center text-xs font-medium text-blue-600 hover:underline"
-      >
-        Reset filters
-      </button>
+      <div className="ml-auto flex items-center gap-3 self-center">
+        <SaveSearchButton filters={filters} bounds={bounds} />
+        <button
+          type="button"
+          onClick={() => onChange(DEFAULT_FILTERS)}
+          className="text-xs font-medium text-blue-600 hover:underline"
+        >
+          Reset filters
+        </button>
+      </div>
 
       <style jsx>{`
         .input {

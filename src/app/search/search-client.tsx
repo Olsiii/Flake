@@ -1,23 +1,31 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   DEFAULT_FILTERS,
   type ListingFilters,
   type MapBounds,
 } from "@/types/listing";
 import { useSearchListings } from "./use-search-listings";
+import { useSavedListingIds } from "@/hooks/use-saved-listings";
 import { FilterBar } from "./filter-bar";
 import { ResultsGrid } from "./results-grid";
+import { paramsToFilters } from "./url-state";
 
 // mapbox-gl touches the DOM at module scope; keep it out of the server bundle.
 const MapPanel = dynamic(() => import("./map-panel").then((m) => m.MapPanel), {
   ssr: false,
 });
 
-export function SearchClient() {
-  const [filters, setFilters] = useState<ListingFilters>(DEFAULT_FILTERS);
+function SearchClientInner() {
+  const searchParams = useSearchParams();
+  const initial = useMemo(() => paramsToFilters(searchParams), [searchParams]);
+
+  const [filters, setFilters] = useState<ListingFilters>(
+    initial.bounds ? initial.filters : DEFAULT_FILTERS,
+  );
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const [polygonGeoJson, setPolygonGeoJson] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -29,6 +37,7 @@ export function SearchClient() {
     polygonGeoJson,
     filters,
   });
+  const { savedIds, toggleSave } = useSavedListingIds();
 
   const handlePinClick = useCallback((id: string) => {
     setSelectedId(id);
@@ -41,7 +50,7 @@ export function SearchClient() {
 
   return (
     <div className="flex h-dvh flex-col">
-      <FilterBar filters={filters} onChange={setFilters} />
+      <FilterBar filters={filters} bounds={bounds} onChange={setFilters} />
 
       <div className="relative flex flex-1 overflow-hidden">
         <div
@@ -58,6 +67,7 @@ export function SearchClient() {
             onPinHover={setHoveredId}
             onPolygonChange={setPolygonGeoJson}
             hasPolygon={polygonGeoJson != null}
+            initialBounds={initial.bounds}
           />
         </div>
 
@@ -72,8 +82,10 @@ export function SearchClient() {
             error={error}
             selectedId={selectedId}
             scrollToId={selectedId}
+            savedIds={savedIds}
             onHover={setHoveredId}
             onSelect={handleCardSelect}
+            onToggleSave={toggleSave}
           />
         </div>
       </div>
@@ -86,5 +98,13 @@ export function SearchClient() {
         {mobileView === "list" ? "Map" : "List"}
       </button>
     </div>
+  );
+}
+
+export function SearchClient() {
+  return (
+    <Suspense>
+      <SearchClientInner />
+    </Suspense>
   );
 }

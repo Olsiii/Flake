@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import type { SearchListing } from "@/types/listing";
 
 interface ListingCardProps {
   listing: SearchListing;
-  selected: boolean;
-  onHover: (id: string | null) => void;
-  onSelect: (id: string) => void;
+  selected?: boolean;
+  saved: boolean;
+  onHover?: (id: string | null) => void;
+  onSelect?: (id: string) => void;
+  onToggleSave: (id: string) => void;
 }
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
@@ -24,26 +25,25 @@ function formatPrice(listing: SearchListing): string {
 export function ListingCard({
   listing,
   selected,
+  saved,
   onHover,
   onSelect,
+  onToggleSave,
 }: ListingCardProps) {
-  const [saveHint, setSaveHint] = useState(false);
-
   function handleSaveClick(e: React.MouseEvent) {
     e.stopPropagation();
-    // Auth lands in M5 — for now, saving just explains itself instead of
-    // silently doing nothing.
-    setSaveHint(true);
-    setTimeout(() => setSaveHint(false), 1800);
+    onToggleSave(listing.id);
   }
 
   return (
     <div
       data-listing-id={listing.id}
-      onMouseEnter={() => onHover(listing.id)}
-      onMouseLeave={() => onHover(null)}
-      onClick={() => onSelect(listing.id)}
-      className={`group cursor-pointer overflow-hidden rounded-lg border bg-white transition-shadow dark:bg-neutral-900 ${
+      onMouseEnter={() => onHover?.(listing.id)}
+      onMouseLeave={() => onHover?.(null)}
+      onClick={() => onSelect?.(listing.id)}
+      className={`group overflow-hidden rounded-lg border bg-white transition-shadow dark:bg-neutral-900 ${
+        onSelect ? "cursor-pointer" : ""
+      } ${
         selected
           ? "border-blue-600 ring-2 ring-blue-600/30"
           : "border-neutral-200 hover:shadow-md dark:border-neutral-800"
@@ -73,17 +73,13 @@ export function ListingCard({
         <button
           type="button"
           onClick={handleSaveClick}
-          title="Sign in to save homes"
-          className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-neutral-500 shadow hover:text-red-500 dark:bg-neutral-900/90"
+          aria-label={saved ? "Remove from saved homes" : "Save home"}
+          className={`absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow hover:text-red-500 dark:bg-neutral-900/90 ${
+            saved ? "text-red-500" : "text-neutral-500"
+          }`}
         >
-          <HeartIcon />
+          <HeartIcon filled={saved} />
         </button>
-
-        {saveHint && (
-          <div className="absolute right-2 bottom-2 rounded bg-neutral-900/90 px-2 py-1 text-[11px] text-white">
-            Sign in to save homes
-          </div>
-        )}
       </div>
 
       <div className="p-3">
@@ -108,9 +104,13 @@ export function ListingCard({
   );
 }
 
-function HeartIcon() {
+function HeartIcon({ filled }: { filled: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      className="h-4 w-4"
+    >
       <path
         d="M12 20s-7-4.35-9.5-8.5C.87 8.1 2.5 5 5.8 5c1.9 0 3.3 1 4.2 2.4C10.9 6 12.3 5 14.2 5c3.3 0 4.93 3.1 3.3 6.5C19 15.65 12 20 12 20Z"
         stroke="currentColor"

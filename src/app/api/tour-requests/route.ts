@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { getSupabaseServer } from "@/lib/supabase-server";
 import {
   getAgentNotificationEmail,
   getResendClient,
@@ -51,6 +52,20 @@ export async function POST(request: Request) {
   let listingTitle: string;
   try {
     const supabase = getSupabaseAdmin();
+
+    // Attach the signed-in user (if any) so the request shows up on their
+    // dashboard — the form itself still works fully signed-out.
+    let userId: string | null = null;
+    try {
+      const serverClient = await getSupabaseServer();
+      const {
+        data: { user },
+      } = await serverClient.auth.getUser();
+      userId = user?.id ?? null;
+    } catch {
+      // No session cookie / Supabase not configured — proceed anonymously.
+    }
+
     const { data: listing, error: listingError } = await supabase
       .from("listings")
       .select("title")
@@ -69,6 +84,7 @@ export async function POST(request: Request) {
 
     const { error: insertError } = await supabase.from("tour_requests").insert({
       listing_id: body.listingId,
+      user_id: userId,
       name: body.name.trim(),
       email: body.email.trim(),
       phone: body.phone?.trim() || null,

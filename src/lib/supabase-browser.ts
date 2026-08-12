@@ -1,9 +1,15 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 
 let client: SupabaseClient<Database> | null = null;
 
-/** Anon-key Supabase client — safe to use from client components. */
+/**
+ * Anon-key Supabase client for client components. Uses @supabase/ssr's
+ * cookie-based storage (not plain @supabase/supabase-js) so the session is
+ * readable server-side too — middleware and Server Components need the
+ * same session the browser just set.
+ */
 export function getSupabaseBrowser() {
   if (client) return client;
 
@@ -15,6 +21,6 @@ export function getSupabaseBrowser() {
     );
   }
 
-  client = createClient<Database>(url, anonKey);
+  client = createBrowserClient<Database>(url, anonKey);
   return client;
 }

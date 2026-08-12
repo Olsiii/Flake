@@ -10,8 +10,10 @@ interface ResultsGridProps {
   error: string | null;
   selectedId: string | null;
   scrollToId: string | null;
+  savedIds: Set<string>;
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
+  onToggleSave: (id: string) => void;
 }
 
 export function ResultsGrid({
@@ -20,8 +22,10 @@ export function ResultsGrid({
   error,
   selectedId,
   scrollToId,
+  savedIds,
   onHover,
   onSelect,
+  onToggleSave,
 }: ResultsGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -53,8 +57,10 @@ export function ResultsGrid({
             key={listing.id}
             listing={listing}
             selected={listing.id === selectedId}
+            saved={savedIds.has(listing.id)}
             onHover={onHover}
             onSelect={onSelect}
+            onToggleSave={onToggleSave}
           />
         ))}
       </div>
