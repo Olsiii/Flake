@@ -1,6 +1,7 @@
 // Seeds ~75 mock listings across a handful of real US cities (so map search
-// has believable clusters), each with photos uploaded to R2 and 10 mock
-// agents to assign them to. Rerunnable: clears previously seeded rows first.
+// has believable clusters), each with photos uploaded to Supabase Storage
+// and 10 mock agents to assign them to. Rerunnable: clears previously
+// seeded rows first.
 //
 // Photos come from picsum.photos (free, no API key, no rate-limit auth) —
 // there's no free *real-estate-specific* photo API left that doesn't need a
@@ -9,9 +10,12 @@
 // photography. They're fetched at seed time and never committed to git.
 import { config } from "dotenv";
 import { faker } from "@faker-js/faker";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getR2Client, getR2BucketName, getR2PublicUrl } from "../src/lib/r2";
+import {
+  getListingImagesBucket,
+  getListingImagePublicUrl,
+} from "../src/lib/storage";
 import { getSupabaseAdmin } from "../src/lib/supabase-admin";
+import { slugify } from "../src/lib/slug";
 
 config({ path: ".env.local" });
 
@@ -302,8 +306,7 @@ function buildListing(agentId: string) {
 }
 
 async function uploadListingImages(listingId: string, count: number) {
-  const client = getR2Client();
-  const bucket = getR2BucketName();
+  const bucket = getListingImagesBucket();
 
   const uploads = await mapWithConcurrency(
     Array.from({ length: count }, (_, i) => i),
@@ -317,18 +320,15 @@ async function uploadListingImages(listingId: string, count: number) {
       const buffer = Buffer.from(await res.arrayBuffer());
       const key = `listings/${listingId}/${index}.jpg`;
 
-      await client.send(
-        new PutObjectCommand({
-          Bucket: bucket,
-          Key: key,
-          Body: buffer,
-          ContentType: "image/jpeg",
-        }),
-      );
+      const { error } = await bucket.upload(key, buffer, {
+        contentType: "image/jpeg",
+        upsert: true,
+      });
+      if (error) throw error;
 
       return {
         listing_id: listingId,
-        url: getR2PublicUrl(key),
+        url: getListingImagePublicUrl(key),
         sort_order: index,
         is_floor_plan: index === count - 1,
         is_3d_tour: index === count - 2 && Math.random() < 0.4,
@@ -350,10 +350,18 @@ async function main() {
   await supabase.from("neighborhoods").delete().neq("id", NIL_UUID);
 
   console.log(`Inserting ${NEIGHBORHOODS.length} neighborhoods...`);
-  const { error: neighborhoodsError } = await supabase
+  const neighborhoodRows = NEIGHBORHOODS.map((n) => ({
+    ...n,
+    slug: slugify(n.name),
+  }));
+  const { data: neighborhoods, error: neighborhoodsError } = await supabase
     .from("neighborhoods")
-    .insert(NEIGHBORHOODS);
+    .insert(neighborhoodRows)
+    .select("id, city, state");
   if (neighborhoodsError) throw neighborhoodsError;
+  const neighborhoodIdByCity = new Map(
+    neighborhoods.map((n) => [`${n.city}|${n.state}`, n.id as string]),
+  );
 
   console.log(`Inserting ${AGENT_COUNT} agents...`);
   const { data: agents, error: agentsError } = await supabase
@@ -364,9 +372,14 @@ async function main() {
   const agentIds = agents.map((a) => a.id as string);
 
   console.log(`Inserting ${LISTING_COUNT} listings...`);
-  const listingRows = Array.from({ length: LISTING_COUNT }, () =>
-    buildListing(faker.helpers.arrayElement(agentIds)),
-  );
+  const listingRows = Array.from({ length: LISTING_COUNT }, () => {
+    const row = buildListing(faker.helpers.arrayElement(agentIds));
+    return {
+      ...row,
+      neighborhood_id:
+        neighborhoodIdByCity.get(`${row.city}|${row.state}`) ?? null,
+    };
+  });
 
   const hotHomeCount = Math.round(LISTING_COUNT * HOT_HOME_FRACTION);
   for (const row of faker.helpers.arrayElements(listingRows, hotHomeCount)) {
@@ -380,7 +393,9 @@ async function main() {
     .select("id");
   if (listingsError) throw listingsError;
 
-  console.log(`Uploading photos to R2 for ${listings.length} listings...`);
+  console.log(
+    `Uploading photos to Supabase Storage for ${listings.length} listings...`,
+  );
   let totalImages = 0;
   for (const [i, listing] of listings.entries()) {
     const imageCount = faker.number.int({ min: 15, max: 30 });

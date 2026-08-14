@@ -24,6 +24,8 @@ function filterParams(filters: ListingFilters) {
     p_max_year_built: filters.maxYearBuilt,
     p_hoa_allowed: filters.hoaAllowed,
     p_sort_by: filters.sortBy,
+    p_city: filters.city,
+    p_keyword: filters.keyword,
   };
 }
 

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useUser } from "@/hooks/use-user";
+import { EmptyState } from "@/components/empty-state";
+import { ListRowsSkeleton } from "@/components/skeleton";
 
 interface TourRequestRow {
   id: string;
@@ -21,10 +23,11 @@ interface ListingLookup {
 
 const STATUS_STYLES: Record<TourRequestRow["status"], string> = {
   requested:
-    "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-  confirmed: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
+    "bg-warning-100 text-warning-800 dark:bg-warning-950 dark:text-warning-300",
+  confirmed:
+    "bg-accent-100 text-accent-800 dark:bg-accent-950 dark:text-accent-300",
   completed:
-    "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300",
+    "bg-success-100 text-success-800 dark:bg-success-950 dark:text-success-300",
   cancelled:
     "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400",
 };
@@ -67,14 +70,18 @@ export function TourRequestsTab() {
       });
   }, [user]);
 
-  if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (requests === null)
-    return <p className="text-sm text-neutral-500">Loading…</p>;
+  if (error)
+    return (
+      <p className="text-danger-600 dark:text-danger-400 text-sm">{error}</p>
+    );
+  if (requests === null) return <ListRowsSkeleton count={3} />;
   if (requests.length === 0) {
     return (
-      <p className="text-sm text-neutral-500">
-        No tour requests yet — request a tour from any listing page.
-      </p>
+      <EmptyState
+        title="No tour requests yet"
+        description="Request a tour from any listing page and it'll show up here."
+        action={{ label: "Start browsing", href: "/search" }}
+      />
     );
   }
 

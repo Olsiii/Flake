@@ -1,8 +1,88 @@
 @import "tailwindcss";
 
+@theme {
+  /* Flake brand palette. `neutral` is overridden below (warm, Bone →
+     Ink Black) so every existing neutral-* usage across the app — text,
+     borders, surfaces, dark-mode — picks up the brand for free. `accent`
+     (Ember Gold) stays the decorative color for icons/hover/borders/
+     focus rings; `brand` (Deep Ember) is reserved for hero sections and
+     strong CTAs (.btn-primary) so gold stays minimal per the design
+     brief. Functional colors (danger/success/warning below) are
+     deliberately untouched — they're system feedback, not brand. */
+  --color-accent-50: #fbf4e7;
+  --color-accent-100: #f6e6c8;
+  --color-accent-200: #eace9a;
+  --color-accent-300: #dcb16d;
+  --color-accent-400: #cc9b50;
+  --color-accent-500: #bb863b;
+  --color-accent-600: #a06f2c;
+  --color-accent-700: #815824;
+  --color-accent-800: #63431b;
+  --color-accent-900: #453014;
+  --color-accent-950: #2b1e0c;
+
+  /* Deep Ember — hero sections and strong CTAs only. */
+  --color-brand-50: #fbece9;
+  --color-brand-100: #f2d0c8;
+  --color-brand-200: #e2a594;
+  --color-brand-300: #c87c64;
+  --color-brand-400: #9c5038;
+  --color-brand-500: #6e2a1e;
+  --color-brand-600: #5e2419;
+  --color-brand-700: #4c1d14;
+  --color-brand-800: #39160f;
+  --color-brand-900: #260f0a;
+  --color-brand-950: #180906;
+
+  /* Warm neutral ramp built from the brand's own Bone/Sand/Slate/Ink
+     Black tones instead of Tailwind's default cool gray, so borders,
+     secondary text, and surfaces read as part of the same palette. */
+  --color-neutral-50: #fcfaf6;
+  --color-neutral-100: #f4eee4;
+  --color-neutral-200: #ebe1cf;
+  --color-neutral-300: #d9c7a3;
+  --color-neutral-400: #b7a87e;
+  --color-neutral-500: #8e8267;
+  --color-neutral-600: #5b564e;
+  --color-neutral-700: #46423b;
+  --color-neutral-800: #2e2b26;
+  --color-neutral-900: #1d1b17;
+  --color-neutral-950: #12100e;
+
+  /* Functional feedback colors — status text and badges only (form
+     errors, destructive actions, success confirmations, pending state).
+     Never used decoratively or on primary actions; the accent above
+     covers those. */
+  --color-danger-50: #fef2f2;
+  --color-danger-200: #fecaca;
+  --color-danger-400: #f87171;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+  --color-danger-900: #7f1d1d;
+  --color-danger-950: #450a0a;
+
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-success-800: #166534;
+  --color-success-950: #052e16;
+
+  --color-warning-100: #fef3c7;
+  --color-warning-300: #fcd34d;
+  --color-warning-800: #92400e;
+  --color-warning-950: #451a03;
+
+  /* Type scale extras — Tailwind's default scale starts at text-xs
+     (12px); this fills in the "micro" eyebrow-label/badge size so it's
+     a real token instead of a repeated arbitrary text-[11px]. */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4eee4;
+  --foreground: #12100e;
 }
 
 @theme inline {
@@ -14,13 +94,83 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #12100e;
+    --foreground: #f4eee4;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family:
+    var(--font-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+@layer components {
+  /* Type scale — apply these to actual heading roles instead of picking
+     a one-off text-* size per page. */
+  .text-display {
+    @apply text-4xl font-semibold tracking-tight sm:text-5xl;
+  }
+  .text-h1 {
+    @apply text-2xl font-semibold tracking-tight sm:text-3xl;
+  }
+  .text-h2 {
+    @apply text-lg font-semibold sm:text-xl;
+  }
+  .text-eyebrow {
+    @apply text-2xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400;
+  }
+
+  /* Buttons — .btn is the default (comfortable, ~44px tap target) for
+     primary/standalone actions; .btn-sm (~36px) is for compact inline
+     actions (table rows, chips, form footers) where .btn would look
+     oversized. Pair with exactly one of the variants below. */
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md px-4 text-sm font-medium whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-sm {
+    @apply inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white;
+  }
+  .btn-secondary {
+    @apply border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800;
+  }
+  .btn-ghost {
+    @apply text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-900;
+  }
+  .btn-danger-ghost {
+    @apply text-danger-600 hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-950;
+  }
+
+  /* Icon-only circular buttons (favorite/collection toggles on cards). */
+  .btn-icon {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-neutral-500 shadow-sm transition-colors hover:text-neutral-900 dark:bg-neutral-900/90 dark:text-neutral-400 dark:hover:text-neutral-100;
+  }
+
+  /* Forms */
+  .input {
+    @apply focus:border-accent-500 focus:ring-accent-500/20 block min-h-11 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-600;
+  }
+  /* Compact variant for dense toolbars (e.g. the search filter bar), where
+     the full-width, 44px-tall .input would be too roomy. */
+  .input-sm {
+    @apply focus:border-accent-500 focus:ring-accent-500/20 min-h-9 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-600;
+  }
+  .label {
+    @apply flex flex-col gap-1 text-xs font-medium text-neutral-500 dark:text-neutral-400;
+  }
+
+  /* Surfaces — shadow-based elevation instead of a hard border. Dark mode
+     keeps a faint border too, since box-shadow barely reads against a
+     near-black page background. */
+  .card {
+    @apply rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)] dark:border dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none;
+  }
 }

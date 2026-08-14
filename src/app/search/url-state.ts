@@ -1,5 +1,6 @@
 import {
   DEFAULT_FILTERS,
+  type AiDetectableFilterKey,
   type ListingFilters,
   type MapBounds,
   type PropertyType,
@@ -30,6 +31,8 @@ export function filtersToParams(
     params.set("maxYearBuilt", String(filters.maxYearBuilt));
   if (!filters.hoaAllowed) params.set("hoaAllowed", "0");
   if (filters.sortBy !== "newest") params.set("sortBy", filters.sortBy);
+  if (filters.city) params.set("city", filters.city);
+  if (filters.keyword) params.set("keyword", filters.keyword);
 
   if (bounds) {
     params.set("minLng", String(bounds.minLng));
@@ -66,6 +69,8 @@ export function paramsToFilters(params: URLSearchParams): {
     maxYearBuilt: num("maxYearBuilt"),
     hoaAllowed: params.get("hoaAllowed") !== "0",
     sortBy: (params.get("sortBy") as SortBy) || DEFAULT_FILTERS.sortBy,
+    city: params.get("city") || null,
+    keyword: params.get("keyword") || null,
   };
 
   const minLng = num("minLng");
@@ -80,7 +85,7 @@ export function paramsToFilters(params: URLSearchParams): {
   return { filters, bounds };
 }
 
-const priceFormatter = new Intl.NumberFormat("en-US", {
+export const priceFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
@@ -110,8 +115,49 @@ export function summarizeFilters(filters: ListingFilters): string {
     );
   }
   if (!filters.hoaAllowed) parts.push("no HOA");
+  if (filters.city) parts.push(filters.city);
+  if (filters.keyword) parts.push(`"${filters.keyword}"`);
 
   return parts.length > 0 ? parts.join(" · ") : "All listings";
+}
+
+/** Short label for one AI-detected filter, for the /search "detected filters" chip row. */
+export function describeDetectedFilter(
+  key: AiDetectableFilterKey,
+  filters: ListingFilters,
+): string | null {
+  switch (key) {
+    case "minPrice":
+      return filters.minPrice != null
+        ? `${priceFormatter.format(filters.minPrice)}+`
+        : null;
+    case "maxPrice":
+      return filters.maxPrice != null
+        ? `Under ${priceFormatter.format(filters.maxPrice)}`
+        : null;
+    case "minBeds":
+      return filters.minBeds != null ? `${filters.minBeds}+ beds` : null;
+    case "minBaths":
+      return filters.minBaths != null ? `${filters.minBaths}+ baths` : null;
+    case "propertyTypes":
+      return filters.propertyTypes.length > 0
+        ? filters.propertyTypes.map((t) => t.replace("-", " ")).join(", ")
+        : null;
+    case "minSqft":
+      return filters.minSqft != null
+        ? `${filters.minSqft.toLocaleString()}+ sqft`
+        : null;
+    case "maxSqft":
+      return filters.maxSqft != null
+        ? `Under ${filters.maxSqft.toLocaleString()} sqft`
+        : null;
+    case "city":
+      return filters.city;
+    case "keyword":
+      return filters.keyword ? `"${filters.keyword}"` : null;
+    default:
+      return null;
+  }
 }
 
 /** Saved searches store `{ ...filters, bounds }` in the `filters` jsonb

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import {
   getAgentNotificationEmail,
+  getFlakeNotificationEmail,
   getResendClient,
   getResendFrom,
 } from "@/lib/resend";
@@ -72,6 +73,13 @@ async function sendLeadEmails(body: LeadPayload) {
   await resend.emails.send({
     from,
     to: getAgentNotificationEmail(),
+    subject: `New inquiry: ${listingTitle}`,
+    text: `${body.name} (${body.email}${body.phone ? `, ${body.phone}` : ""}) is interested in "${listingTitle}".\n\nMessage:\n${body.message || "(no message)"}`,
+  });
+
+  await resend.emails.send({
+    from,
+    to: getFlakeNotificationEmail(),
     subject: `New inquiry: ${listingTitle}`,
     text: `${body.name} (${body.email}${body.phone ? `, ${body.phone}` : ""}) is interested in "${listingTitle}".\n\nMessage:\n${body.message || "(no message)"}`,
   });

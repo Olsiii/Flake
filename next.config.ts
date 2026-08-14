@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
-function r2Hostname(): string | null {
-  const url = process.env.R2_PUBLIC_URL;
+function supabaseHostname(): string | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!url) return null;
   try {
     return new URL(url).hostname;
@@ -10,15 +10,13 @@ function r2Hostname(): string | null {
   }
 }
 
-const dynamicR2Host = r2Hostname();
+const dynamicSupabaseHost = supabaseHostname();
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "*.r2.dev" },
-      { protocol: "https", hostname: "*.r2.cloudflarestorage.com" },
-      ...(dynamicR2Host
-        ? [{ protocol: "https" as const, hostname: dynamicR2Host }]
+      ...(dynamicSupabaseHost
+        ? [{ protocol: "https" as const, hostname: dynamicSupabaseHost }]
         : []),
     ],
   },

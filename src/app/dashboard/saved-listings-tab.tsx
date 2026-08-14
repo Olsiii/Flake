@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useSavedListingIds } from "@/hooks/use-saved-listings";
 import { ListingCard } from "../search/listing-card";
+import { EmptyState } from "@/components/empty-state";
+import { ListingGridSkeleton } from "@/components/skeleton";
 import type { SearchListing } from "@/types/listing";
 
 export function SavedListingsTab() {
@@ -22,10 +24,12 @@ export function SavedListingsTab() {
   }, []);
 
   if (error) {
-    return <p className="text-sm text-red-600">{error}</p>;
+    return (
+      <p className="text-danger-600 dark:text-danger-400 text-sm">{error}</p>
+    );
   }
   if (listings === null) {
-    return <p className="text-sm text-neutral-500">Loading…</p>;
+    return <ListingGridSkeleton count={3} />;
   }
 
   const visible = listings.filter(
@@ -34,10 +38,11 @@ export function SavedListingsTab() {
 
   if (visible.length === 0) {
     return (
-      <p className="text-sm text-neutral-500">
-        No saved listings yet — tap the heart icon on any listing to save it
-        here.
-      </p>
+      <EmptyState
+        title="No saved listings yet"
+        description="Tap the heart icon on any listing to save it here."
+        action={{ label: "Start browsing", href: "/search" }}
+      />
     );
   }
 

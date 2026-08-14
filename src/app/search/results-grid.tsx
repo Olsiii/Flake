@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import type { SearchListing } from "@/types/listing";
 import { ListingCard } from "./listing-card";
+import { EmptyState } from "@/components/empty-state";
+import { ListingGridSkeleton } from "@/components/skeleton";
 
 interface ResultsGridProps {
   listings: SearchListing[];
@@ -38,36 +40,45 @@ export function ResultsGrid({
   }, [scrollToId]);
 
   return (
-    <div ref={containerRef} className="h-full overflow-y-auto p-4">
+    <div ref={containerRef} className="@container h-full overflow-y-auto p-5">
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+        <div className="border-danger-200 bg-danger-50 text-danger-700 dark:border-danger-900 dark:bg-danger-950 dark:text-danger-300 rounded-md border p-3 text-sm">
           {error}
         </div>
       )}
 
-      {!error && listings.length === 0 && !loading && (
-        <div className="flex h-full items-center justify-center text-sm text-neutral-500">
-          No listings in this area. Try zooming out or clearing filters.
+      {!error && loading && listings.length === 0 && (
+        <ListingGridSkeleton count={6} layout="container" />
+      )}
+
+      {!error && !loading && listings.length === 0 && (
+        <div className="flex h-full items-center justify-center">
+          <EmptyState
+            title="No listings in this area"
+            description="Try zooming out on the map or clearing a filter."
+          />
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {listings.map((listing) => (
-          <ListingCard
-            key={listing.id}
-            listing={listing}
-            selected={listing.id === selectedId}
-            saved={savedIds.has(listing.id)}
-            onHover={onHover}
-            onSelect={onSelect}
-            onToggleSave={onToggleSave}
-          />
-        ))}
-      </div>
+      {listings.length > 0 && (
+        <div className="grid grid-cols-1 gap-5 @lg:grid-cols-2 @4xl:grid-cols-3">
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              selected={listing.id === selectedId}
+              saved={savedIds.has(listing.id)}
+              onHover={onHover}
+              onSelect={onSelect}
+              onToggleSave={onToggleSave}
+            />
+          ))}
+        </div>
+      )}
 
-      {loading && (
+      {loading && listings.length > 0 && (
         <div className="pointer-events-none sticky bottom-2 mt-4 flex justify-center">
-          <span className="rounded-full bg-neutral-900/90 px-3 py-1 text-xs text-white shadow">
+          <span className="rounded-full bg-neutral-900/90 px-3 py-1 text-xs text-white shadow-md">
             Updating results…
           </span>
         </div>

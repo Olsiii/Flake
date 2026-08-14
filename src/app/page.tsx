@@ -1,69 +1,103 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
+import { getSupabaseServer } from "@/lib/supabase-server";
+import { HomeSearchBox } from "./home-search-box";
+import { FeaturedListings } from "./featured-listings";
+import type { SearchListing } from "@/types/listing";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "Flake",
+};
+
+export default async function Home() {
+  let featured: SearchListing[] = [];
+  try {
+    const supabase = await getSupabaseServer();
+    const { data } = await supabase.rpc("featured_listings", { p_limit: 6 });
+    featured = data ?? [];
+  } catch {
+    // Featured listings are a nice-to-have — an empty section beats a
+    // broken homepage if the query fails.
+  }
+
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-between bg-white px-16 py-32 sm:items-start dark:bg-black">
-        <Image
-          className="h-5 w-[100px] dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl leading-10 font-semibold tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-1 flex-col">
+      <section className="bg-brand-500 px-4 py-20 text-center">
+        <h1 className="text-display mx-auto max-w-2xl text-neutral-50">
+          Find the home that actually fits.
+        </h1>
+        <p className="text-brand-100 mx-auto mt-4 max-w-xl">
+          Search in plain English, save what you like into shareable
+          collections, or take a 2-minute quiz to get matched instantly.
+        </p>
+
+        <div className="mx-auto mt-8 max-w-xl">
+          <HomeSearchBox />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="bg-foreground text-background flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 transition-colors hover:bg-[#383838] md:w-[158px] dark:hover:bg-[#ccc]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="mt-4 flex items-center justify-center gap-4 text-sm">
+          <Link
+            href="/search"
+            className="text-accent-300 hover:text-accent-200 font-medium hover:underline"
           >
-            <Image
-              className="h-[14px] w-4 dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] md:w-[158px] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Browse all listings
+          </Link>
+          <span className="text-brand-300">·</span>
+          <Link
+            href="/get-started"
+            className="text-accent-300 hover:text-accent-200 font-medium hover:underline"
           >
-            Documentation
-          </a>
+            Take the matching quiz
+          </Link>
         </div>
-      </main>
+      </section>
+
+      <Suspense fallback={null}>
+        <FeaturedListings listings={featured} />
+      </Suspense>
+
+      <section className="mx-auto max-w-6xl px-4 py-12 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          <Step
+            number="1"
+            title="Search or ask"
+            description="Type a plain-English query or use filters — beds, baths, price, property type, and more."
+          />
+          <Step
+            number="2"
+            title="Save & share"
+            description="Add listings to a collection, share the link with anyone, and collect notes without them needing an account."
+          />
+          <Step
+            number="3"
+            title="Get matched"
+            description="Answer a few quick questions and we'll pre-filter search results to what actually fits you."
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Step({
+  number,
+  title,
+  description,
+}: {
+  number: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div>
+      <div className="bg-accent-600 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white">
+        {number}
+      </div>
+      <h3 className="text-h2 mt-3">{title}</h3>
+      <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+        {description}
+      </p>
     </div>
   );
 }

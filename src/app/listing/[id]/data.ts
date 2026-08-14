@@ -8,9 +8,8 @@ import type {
 } from "@/types/listing";
 
 /**
- * Composes a listing detail from four tables. There's no neighborhood_id on
- * listings (not in the original schema), so the match is by city+state —
- * fine since neighborhoods are seeded one-per-city.
+ * Composes a listing detail from four tables, joining neighborhoods via
+ * listings.neighborhood_id.
  */
 export async function getListingDetail(
   id: string,
@@ -43,14 +42,15 @@ export async function getListingDetail(
           .eq("id", listing.agent_id)
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
-    supabase
-      .from("neighborhoods")
-      .select(
-        "id, name, city, state, description, crime_score, walk_score, local_insights",
-      )
-      .eq("city", listing.city)
-      .eq("state", listing.state)
-      .maybeSingle(),
+    listing.neighborhood_id
+      ? supabase
+          .from("neighborhoods")
+          .select(
+            "id, name, city, state, slug, description, crime_score, walk_score, local_insights",
+          )
+          .eq("id", listing.neighborhood_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
 
   if (imagesError) throw imagesError;

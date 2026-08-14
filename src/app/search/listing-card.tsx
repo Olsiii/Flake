@@ -1,5 +1,6 @@
 "use client";
 
+import { AddToCollectionButton } from "@/components/add-to-collection-button";
 import type { SearchListing } from "@/types/listing";
 
 interface ListingCardProps {
@@ -41,17 +42,17 @@ export function ListingCard({
       onMouseEnter={() => onHover?.(listing.id)}
       onMouseLeave={() => onHover?.(null)}
       onClick={() => onSelect?.(listing.id)}
-      className={`group overflow-hidden rounded-lg border bg-white transition-shadow dark:bg-neutral-900 ${
+      className={`card group overflow-hidden transition-shadow ${
         onSelect ? "cursor-pointer" : ""
       } ${
         selected
-          ? "border-blue-600 ring-2 ring-blue-600/30"
-          : "border-neutral-200 hover:shadow-md dark:border-neutral-800"
+          ? "ring-accent-600 shadow-lg ring-2"
+          : "hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_16px_32px_rgba(0,0,0,0.1)]"
       }`}
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800">
         {listing.primary_image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element -- external R2 URLs, no next/image domain config yet
+          // eslint-disable-next-line @next/next/no-img-element -- external Supabase Storage URLs
           <img
             src={listing.primary_image_url}
             alt={listing.title}
@@ -65,7 +66,7 @@ export function ListingCard({
         )}
 
         {listing.is_hot_home && (
-          <span className="absolute top-2 left-2 rounded-full bg-orange-600 px-2 py-0.5 text-[11px] font-semibold text-white shadow">
+          <span className="text-2xs absolute top-2 left-2 rounded-full bg-neutral-900/90 px-2 py-0.5 font-semibold text-white shadow-sm">
             🔥 Hot Home
           </span>
         )}
@@ -74,33 +75,62 @@ export function ListingCard({
           type="button"
           onClick={handleSaveClick}
           aria-label={saved ? "Remove from saved homes" : "Save home"}
-          className={`absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow hover:text-red-500 dark:bg-neutral-900/90 ${
-            saved ? "text-red-500" : "text-neutral-500"
+          className={`btn-icon absolute top-2 right-2 ${
+            saved ? "text-accent-600 dark:text-accent-400" : ""
           }`}
         >
           <HeartIcon filled={saved} />
         </button>
+
+        <AddToCollectionButton
+          listingId={listing.id}
+          className="btn-icon absolute top-2 right-14"
+        >
+          <CollectionIcon />
+        </AddToCollectionButton>
       </div>
 
-      <div className="p-3">
-        <div className="flex items-baseline justify-between">
-          <span className="text-base font-semibold">
+      <div className="p-4">
+        <div className="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+          {listing.title}
+        </div>
+        <div className="mt-1 flex items-baseline justify-between gap-2">
+          <span className="text-xl font-bold tracking-tight">
             {formatPrice(listing)}
           </span>
-          <span className="text-[11px] text-neutral-500 capitalize">
+          <span className="text-2xs shrink-0 text-neutral-500 capitalize">
             {listing.status.replace("-", " ")}
           </span>
         </div>
-        <div className="mt-0.5 text-sm text-neutral-700 dark:text-neutral-300">
+        <div className="mt-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">
           {listing.beds != null && `${listing.beds} bd`}
           {listing.baths != null && ` · ${listing.baths} ba`}
           {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} sqft`}
         </div>
-        <div className="mt-1 truncate text-xs text-neutral-500">
+        <div className="mt-1.5 truncate text-xs text-neutral-500">
           {listing.address}, {listing.city}, {listing.state}
         </div>
       </div>
     </div>
+  );
+}
+
+function CollectionIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M4 6a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 11v5M9.5 13.5h5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

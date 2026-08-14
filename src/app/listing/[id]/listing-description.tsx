@@ -28,9 +28,7 @@ export function ListingDescription({ listing }: { listing: ListingDetail }) {
         </div>
       )}
 
-      <h2 className="mb-2 text-sm font-semibold tracking-wide text-neutral-500 uppercase">
-        Facts
-      </h2>
+      <h2 className="text-eyebrow mb-2">Facts</h2>
       <div>
         <Fact
           label="Property type"

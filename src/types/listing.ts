@@ -58,6 +58,10 @@ export interface ListingFilters {
   maxYearBuilt: number | null;
   hoaAllowed: boolean;
   sortBy: SortBy;
+  /** Structured city match, set by AI-extracted filters. */
+  city: string | null;
+  /** Loose title/description/city match — the keyword-search fallback when AI extraction fails. */
+  keyword: string | null;
 }
 
 export const DEFAULT_FILTERS: ListingFilters = {
@@ -72,7 +76,23 @@ export const DEFAULT_FILTERS: ListingFilters = {
   maxYearBuilt: null,
   hoaAllowed: true,
   sortBy: "newest",
+  city: null,
+  keyword: null,
 };
+
+/** Filter keys that /api/ai-search can populate — used to drive the "detected filters" chip row. */
+export const AI_DETECTABLE_FILTER_KEYS = [
+  "minPrice",
+  "maxPrice",
+  "minBeds",
+  "minBaths",
+  "propertyTypes",
+  "minSqft",
+  "maxSqft",
+  "city",
+  "keyword",
+] as const;
+export type AiDetectableFilterKey = (typeof AI_DETECTABLE_FILTER_KEYS)[number];
 
 export interface MapBounds {
   minLng: number;
@@ -103,10 +123,23 @@ export interface Neighborhood {
   name: string;
   city: string;
   state: string;
+  slug: string;
   description: string | null;
   crime_score: number | null;
   walk_score: number | null;
   local_insights: string[];
+}
+
+/** Row shape returned by listings_by_city/listings_by_neighborhood — a SearchListing plus the total match count, for pagination. */
+export interface PaginatedSearchListing extends SearchListing {
+  total_count: number;
+}
+
+/** Row shape returned by list_cities. */
+export interface CitySummary {
+  city: string;
+  state: string;
+  listing_count: number;
 }
 
 export interface ListingDetail {

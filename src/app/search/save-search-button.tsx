@@ -75,24 +75,24 @@ export function SaveSearchButton({
       <button
         type="button"
         onClick={handleClick}
-        className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+        className="btn-sm btn-secondary shrink-0"
       >
         Save this search
       </button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-lg bg-white p-4 dark:bg-neutral-900">
-            <h2 className="text-sm font-semibold">Save this search</h2>
+          <div className="card w-full max-w-sm p-4">
+            <h2 className="text-h2">Save this search</h2>
 
             {saved ? (
-              <p className="mt-3 text-sm text-green-700 dark:text-green-400">
+              <p className="text-success-700 dark:text-success-400 mt-3 text-sm">
                 Saved! Find it on your dashboard.
               </p>
             ) : (
               <form onSubmit={handleSubmit} className="mt-3 space-y-3">
                 {error && (
-                  <div className="rounded-md bg-red-50 p-2 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
+                  <div className="bg-danger-50 text-danger-700 dark:bg-danger-950 dark:text-danger-300 rounded-md p-2 text-xs">
                     {error}
                   </div>
                 )}
@@ -101,9 +101,9 @@ export function SaveSearchButton({
                   placeholder="Name this search"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="input"
                 />
-                <label className="flex flex-col gap-1 text-xs text-neutral-500">
+                <label className="label">
                   Email me about new matches
                   <select
                     value={alertFrequency}
@@ -113,7 +113,7 @@ export function SaveSearchButton({
                           .value as (typeof ALERT_OPTIONS)[number]["value"],
                       )
                     }
-                    className="rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="input"
                   >
                     {ALERT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -126,14 +126,14 @@ export function SaveSearchButton({
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="rounded-md px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    className="btn btn-ghost"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                    className="btn btn-primary"
                   >
                     {submitting ? "Saving…" : "Save search"}
                   </button>

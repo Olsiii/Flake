@@ -1,4 +1,5 @@
 import type { PropertyType, SearchListing, SortBy } from "./listing";
+import type { CollectionListing } from "./collection";
 
 /**
  * Hand-written stub, not `supabase gen types typescript` output — there's
@@ -34,6 +35,24 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      collections: {
+        Row: CollectionRow;
+        Insert: CollectionInsert;
+        Update: Partial<CollectionInsert>;
+        Relationships: [];
+      };
+      collection_items: {
+        Row: CollectionItemRow;
+        Insert: CollectionItemInsert;
+        Update: Partial<CollectionItemInsert>;
+        Relationships: [];
+      };
+      quiz_responses: {
+        Row: QuizResponseRow;
+        Insert: QuizResponseInsert;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -48,6 +67,18 @@ export interface Database {
       my_saved_listings: {
         Args: Record<string, never>;
         Returns: SearchListing[];
+      };
+      get_collection_listings: {
+        Args: { p_collection_id: string };
+        Returns: CollectionListing[];
+      };
+      featured_listings: {
+        Args: { p_limit?: number };
+        Returns: SearchListing[];
+      };
+      set_collection_item_note: {
+        Args: { p_item_id: string; p_note: string };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;
@@ -152,4 +183,58 @@ interface ListingLookupRow {
   address: string;
   city: string;
   state: string;
+}
+
+interface CollectionRow {
+  [key: string]: unknown;
+  id: string;
+  owner_id: string;
+  name: string;
+  is_shared: boolean;
+  created_at: string;
+}
+
+interface CollectionInsert {
+  [key: string]: unknown;
+  id?: string;
+  owner_id: string;
+  name: string;
+  is_shared?: boolean;
+  created_at?: string;
+}
+
+interface CollectionItemRow {
+  [key: string]: unknown;
+  id: string;
+  collection_id: string;
+  listing_id: string;
+  added_by: string | null;
+  note: string | null;
+  created_at: string;
+}
+
+interface CollectionItemInsert {
+  [key: string]: unknown;
+  id?: string;
+  collection_id: string;
+  listing_id: string;
+  added_by?: string | null;
+  note?: string | null;
+  created_at?: string;
+}
+
+interface QuizResponseRow {
+  [key: string]: unknown;
+  id: string;
+  user_id: string | null;
+  answers: Record<string, unknown>;
+  created_at: string;
+}
+
+interface QuizResponseInsert {
+  [key: string]: unknown;
+  id?: string;
+  user_id?: string | null;
+  answers: Record<string, unknown>;
+  created_at?: string;
 }

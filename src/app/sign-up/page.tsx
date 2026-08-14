@@ -58,7 +58,7 @@ function SignUpForm() {
   if (checkEmail) {
     return (
       <div className="mx-auto max-w-sm px-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold">Check your email</h1>
+        <h1 className="text-h1">Check your email</h1>
         <p className="mt-2 text-sm text-neutral-500">
           We sent a confirmation link to {email}. Click it to finish creating
           your account.
@@ -69,10 +69,10 @@ function SignUpForm() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="text-2xl font-semibold">Create an account</h1>
+      <h1 className="text-h1">Create an account</h1>
 
       {error && (
-        <div className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <div className="bg-danger-50 text-danger-700 dark:bg-danger-950 dark:text-danger-300 mt-4 rounded-md p-3 text-sm">
           {error}
         </div>
       )}
@@ -83,7 +83,7 @@ function SignUpForm() {
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="input"
         />
         <input
           required
@@ -91,7 +91,7 @@ function SignUpForm() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="input"
         />
         <input
           required
@@ -100,12 +100,12 @@ function SignUpForm() {
           placeholder="Password (min. 6 characters)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="input"
         />
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-md bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+          className="btn btn-primary w-full"
         >
           {submitting ? "Creating account…" : "Sign up"}
         </button>
@@ -120,7 +120,7 @@ function SignUpForm() {
       <button
         type="button"
         onClick={handleGoogle}
-        className="w-full rounded-md border border-neutral-300 py-2 text-sm font-medium hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+        className="btn btn-secondary w-full"
       >
         Continue with Google
       </button>
@@ -129,7 +129,7 @@ function SignUpForm() {
         Already have an account?{" "}
         <Link
           href={`/sign-in?redirect=${encodeURIComponent(redirectTo)}`}
-          className="text-blue-600 hover:underline"
+          className="text-accent-600 dark:text-accent-400 hover:underline"
         >
           Sign in
         </Link>

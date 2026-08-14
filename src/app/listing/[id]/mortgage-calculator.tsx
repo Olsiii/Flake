@@ -39,13 +39,11 @@ export function MortgageCalculator({ price }: { price: number }) {
   }, [price, downPaymentPct, interestRate, termYears]);
 
   return (
-    <section className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
-      <h2 className="mb-3 text-sm font-semibold tracking-wide text-neutral-500 uppercase">
-        Mortgage calculator
-      </h2>
+    <section className="card p-4">
+      <h2 className="text-eyebrow mb-3">Mortgage calculator</h2>
 
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1 text-xs text-neutral-500">
+        <label className="label">
           Down payment
           <div className="flex items-center gap-1">
             <input
@@ -55,13 +53,13 @@ export function MortgageCalculator({ price }: { price: number }) {
               step={1}
               value={downPaymentPct}
               onChange={(e) => setDownPaymentPct(Number(e.target.value) || 0)}
-              className="w-full rounded-md border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="input-sm w-full"
             />
             <span>%</span>
           </div>
         </label>
 
-        <label className="flex flex-col gap-1 text-xs text-neutral-500">
+        <label className="label">
           Interest rate
           <div className="flex items-center gap-1">
             <input
@@ -71,18 +69,18 @@ export function MortgageCalculator({ price }: { price: number }) {
               step={0.1}
               value={interestRate}
               onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
-              className="w-full rounded-md border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="input-sm w-full"
             />
             <span>%</span>
           </div>
         </label>
 
-        <label className="col-span-2 flex flex-col gap-1 text-xs text-neutral-500">
+        <label className="label col-span-2">
           Loan term
           <select
             value={termYears}
             onChange={(e) => setTermYears(Number(e.target.value) as 15 | 30)}
-            className="w-full rounded-md border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            className="input-sm w-full"
           >
             {TERM_OPTIONS.map((years) => (
               <option key={years} value={years}>

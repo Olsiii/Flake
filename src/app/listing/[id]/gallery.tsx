@@ -45,7 +45,7 @@ export function Gallery({
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-neutral-100 text-sm text-neutral-400 dark:bg-neutral-900">
+      <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-neutral-100 text-sm text-neutral-400 dark:bg-neutral-900">
         No photos available
       </div>
     );
@@ -59,7 +59,7 @@ export function Gallery({
             key={t}
             type="button"
             onClick={() => selectTab(t)}
-            className={`rounded px-3 py-1.5 font-medium transition-colors ${
+            className={`min-h-9 rounded px-3 py-1.5 font-medium transition-colors ${
               tab === t
                 ? "bg-white shadow-sm dark:bg-neutral-700"
                 : "text-neutral-500"
@@ -72,7 +72,7 @@ export function Gallery({
       </div>
 
       {current.length === 0 ? (
-        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-neutral-100 text-sm text-neutral-400 dark:bg-neutral-900">
+        <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-neutral-100 text-sm text-neutral-400 dark:bg-neutral-900">
           No {TAB_LABELS[tab].toLowerCase()} available
         </div>
       ) : (
@@ -80,13 +80,13 @@ export function Gallery({
           <button
             type="button"
             onClick={() => setLightboxOpen(true)}
-            className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg bg-neutral-100 dark:bg-neutral-900"
+            className="relative block aspect-video w-full overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-900"
           >
             <Image
               src={current[index].url}
               alt={title}
               fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
+              sizes="(min-width: 1280px) 1200px, 100vw"
               className="object-cover"
               priority={index === 0}
             />
@@ -101,7 +101,7 @@ export function Gallery({
                   onClick={() => setIndex(i)}
                   className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-md ${
                     i === index
-                      ? "ring-2 ring-blue-600"
+                      ? "ring-accent-600 ring-2"
                       : "opacity-80 hover:opacity-100"
                   }`}
                 >

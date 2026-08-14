@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Skeleton } from "@/components/skeleton";
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -63,16 +64,14 @@ export function ValuationCard({ listingId }: { listingId: string }) {
   }, [fetchValuation]);
 
   return (
-    <section className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
+    <section className="card p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold tracking-wide text-neutral-500 uppercase">
-          Get Estimate
-        </h2>
+        <h2 className="text-eyebrow">Get Estimate</h2>
         {state.status === "ready" && (
           <button
             type="button"
             onClick={() => fetchValuation(true)}
-            className="text-xs font-medium text-blue-600 hover:underline"
+            className="text-accent-600 dark:text-accent-400 text-xs font-medium hover:underline"
           >
             Recalculate
           </button>
@@ -80,7 +79,10 @@ export function ValuationCard({ listingId }: { listingId: string }) {
       </div>
 
       {state.status === "loading" && (
-        <p className="mt-2 text-sm text-neutral-500">Calculating estimate…</p>
+        <div className="mt-2 space-y-2" aria-label="Calculating estimate">
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="h-3 w-48" />
+        </div>
       )}
 
       {state.status === "unavailable" && (
@@ -88,7 +90,9 @@ export function ValuationCard({ listingId }: { listingId: string }) {
       )}
 
       {state.status === "error" && (
-        <p className="mt-2 text-sm text-red-600">{state.message}</p>
+        <p className="text-danger-600 dark:text-danger-400 mt-2 text-sm">
+          {state.message}
+        </p>
       )}
 
       {state.status === "ready" && (

@@ -29,7 +29,7 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
   const [tab, setTab] = useState<Tab>("contact");
 
   return (
-    <section className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
+    <section className="card p-4">
       <div className="flex items-center gap-3">
         {agent.photo_url ? (
           <Image
@@ -43,9 +43,9 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
         ) : (
           <div className="h-12 w-12 rounded-full bg-neutral-200 dark:bg-neutral-800" />
         )}
-        <div>
-          <div className="font-medium">{agent.name}</div>
-          <div className="text-xs text-neutral-500">
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-medium">{agent.name}</div>
+          <div className="truncate text-xs text-neutral-500">
             {agent.phone} {agent.phone && agent.email && "·"} {agent.email}
           </div>
         </div>
@@ -55,7 +55,7 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
         <button
           type="button"
           onClick={() => setTab("contact")}
-          className={`flex-1 rounded px-3 py-1.5 font-medium transition-colors ${
+          className={`min-h-9 flex-1 rounded px-3 py-1.5 font-medium transition-colors ${
             tab === "contact"
               ? "bg-white shadow-sm dark:bg-neutral-700"
               : "text-neutral-500"
@@ -66,7 +66,7 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
         <button
           type="button"
           onClick={() => setTab("tour")}
-          className={`flex-1 rounded px-3 py-1.5 font-medium transition-colors ${
+          className={`min-h-9 flex-1 rounded px-3 py-1.5 font-medium transition-colors ${
             tab === "tour"
               ? "bg-white shadow-sm dark:bg-neutral-700"
               : "text-neutral-500"
@@ -89,7 +89,7 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
 
 function SuccessMessage({ text }: { text: string }) {
   return (
-    <div className="rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-950 dark:text-green-300">
+    <div className="bg-success-50 text-success-800 dark:bg-success-950 dark:text-success-300 rounded-md p-3 text-sm">
       {text}
     </div>
   );
@@ -97,14 +97,13 @@ function SuccessMessage({ text }: { text: string }) {
 
 function ErrorMessage({ text }: { text: string }) {
   return (
-    <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+    <div className="bg-danger-50 text-danger-700 dark:bg-danger-950 dark:text-danger-300 rounded-md p-3 text-sm">
       {text}
     </div>
   );
 }
 
-const inputClass =
-  "w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900";
+const inputClass = "input";
 
 function ContactAgentForm({ listingId }: { listingId: string }) {
   const [form, setForm] = useState({
@@ -172,7 +171,7 @@ function ContactAgentForm({ listingId }: { listingId: string }) {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+        className="btn btn-primary w-full"
       >
         {submitting ? "Sending…" : "Send message"}
       </button>
@@ -250,7 +249,7 @@ function RequestTourForm({ listingId }: { listingId: string }) {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+        className="btn btn-primary w-full"
       >
         {submitting ? "Requesting…" : "Request tour"}
       </button>

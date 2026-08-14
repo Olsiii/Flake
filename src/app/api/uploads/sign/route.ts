@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getR2Client, getR2BucketName, getR2PublicUrl } from "@/lib/r2";
+import {
+  getListingImagesBucket,
+  getListingImagePublicUrl,
+} from "@/lib/storage";
 
 const ALLOWED_CONTENT_TYPES = new Set([
   "image/jpeg",
@@ -16,7 +17,9 @@ const EXTENSION_BY_CONTENT_TYPE: Record<string, string> = {
   "image/webp": "webp",
 };
 
-const SIGNED_URL_TTL_SECONDS = 60 * 5;
+// Supabase signed upload URLs are valid for 2 hours — not configurable via
+// createSignedUploadUrl, unlike the R2/S3 presigned PUT this replaced.
+const SIGNED_URL_TTL_SECONDS = 60 * 60 * 2;
 
 // NOTE: this route doesn't check who's calling yet — there's no auth
 // session wiring in the app yet. Once there is, gate this behind
@@ -45,19 +48,23 @@ export async function POST(request: Request) {
   const extension = EXTENSION_BY_CONTENT_TYPE[contentType];
   const key = `listings/${listingId}/${randomUUID()}.${extension}`;
 
-  const uploadUrl = await getSignedUrl(
-    getR2Client(),
-    new PutObjectCommand({
-      Bucket: getR2BucketName(),
-      Key: key,
-      ContentType: contentType,
-    }),
-    { expiresIn: SIGNED_URL_TTL_SECONDS },
-  );
+  const { data, error } =
+    await getListingImagesBucket().createSignedUploadUrl(key);
+  if (error || !data) {
+    return NextResponse.json(
+      { error: "Failed to create upload URL" },
+      { status: 500 },
+    );
+  }
 
+  // The caller must finish the upload with the Supabase client SDK —
+  // supabase.storage.from("listing-images").uploadToSignedUrl(key, token,
+  // file) — not a raw PUT to uploadUrl, since Supabase signed uploads are
+  // token-authenticated POSTs rather than presigned S3-style PUTs.
   return NextResponse.json({
-    uploadUrl,
-    publicUrl: getR2PublicUrl(key),
+    uploadUrl: data.signedUrl,
+    token: data.token,
+    publicUrl: getListingImagePublicUrl(key),
     key,
     expiresIn: SIGNED_URL_TTL_SECONDS,
   });

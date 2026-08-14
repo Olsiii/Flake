@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const DEFAULT_FROM = "Real Estate App <onboarding@resend.dev>";
+const DEFAULT_FROM = "Flake <onboarding@resend.dev>";
 
 /**
  * Null when RESEND_API_KEY isn't set, so callers can treat email as
@@ -21,4 +21,9 @@ export function getAgentNotificationEmail(): string {
   return (
     process.env.AGENT_NOTIFICATION_EMAIL || "agent-notifications@example.com"
   );
+}
+
+/** Flake's own inbox — cc'd on every lead so the company has a copy independent of the listing agent. */
+export function getFlakeNotificationEmail(): string {
+  return process.env.FLAKE_NOTIFICATION_EMAIL || "leads@flake.com";
 }

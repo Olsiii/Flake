@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useUser } from "@/hooks/use-user";
+import { EmptyState } from "@/components/empty-state";
+import { ListRowsSkeleton } from "@/components/skeleton";
 import {
   extractFiltersAndBounds,
   filtersToParams,
@@ -68,15 +70,18 @@ export function SavedSearchesTab() {
     await supabase.from("saved_searches").delete().eq("id", id);
   }
 
-  if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (searches === null)
-    return <p className="text-sm text-neutral-500">Loading…</p>;
+  if (error)
+    return (
+      <p className="text-danger-600 dark:text-danger-400 text-sm">{error}</p>
+    );
+  if (searches === null) return <ListRowsSkeleton count={3} />;
   if (searches.length === 0) {
     return (
-      <p className="text-sm text-neutral-500">
-        No saved searches yet — use &quot;Save this search&quot; on the search
-        page.
-      </p>
+      <EmptyState
+        title="No saved searches yet"
+        description='Use "Save this search" on the search page to get alerted about new matches.'
+        action={{ label: "Start browsing", href: "/search" }}
+      />
     );
   }
 
@@ -94,7 +99,7 @@ export function SavedSearchesTab() {
                   handleRename(s.id, e.target.value.trim());
                 }
               }}
-              className="w-40 rounded-md border border-transparent px-2 py-1 text-sm font-medium hover:border-neutral-200 focus:border-neutral-300 dark:hover:border-neutral-700 dark:focus:border-neutral-600"
+              className="min-h-9 w-40 rounded-md border border-transparent px-2 py-1 text-sm font-medium hover:border-neutral-200 focus:border-neutral-300 dark:hover:border-neutral-700 dark:focus:border-neutral-600"
             />
             <span className="flex-1 text-sm text-neutral-500">
               {summarizeFilters(filters)}
@@ -107,7 +112,7 @@ export function SavedSearchesTab() {
                   e.target.value as (typeof ALERT_OPTIONS)[number],
                 )
               }
-              className="rounded-md border border-neutral-300 px-2 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+              className="input-sm text-xs"
             >
               {ALERT_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -117,14 +122,14 @@ export function SavedSearchesTab() {
             </select>
             <a
               href={`/search?${params.toString()}`}
-              className="text-xs font-medium text-blue-600 hover:underline"
+              className="btn-sm btn-ghost text-accent-600 dark:text-accent-400"
             >
               View results
             </a>
             <button
               type="button"
               onClick={() => handleDelete(s.id)}
-              className="text-xs font-medium text-red-600 hover:underline"
+              className="btn-sm btn-danger-ghost"
             >
               Delete
             </button>

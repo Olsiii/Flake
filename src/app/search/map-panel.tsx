@@ -313,7 +313,7 @@ export function MapPanel({
         <button
           type="button"
           onClick={() => drawRef.current?.changeMode("draw_polygon")}
-          className="rounded-md bg-white px-3 py-1.5 text-xs font-medium shadow hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="btn-sm bg-white shadow-md hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
         >
           Draw search area
         </button>
@@ -324,7 +324,7 @@ export function MapPanel({
               drawRef.current?.deleteAll();
               onPolygonChange(null);
             }}
-            className="rounded-md bg-white px-3 py-1.5 text-xs font-medium text-red-600 shadow hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+            className="btn-sm text-danger-600 dark:text-danger-400 bg-white shadow-md hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
           >
             Clear area
           </button>
