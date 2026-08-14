@@ -204,7 +204,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
           <div className="space-y-4">
             <div>
               <span className="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                Square feet
+                Square meters
               </span>
               <div className="flex items-center gap-2">
                 <NumberInput
@@ -240,7 +240,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                HOA allowed
+                Building fee allowed
               </span>
               <button
                 type="button"

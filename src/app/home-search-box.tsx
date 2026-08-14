@@ -46,7 +46,7 @@ export function HomeSearchBox() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder='Try "3 bed house near downtown under $500k"'
+          placeholder='Try "3 bed house near downtown under €150k"'
           className="input w-full"
         />
         <button

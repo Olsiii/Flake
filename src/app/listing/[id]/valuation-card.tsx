@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { Skeleton } from "@/components/skeleton";
 
-const priceFormatter = new Intl.NumberFormat("en-US", {
+const priceFormatter = new Intl.NumberFormat("en-GB", {
   style: "currency",
-  currency: "USD",
+  currency: "EUR",
   maximumFractionDigits: 0,
 });
 

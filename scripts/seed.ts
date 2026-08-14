@@ -253,25 +253,29 @@ function buildListing(agentId: string) {
   const baths = isLand
     ? null
     : roundToHalf(faker.number.float({ min: 1, max: 4.5 }));
-  const sqft = isLand ? null : faker.number.int({ min: 650, max: 5200 });
+  // Sizes/prices are Kosovo-scale, not converted US numbers: Prishtina
+  // apartments/houses run roughly 45-260 m², land parcels a few hundred
+  // to ~1.5 hectares, and sale prices around €700-2200/m² depending on
+  // neighborhood — nowhere close to US price-per-sqft figures.
+  const sqft = isLand ? null : faker.number.int({ min: 45, max: 260 });
   const lotSize = isLand
-    ? faker.number.int({ min: 5000, max: 217800 })
-    : faker.number.int({ min: 1200, max: 20000 });
-  const yearBuilt = isLand ? null : faker.number.int({ min: 1950, max: 2024 });
+    ? faker.number.int({ min: 300, max: 15000 })
+    : faker.number.int({ min: 80, max: 1200 });
+  const yearBuilt = isLand ? null : faker.number.int({ min: 1970, max: 2024 });
 
   const isRent = status === "for-rent";
-  const pricePerSqft = faker.number.int({ min: 180, max: 620 });
+  const pricePerSqm = faker.number.int({ min: 700, max: 2200 });
   const price = isLand
-    ? faker.number.int({ min: 40000, max: 650000 })
+    ? faker.number.int({ min: 5000, max: 150000 })
     : isRent
-      ? faker.number.int({ min: 1200, max: 6500 })
-      : Math.round(((sqft ?? 1500) * pricePerSqft) / 500) * 500;
+      ? faker.number.int({ min: 200, max: 900 })
+      : Math.round(((sqft ?? 70) * pricePerSqm) / 500) * 500;
 
   const hoaFee =
     propertyType === "condo" || propertyType === "townhouse"
-      ? faker.number.int({ min: 150, max: 750 })
+      ? faker.number.int({ min: 15, max: 60 })
       : Math.random() < 0.15
-        ? faker.number.int({ min: 50, max: 300 })
+        ? faker.number.int({ min: 10, max: 30 })
         : null;
 
   const isHotHome = false; // assigned after generation, on a random subset
@@ -279,11 +283,15 @@ function buildListing(agentId: string) {
 
   const propertyTypeLabel = propertyType.replace("-", " ");
   const title = isLand
-    ? `${lotSize.toLocaleString()} sqft Lot in ${cityInfo.city}, ${cityInfo.state}`
+    ? `${lotSize.toLocaleString()} m² Lot in ${cityInfo.city}, ${cityInfo.state}`
     : `${beds} Bed, ${baths} Bath ${propertyTypeLabel} in ${cityInfo.city}`;
 
-  const lat = cityInfo.lat + faker.number.float({ min: -0.08, max: 0.08 });
-  const lng = cityInfo.lng + faker.number.float({ min: -0.08, max: 0.08 });
+  // Prishtina's neighborhoods are each only a few hundred meters to ~1-2km
+  // across, so a tight jitter keeps listings inside their named area —
+  // the old ±0.08° (~8km) US-city-scale spread would scatter them across
+  // several neighboring areas.
+  const lat = cityInfo.lat + faker.number.float({ min: -0.012, max: 0.012 });
+  const lng = cityInfo.lng + faker.number.float({ min: -0.012, max: 0.012 });
 
   return {
     mls_id:

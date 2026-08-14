@@ -1,9 +1,9 @@
 import { AddToCollectionButton } from "@/components/add-to-collection-button";
 import type { ListingDetail } from "@/types/listing";
 
-const priceFormatter = new Intl.NumberFormat("en-US", {
+const priceFormatter = new Intl.NumberFormat("en-GB", {
   style: "currency",
-  currency: "USD",
+  currency: "EUR",
   maximumFractionDigits: 0,
 });
 
@@ -36,7 +36,7 @@ export function ListingSummary({ listing }: { listing: ListingDetail }) {
         {listing.beds != null && <span>{listing.beds} beds</span>}
         {listing.baths != null && <span>{listing.baths} baths</span>}
         {listing.sqft != null && (
-          <span>{listing.sqft.toLocaleString()} sqft</span>
+          <span>{listing.sqft.toLocaleString()} m²</span>
         )}
         <span className="capitalize">{listing.status.replace("-", " ")}</span>
         <span>{listing.days_on_market} days on market</span>

@@ -11,7 +11,7 @@ import { MapPinPopup } from "@/components/map-pin-popup";
 import type { MapBounds, SearchListing } from "@/types/listing";
 
 const SOURCE_ID = "listings";
-const US_CENTER: [number, number] = [-98.5795, 39.8283];
+const KOSOVO_CENTER: [number, number] = [20.9, 42.6];
 
 interface MapPanelProps {
   listings: SearchListing[];
@@ -40,8 +40,8 @@ function toFeatureCollection(
         id: l.id,
         priceLabel:
           l.status === "for-rent"
-            ? `$${Math.round(l.price).toLocaleString()}/mo`
-            : `$${Math.round(l.price).toLocaleString()}`,
+            ? `€${Math.round(l.price).toLocaleString()}/mo`
+            : `€${Math.round(l.price).toLocaleString()}`,
       },
     })),
   };
@@ -111,7 +111,7 @@ export function MapPanel({
               [bounds.maxLng, bounds.maxLat],
             ] as [[number, number], [number, number]],
           }
-        : { center: US_CENTER, zoom: 3.8 }),
+        : { center: KOSOVO_CENTER, zoom: 8.3 }),
     });
     mapRef.current = map;
 

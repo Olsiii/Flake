@@ -105,7 +105,7 @@ async function computeValuation(request: Request, { id }: { id: string }) {
   if (!comps || comps.length < MIN_COMPS) {
     return NextResponse.json({
       available: false,
-      reason: `Not enough comparable listings within ${COMP_RADIUS_MILES} miles.`,
+      reason: `Not enough comparable listings within ${Math.round(COMP_RADIUS_MILES * 1.609)} km.`,
     });
   }
 

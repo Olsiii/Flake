@@ -41,11 +41,11 @@ const EXTRACT_TOOL: Anthropic.Tool = {
     properties: {
       minPrice: {
         type: ["number", "null"],
-        description: "Minimum price in USD, or null if not mentioned.",
+        description: "Minimum price in EUR, or null if not mentioned.",
       },
       maxPrice: {
         type: ["number", "null"],
-        description: "Maximum price in USD, or null if not mentioned.",
+        description: "Maximum price in EUR, or null if not mentioned.",
       },
       minBeds: {
         type: ["integer", "null"],
@@ -63,11 +63,11 @@ const EXTRACT_TOOL: Anthropic.Tool = {
       },
       minSqft: {
         type: ["integer", "null"],
-        description: "Minimum square footage, or null if not mentioned.",
+        description: "Minimum size in square meters, or null if not mentioned.",
       },
       maxSqft: {
         type: ["integer", "null"],
-        description: "Maximum square footage, or null if not mentioned.",
+        description: "Maximum size in square meters, or null if not mentioned.",
       },
       city: {
         type: ["string", "null"],

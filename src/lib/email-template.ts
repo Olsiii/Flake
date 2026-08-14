@@ -24,7 +24,7 @@ export function brandedEmailHtml(bodyHtml: string): string {
           <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:480px;">
             <tr>
               <td style="padding:28px 32px 0;">
-                <img src="${SITE_URL}/horizontal-2.png" alt="Flake" height="28" style="display:block;height:28px;width:auto;" />
+                <img src="${SITE_URL}/no-bg-flake.png" alt="Flake" height="28" style="display:block;height:28px;width:auto;" />
               </td>
             </tr>
             <tr>

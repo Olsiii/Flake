@@ -12,9 +12,9 @@ interface ListingCardProps {
   onToggleSave: (id: string) => void;
 }
 
-const priceFormatter = new Intl.NumberFormat("en-US", {
+const priceFormatter = new Intl.NumberFormat("en-GB", {
   style: "currency",
-  currency: "USD",
+  currency: "EUR",
   maximumFractionDigits: 0,
 });
 
@@ -105,7 +105,7 @@ export function ListingCard({
         <div className="mt-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">
           {listing.beds != null && `${listing.beds} bd`}
           {listing.baths != null && ` · ${listing.baths} ba`}
-          {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} sqft`}
+          {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} m²`}
         </div>
         <div className="mt-1.5 truncate text-xs text-neutral-500">
           {listing.address}, {listing.city}, {listing.state}

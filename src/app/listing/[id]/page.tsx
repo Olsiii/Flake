@@ -68,17 +68,17 @@ export default async function ListingPage({
       addressLocality: listing.city,
       addressRegion: listing.state,
       postalCode: listing.zip,
-      addressCountry: "US",
+      addressCountry: "XK",
     },
     numberOfRooms: listing.beds ?? undefined,
     floorSize:
       listing.sqft != null
-        ? { "@type": "QuantitativeValue", value: listing.sqft, unitCode: "FTK" }
+        ? { "@type": "QuantitativeValue", value: listing.sqft, unitCode: "MTK" }
         : undefined,
     offers: {
       "@type": "Offer",
       price: listing.price,
-      priceCurrency: "USD",
+      priceCurrency: "EUR",
       availability:
         listing.status === "sold"
           ? "https://schema.org/SoldOut"

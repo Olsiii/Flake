@@ -6,9 +6,9 @@ import { useSavedListingIds } from "@/hooks/use-saved-listings";
 import { ContactAgentForm } from "@/components/contact-agent-form";
 import type { SearchListing } from "@/types/listing";
 
-const priceFormatter = new Intl.NumberFormat("en-US", {
+const priceFormatter = new Intl.NumberFormat("en-GB", {
   style: "currency",
-  currency: "USD",
+  currency: "EUR",
   maximumFractionDigits: 0,
 });
 

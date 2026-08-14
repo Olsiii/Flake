@@ -15,7 +15,7 @@ const FAQ_ITEMS = [
   {
     question: "How does Flake's AI search work?",
     answer:
-      "Type what you're looking for in plain English — like \"3 bed house near downtown under $500k\" — and Flake extracts the price, beds, property type, and location filters for you automatically, then falls back to keyword matching if it can't find a clear match.",
+      "Type what you're looking for in plain English — like \"3 bed house near downtown under €150k\" — and Flake extracts the price, beds, property type, and location filters for you automatically, then falls back to keyword matching if it can't find a clear match.",
   },
   {
     question: "How accurate is the price estimate on a listing?",

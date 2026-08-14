@@ -85,9 +85,9 @@ export function paramsToFilters(params: URLSearchParams): {
   return { filters, bounds };
 }
 
-export const priceFormatter = new Intl.NumberFormat("en-US", {
+export const priceFormatter = new Intl.NumberFormat("en-GB", {
   style: "currency",
-  currency: "USD",
+  currency: "EUR",
   maximumFractionDigits: 0,
   notation: "compact",
 });
@@ -111,10 +111,10 @@ export function summarizeFilters(filters: ListingFilters): string {
     );
   if (filters.minSqft != null || filters.maxSqft != null) {
     parts.push(
-      `${filters.minSqft?.toLocaleString() ?? "0"}–${filters.maxSqft?.toLocaleString() ?? "∞"} sqft`,
+      `${filters.minSqft?.toLocaleString() ?? "0"}–${filters.maxSqft?.toLocaleString() ?? "∞"} m²`,
     );
   }
-  if (!filters.hoaAllowed) parts.push("no HOA");
+  if (!filters.hoaAllowed) parts.push("no building fee");
   if (filters.city) parts.push(filters.city);
   if (filters.keyword) parts.push(`"${filters.keyword}"`);
 
@@ -145,11 +145,11 @@ export function describeDetectedFilter(
         : null;
     case "minSqft":
       return filters.minSqft != null
-        ? `${filters.minSqft.toLocaleString()}+ sqft`
+        ? `${filters.minSqft.toLocaleString()}+ m²`
         : null;
     case "maxSqft":
       return filters.maxSqft != null
-        ? `Under ${filters.maxSqft.toLocaleString()} sqft`
+        ? `Under ${filters.maxSqft.toLocaleString()} m²`
         : null;
     case "city":
       return filters.city;

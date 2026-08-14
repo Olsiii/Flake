@@ -72,7 +72,7 @@ export default async function NeighborhoodPage({
       "@type": "PostalAddress",
       addressLocality: neighborhood.city,
       addressRegion: neighborhood.state,
-      addressCountry: "US",
+      addressCountry: "XK",
     },
     additionalProperty: [
       neighborhood.walk_score != null

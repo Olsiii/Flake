@@ -42,16 +42,16 @@ export function ListingDescription({ listing }: { listing: ListingDetail }) {
         <Fact
           label="Lot size"
           value={
-            listing.lot_size ? `${listing.lot_size.toLocaleString()} sqft` : "—"
+            listing.lot_size ? `${listing.lot_size.toLocaleString()} m²` : "—"
           }
         />
         <Fact
-          label="HOA fee"
+          label="Building fee"
           value={
-            listing.hoa_fee ? `$${listing.hoa_fee.toLocaleString()}/mo` : "None"
+            listing.hoa_fee ? `€${listing.hoa_fee.toLocaleString()}/mo` : "None"
           }
         />
-        {listing.mls_id && <Fact label="MLS #" value={listing.mls_id} />}
+        {listing.mls_id && <Fact label="Reference #" value={listing.mls_id} />}
       </div>
     </section>
   );
