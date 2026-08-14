@@ -4,11 +4,45 @@ import { Suspense } from "react";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { HomeSearchBox } from "./home-search-box";
 import { FeaturedListings } from "./featured-listings";
+import { Faq } from "@/components/faq";
 import type { SearchListing } from "@/types/listing";
 
 export const metadata: Metadata = {
   title: "Flake",
 };
+
+const FAQ_ITEMS = [
+  {
+    question: "How does Flake's AI search work?",
+    answer:
+      "Type what you're looking for in plain English — like \"3 bed house near downtown under $500k\" — and Flake extracts the price, beds, property type, and location filters for you automatically, then falls back to keyword matching if it can't find a clear match.",
+  },
+  {
+    question: "How accurate is the price estimate on a listing?",
+    answer:
+      "The estimate on each listing page is an automated calculation based on comparable nearby listings — it's meant to give you a ballpark, not an appraisal, so treat it as a starting point for your own research.",
+  },
+  {
+    question: "Do I need an account to browse or save homes?",
+    answer:
+      "You can browse and search without one. Creating a collection and sharing its link doesn't require an account either — but saving individual listings, saving searches, and getting alerts do, since those are tied to your profile.",
+  },
+  {
+    question: "Can Flake notify me when new matching listings show up?",
+    answer:
+      "Yes — save a search from the results page and Flake will email you when new listings match your filters, so you don't have to keep checking back.",
+  },
+  {
+    question: "How do I contact an agent or schedule a tour?",
+    answer:
+      "Every listing page has a \"Contact Agent\" and \"Request a Tour\" form right next to the agent's info — submit either one and both the agent and our team get notified.",
+  },
+  {
+    question: "What does the 2-minute quiz actually do?",
+    answer:
+      "It asks a few quick questions about what you're looking for, then pre-filters your search results so the homes you see actually fit — no more scrolling past listings that were never going to work.",
+  },
+];
 
 export default async function Home() {
   let featured: SearchListing[] = [];
@@ -74,6 +108,13 @@ export default async function Home() {
             title="Get matched"
             description="Answer a few quick questions and we'll pre-filter search results to what actually fits you."
           />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-4 py-12 lg:px-8">
+        <h2 className="text-h1 text-center">Frequently asked questions</h2>
+        <div className="mt-8">
+          <Faq items={FAQ_ITEMS} />
         </div>
       </section>
     </div>

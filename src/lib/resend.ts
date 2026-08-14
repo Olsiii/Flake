@@ -25,5 +25,5 @@ export function getAgentNotificationEmail(): string {
 
 /** Flake's own inbox — cc'd on every lead so the company has a copy independent of the listing agent. */
 export function getFlakeNotificationEmail(): string {
-  return process.env.FLAKE_NOTIFICATION_EMAIL || "leads@flake.com";
+  return process.env.FLAKE_NOTIFICATION_EMAIL || "flakeeestate@gmail.com";
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CollectionsTab } from "./collections-tab";
 import { SavedListingsTab } from "./saved-listings-tab";
 import { SavedSearchesTab } from "./saved-searches-tab";
@@ -15,8 +15,20 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+const TAB_IDS = new Set<string>(TABS.map((t) => t.id));
+
+/** Deep-linkable via ?tab= so the top nav / sidebar can jump straight to a tab. */
 export function DashboardClient() {
-  const [tab, setTab] = useState<TabId>("saved-listings");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const requested = searchParams.get("tab");
+  const tab: TabId = (
+    requested && TAB_IDS.has(requested) ? requested : "saved-listings"
+  ) as TabId;
+
+  function setTab(next: TabId) {
+    router.replace(`/dashboard?tab=${next}`, { scroll: false });
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8">

@@ -1,7 +1,7 @@
-// Seeds ~75 mock listings across a handful of real US cities (so map search
-// has believable clusters), each with photos uploaded to Supabase Storage
-// and 10 mock agents to assign them to. Rerunnable: clears previously
-// seeded rows first.
+// Seeds ~75 mock listings across Prishtina's neighborhoods (plus a couple
+// other Kosovo cities, so map search has believable clusters), each with
+// photos uploaded to Supabase Storage and 10 mock agents to assign them to.
+// Rerunnable: clears previously seeded rows first.
 //
 // Photos come from picsum.photos (free, no API key, no rate-limit auth) —
 // there's no free *real-estate-specific* photo API left that doesn't need a
@@ -19,17 +19,22 @@ import { slugify } from "../src/lib/slug";
 
 config({ path: ".env.local" });
 
+// Primary market is Prishtina, Kosovo — so most "cities" here are actually
+// Prishtina neighborhoods (Kosovo doesn't have US-style states, and for a
+// single-metro site the useful geographic granularity is the neighborhood
+// level, not the city level). A couple of other real Kosovo cities are
+// mixed in for variety. `state` is just "Kosovo" for all of them.
 const CITIES = [
-  { city: "Austin", state: "TX", lat: 30.2672, lng: -97.7431 },
-  { city: "Denver", state: "CO", lat: 39.7392, lng: -104.9903 },
-  { city: "Seattle", state: "WA", lat: 47.6062, lng: -122.3321 },
-  { city: "Miami", state: "FL", lat: 25.7617, lng: -80.1918 },
-  { city: "Chicago", state: "IL", lat: 41.8781, lng: -87.6298 },
-  { city: "Nashville", state: "TN", lat: 36.1627, lng: -86.7816 },
-  { city: "Phoenix", state: "AZ", lat: 33.4484, lng: -112.074 },
-  { city: "Raleigh", state: "NC", lat: 35.7796, lng: -78.6382 },
-  { city: "Portland", state: "OR", lat: 45.5152, lng: -122.6784 },
-  { city: "Boston", state: "MA", lat: 42.3601, lng: -71.0589 },
+  { city: "Dardania", state: "Kosovo", lat: 42.655, lng: 21.15 },
+  { city: "Ulpiana", state: "Kosovo", lat: 42.6486, lng: 21.1642 },
+  { city: "Bregu i Diellit", state: "Kosovo", lat: 42.6428, lng: 21.1717 },
+  { city: "Sunny Hill", state: "Kosovo", lat: 42.6606, lng: 21.1364 },
+  { city: "Arbëria", state: "Kosovo", lat: 42.6656, lng: 21.1494 },
+  { city: "Velania", state: "Kosovo", lat: 42.6708, lng: 21.1614 },
+  { city: "Mati 1", state: "Kosovo", lat: 42.6494, lng: 21.1553 },
+  { city: "Lakrishte", state: "Kosovo", lat: 42.6389, lng: 21.1608 },
+  { city: "Prizren", state: "Kosovo", lat: 42.2139, lng: 20.7397 },
+  { city: "Pejë", state: "Kosovo", lat: 42.6591, lng: 20.2883 },
 ] as const;
 
 const PROPERTY_TYPES = [
@@ -59,143 +64,143 @@ const IMAGE_CONCURRENCY = 6;
 // per the brief, matched to a listing by city/state at query time.
 const NEIGHBORHOODS = [
   {
-    city: "Austin",
-    state: "TX",
-    name: "Central Austin",
+    city: "Dardania",
+    state: "Kosovo",
+    name: "Dardania",
     description:
-      "A dense mix of bungalows and new builds close to downtown, UT, and the greenbelt trail system.",
-    crime_score: 32,
-    walk_score: 68,
+      "One of Prishtina's largest and most established residential areas, a dense mix of socialist-era apartment blocks and newer infill construction close to the University of Prishtina and Bill Clinton Boulevard.",
+    crime_score: 28,
+    walk_score: 78,
     local_insights: [
-      "Walkable to South Congress shops and restaurants",
-      "Zoned for Austin ISD's highest-rated elementary schools",
-      "Frequent live music venues within a few blocks",
+      "Walking distance to the University of Prishtina campus",
+      "Well-served by city bus lines into the center",
+      "Busy local market and shop-lined streets",
     ],
   },
   {
-    city: "Denver",
-    state: "CO",
-    name: "Central Denver",
+    city: "Ulpiana",
+    state: "Kosovo",
+    name: "Ulpiana",
     description:
-      "Tree-lined streets near City Park with quick access to downtown and the Rockies foothills.",
-    crime_score: 38,
-    walk_score: 71,
-    local_insights: [
-      "10-minute drive to downtown Denver",
-      "Light rail station within walking distance",
-      "Home to several highly-rated city parks",
-    ],
-  },
-  {
-    city: "Seattle",
-    state: "WA",
-    name: "Capitol Hill Area",
-    description:
-      "Dense, walkable neighborhood with a mix of historic homes and modern condos near downtown Seattle.",
-    crime_score: 45,
-    walk_score: 89,
-    local_insights: [
-      "One of the most walkable neighborhoods in the city",
-      "Excellent public transit access to downtown",
-      "Active nightlife and dining scene",
-    ],
-  },
-  {
-    city: "Miami",
-    state: "FL",
-    name: "Coral Gables Adjacent",
-    description:
-      "Mediterranean-influenced streets with mature tree canopy, close to shops and top-rated schools.",
-    crime_score: 27,
-    walk_score: 62,
-    local_insights: [
-      "Highly-rated public and private school options nearby",
-      "15 minutes to Miami International Airport",
-      "Frequent flooding advisories during hurricane season",
-    ],
-  },
-  {
-    city: "Chicago",
-    state: "IL",
-    name: "North Side",
-    description:
-      "Classic Chicago bungalows and greystones a short train ride from the Loop.",
-    crime_score: 41,
+      "A centrally-located neighborhood named after the ancient Roman city, mixing mid-rise apartments with tree-lined streets near Mother Teresa Boulevard and the National Library.",
+    crime_score: 25,
     walk_score: 82,
     local_insights: [
-      "CTA Brown/Red Line access within a few blocks",
-      "Lake Michigan lakefront trail nearby",
-      "Strong farmers market and local business scene",
+      "Steps from Mother Teresa Boulevard's cafes and shops",
+      "Close to the National Library and National Theatre",
+      "Popular with young professionals and students",
     ],
   },
   {
-    city: "Nashville",
-    state: "TN",
-    name: "East Nashville",
+    city: "Bregu i Diellit",
+    state: "Kosovo",
+    name: "Bregu i Diellit",
     description:
-      "One of the city's fastest-growing areas, known for its mix of historic homes and new construction.",
-    crime_score: 43,
-    walk_score: 58,
+      "A hillside residential area on Prishtina's eastern edge, known for newer apartment developments and views over the city.",
+    crime_score: 22,
+    walk_score: 60,
     local_insights: [
-      "Rapidly appreciating home values over the past 5 years",
-      "Walkable pockets around Five Points",
-      "10 minutes from downtown Nashville and the airport",
+      "Quieter than the city center, with newer construction",
+      "Growing selection of cafes and bakeries",
+      "10–15 minute drive to downtown Prishtina",
     ],
   },
   {
-    city: "Phoenix",
-    state: "AZ",
-    name: "Central Phoenix",
+    city: "Sunny Hill",
+    state: "Kosovo",
+    name: "Sunny Hill",
     description:
-      "Established neighborhood with mature landscaping, close to light rail and downtown.",
-    crime_score: 48,
-    walk_score: 54,
+      "A leafy, family-oriented neighborhood on Prishtina's southern edge, home to the Sunny Hill festival grounds and Germia Park's entrance.",
+    crime_score: 20,
+    walk_score: 55,
     local_insights: [
-      "Light rail access to downtown and Tempe",
-      "Extreme summer heat — check cooling costs before buying",
-      "Growing restaurant and arts district nearby",
+      "Minutes from Germia Park's trails and picnic areas",
+      "Home to the annual Sunny Hill music festival",
+      "Mostly single-family homes and townhouses",
     ],
   },
   {
-    city: "Raleigh",
-    state: "NC",
-    name: "Inside the Beltline",
+    city: "Arbëria",
+    state: "Kosovo",
+    name: "Arbëria",
     description:
-      "Close-in Raleigh neighborhoods with easy access to downtown, NC State, and greenway trails.",
+      "Prishtina's most upscale hillside district, home to many embassies and diplomatic residences, with newer villas and panoramic city views.",
+    crime_score: 15,
+    walk_score: 48,
+    local_insights: [
+      "Highest concentration of embassies and diplomatic residences",
+      "Mostly detached villas rather than apartment blocks",
+      "Some of the highest per-square-meter prices in the city",
+    ],
+  },
+  {
+    city: "Velania",
+    state: "Kosovo",
+    name: "Velania",
+    description:
+      "A quiet, established neighborhood just north of the University of Prishtina, popular with students and university staff.",
+    crime_score: 27,
+    walk_score: 74,
+    local_insights: [
+      "Close to University of Prishtina faculties",
+      "Mix of older houses and student housing",
+      "Easy walk to the city center",
+    ],
+  },
+  {
+    city: "Mati 1",
+    state: "Kosovo",
+    name: "Mati 1",
+    description:
+      "A dense, central neighborhood a short walk from Mother Teresa Square, mixing older apartment blocks with ground-floor retail.",
     crime_score: 30,
-    walk_score: 49,
+    walk_score: 85,
     local_insights: [
-      "Zoned for well-regarded Wake County schools",
-      "Extensive greenway trail network for running/biking",
-      "Short commute to Research Triangle Park",
+      "Steps from Mother Teresa Square and the Grand Hotel area",
+      "Some of the best transit access in the city",
+      "Busy pedestrian streets with shops and cafes",
     ],
   },
   {
-    city: "Portland",
-    state: "OR",
-    name: "Inner Southeast",
+    city: "Lakrishte",
+    state: "Kosovo",
+    name: "Lakrishte",
     description:
-      "Bike-friendly streets with a strong independent business scene, minutes from downtown Portland.",
+      "A mixed residential and commercial area near Prishtina's main bus station, undergoing steady redevelopment.",
     crime_score: 35,
-    walk_score: 76,
+    walk_score: 70,
     local_insights: [
-      "Extensive dedicated bike lane network",
-      "Walkable to Hawthorne and Division St. shops",
-      "No sales tax in Oregon",
+      "Close to Prishtina's main inter-city bus station",
+      "Convenient for commuters traveling outside the city",
+      "Ongoing new residential construction",
     ],
   },
   {
-    city: "Boston",
-    state: "MA",
-    name: "Greater Boston",
+    city: "Prizren",
+    state: "Kosovo",
+    name: "Prizren Old Town",
     description:
-      "Historic housing stock with strong public transit access across Boston's inner neighborhoods.",
-    crime_score: 33,
-    walk_score: 83,
+      "Kosovo's historic second city, known for its Ottoman-era old town, stone bridges, and the Sharr Mountains backdrop.",
+    crime_score: 24,
+    walk_score: 80,
     local_insights: [
-      "MBTA subway access within walking distance",
-      "Close to multiple top-ranked universities and hospitals",
-      "Older housing stock — budget for maintenance/updates",
+      "Ottoman and Byzantine-era architecture throughout the old town",
+      "Home to the Dokufest film festival each summer",
+      "About 90 minutes from Prishtina by road",
+    ],
+  },
+  {
+    city: "Pejë",
+    state: "Kosovo",
+    name: "Pejë City Center",
+    description:
+      "A city in western Kosovo at the foot of the Accursed Mountains (Bjeshkët e Nemuna), gateway to Rugova Canyon.",
+    crime_score: 26,
+    walk_score: 65,
+    local_insights: [
+      "Closest city to Rugova Canyon and its hiking trails",
+      "Historic Patriarchate of Peć monastery nearby",
+      "Growing outdoor tourism economy",
     ],
   },
 ] as const;

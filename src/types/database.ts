@@ -1,4 +1,4 @@
-import type { PropertyType, SearchListing, SortBy } from "./listing";
+import type { CitySummary, PropertyType, SearchListing, SortBy } from "./listing";
 import type { CollectionListing } from "./collection";
 
 /**
@@ -79,6 +79,10 @@ export interface Database {
       set_collection_item_note: {
         Args: { p_item_id: string; p_note: string };
         Returns: undefined;
+      };
+      list_cities: {
+        Args: Record<string, never>;
+        Returns: CitySummary[];
       };
     };
     Enums: Record<string, never>;
