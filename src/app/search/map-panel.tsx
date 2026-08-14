@@ -349,6 +349,22 @@ export function MapPanel({
     highlightedIdsRef.current = nextIds;
   }, [selectedId, hoveredId]);
 
+  // Selecting a listing (e.g. clicking its card in the results list) pans
+  // the map to it, so "where is this on the map" has an answer even when
+  // the pin isn't in the current viewport.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !loadedRef.current || !selectedId) return;
+    const listing = pendingListingsRef.current.find(
+      (l) => l.id === selectedId,
+    );
+    if (!listing) return;
+    map.easeTo({
+      center: [listing.lng, listing.lat],
+      zoom: Math.max(map.getZoom(), 14),
+    });
+  }, [selectedId]);
+
   if (!token) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-neutral-100 p-6 text-center text-sm text-neutral-500 dark:bg-neutral-900">

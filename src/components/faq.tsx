@@ -20,7 +20,7 @@ export function Faq({ items }: { items: FaqItem[] }) {
               type="button"
               onClick={() => setOpenIndex(open ? null : i)}
               aria-expanded={open}
-              className="flex min-h-11 w-full items-center justify-between gap-4 py-4 text-left"
+              className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-4 py-4 text-left"
             >
               <span className="text-base font-semibold text-neutral-950 sm:text-lg dark:text-neutral-50">
                 {item.question}

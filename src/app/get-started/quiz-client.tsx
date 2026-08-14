@@ -205,7 +205,7 @@ export function QuizClient() {
             <input
               value={answers.city}
               onChange={(e) => patch({ city: e.target.value })}
-              placeholder="e.g. Austin, TX"
+              placeholder="e.g. Prishtina"
               className={`${inputClass} w-full`}
             />
           </StepShell>

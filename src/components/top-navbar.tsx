@@ -10,10 +10,9 @@ import { slugify } from "@/lib/slug";
 import { PROPERTY_TYPES, type PropertyType } from "@/types/listing";
 
 const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
-  "single-family": "Single-Family Homes",
-  condo: "Condos",
-  townhouse: "Townhouses",
-  "multi-family": "Multi-Family",
+  house: "Houses",
+  apartment: "Apartments",
+  office: "Offices",
   land: "Land",
 };
 
@@ -166,7 +165,7 @@ export function TopNavbar() {
         className="relative border-b border-neutral-200 bg-white"
         onMouseLeave={() => setOpenId(null)}
       >
-        <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 lg:px-8">
+        <div className="mx-auto flex h-24 max-w-[1600px] items-center justify-between px-4 lg:px-8">
           <div className="flex items-center gap-6 lg:hidden">
             <button
               type="button"
@@ -359,7 +358,7 @@ function Logo() {
       ref={imgRef}
       src="/no-bg-flake.png"
       alt="Flake"
-      className="h-14 w-auto"
+      className="h-20 w-auto"
       onError={() => setError(true)}
     />
   );

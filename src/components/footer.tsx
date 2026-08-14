@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CookieSettingsLink } from "./cookie-settings-link";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -6,7 +7,7 @@ export function Footer() {
   return (
     <footer className="border-t border-neutral-300 bg-neutral-200">
       <div className="mx-auto max-w-6xl px-4 py-10 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-5">
           <div className="col-span-2 sm:col-span-1">
             <span className="text-lg font-semibold tracking-tight text-neutral-950">
               Flake
@@ -79,6 +80,39 @@ export function Footer() {
                 >
                   flakeeestate@gmail.com
                 </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">Legal</div>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-neutral-600 hover:text-neutral-950"
+                >
+                  Terms of use
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-neutral-600 hover:text-neutral-950"
+                >
+                  Privacy policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cookie-policy"
+                  className="text-neutral-600 hover:text-neutral-950"
+                >
+                  Cookie policy
+                </Link>
+              </li>
+              <li>
+                <CookieSettingsLink />
               </li>
             </ul>
           </div>

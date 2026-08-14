@@ -38,7 +38,7 @@ export function Sidebar() {
   const onDashboard = pathname.startsWith("/dashboard");
 
   return (
-    <aside className="fixed top-[67px] bottom-0 left-0 z-40 hidden w-[74px] flex-col items-center border-r border-neutral-200 bg-white py-6 sm:flex lg:w-[82px]">
+    <aside className="fixed top-[99px] bottom-0 left-0 z-40 hidden w-[74px] flex-col items-center border-r border-neutral-200 bg-white py-6 sm:flex lg:w-[82px]">
       <nav className="flex flex-1 flex-col items-center gap-10">
         {SIDEBAR_ITEMS.map((item) => {
           const active =

@@ -59,7 +59,7 @@ const EXTRACT_TOOL: Anthropic.Tool = {
         type: "array",
         items: { type: "string", enum: [...PROPERTY_TYPES] },
         description:
-          "Property types implied by the query, mapped onto this enum (e.g. 'house' -> single-family, 'condo' -> condo). Empty array if none mentioned.",
+          "Property types implied by the query, mapped onto this enum (e.g. 'home'/'house' -> house, 'flat'/'condo' -> apartment, 'commercial space' -> office). Empty array if none mentioned.",
       },
       minSqft: {
         type: ["integer", "null"],

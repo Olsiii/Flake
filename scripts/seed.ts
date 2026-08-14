@@ -37,13 +37,7 @@ const CITIES = [
   { city: "Pejë", state: "Kosovo", lat: 42.6591, lng: 20.2883 },
 ] as const;
 
-const PROPERTY_TYPES = [
-  "single-family",
-  "condo",
-  "townhouse",
-  "multi-family",
-  "land",
-] as const;
+const PROPERTY_TYPES = ["house", "apartment", "office", "land"] as const;
 
 const STATUSES = [
   "for-sale",
@@ -249,18 +243,27 @@ function buildListing(agentId: string) {
   const isLand = propertyType === "land";
   const status = faker.helpers.arrayElement(STATUSES);
 
-  const beds = isLand ? null : faker.number.int({ min: 1, max: 6 });
-  const baths = isLand
-    ? null
-    : roundToHalf(faker.number.float({ min: 1, max: 4.5 }));
+  const isOffice = propertyType === "office";
+  const isResidential = !isLand && !isOffice; // house or apartment
+  const beds = isResidential ? faker.number.int({ min: 1, max: 6 }) : null;
+  const baths = isResidential
+    ? roundToHalf(faker.number.float({ min: 1, max: 4.5 }))
+    : null;
   // Sizes/prices are Kosovo-scale, not converted US numbers: Prishtina
-  // apartments/houses run roughly 45-260 m², land parcels a few hundred
-  // to ~1.5 hectares, and sale prices around €700-2200/m² depending on
-  // neighborhood — nowhere close to US price-per-sqft figures.
-  const sqft = isLand ? null : faker.number.int({ min: 45, max: 260 });
+  // apartments/houses run roughly 45-260 m² (offices a bit wider, 30-500
+  // m²), land parcels a few hundred to ~1.5 hectares, and sale prices
+  // around €700-2200/m² depending on neighborhood — nowhere close to US
+  // price-per-sqft figures.
+  const sqft = isLand
+    ? null
+    : faker.number.int({ min: isOffice ? 30 : 45, max: isOffice ? 500 : 260 });
+  // Only standalone houses and raw land have a meaningful separate lot —
+  // apartments/offices are units within a building.
   const lotSize = isLand
     ? faker.number.int({ min: 300, max: 15000 })
-    : faker.number.int({ min: 80, max: 1200 });
+    : propertyType === "house"
+      ? faker.number.int({ min: 80, max: 1200 })
+      : null;
   const yearBuilt = isLand ? null : faker.number.int({ min: 1970, max: 2024 });
 
   const isRent = status === "for-rent";
@@ -271,8 +274,11 @@ function buildListing(agentId: string) {
       ? faker.number.int({ min: 200, max: 900 })
       : Math.round(((sqft ?? 70) * pricePerSqm) / 500) * 500;
 
-  const hoaFee =
-    propertyType === "condo" || propertyType === "townhouse"
+  // Apartments and offices sit in shared buildings with a service/building
+  // fee; standalone houses rarely do, land never does.
+  const hoaFee = isLand
+    ? null
+    : propertyType === "apartment" || isOffice
       ? faker.number.int({ min: 15, max: 60 })
       : Math.random() < 0.15
         ? faker.number.int({ min: 10, max: 30 })
@@ -283,8 +289,10 @@ function buildListing(agentId: string) {
 
   const propertyTypeLabel = propertyType.replace("-", " ");
   const title = isLand
-    ? `${lotSize.toLocaleString()} m² Lot in ${cityInfo.city}, ${cityInfo.state}`
-    : `${beds} Bed, ${baths} Bath ${propertyTypeLabel} in ${cityInfo.city}`;
+    ? `${lotSize!.toLocaleString()} m² Lot in ${cityInfo.city}, ${cityInfo.state}`
+    : isOffice
+      ? `${sqft!.toLocaleString()} m² Office in ${cityInfo.city}`
+      : `${beds} Bed, ${baths} Bath ${propertyTypeLabel} in ${cityInfo.city}`;
 
   // Prishtina's neighborhoods are each only a few hundred meters to ~1-2km
   // across, so a tight jitter keeps listings inside their named area —

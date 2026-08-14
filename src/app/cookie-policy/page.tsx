@@ -1,0 +1,16 @@
+import type { Metadata } from "next";
+import { LegalPage } from "@/components/legal-page";
+import { renderLegalDoc } from "@/lib/legal-doc";
+
+const FILENAME = "flake-real-estate-cookie-policy.md";
+
+export const metadata: Metadata = {
+  title: "Cookie Policy | Flake",
+};
+
+export default async function CookiePolicyPage() {
+  const html = await renderLegalDoc(FILENAME);
+  return (
+    <LegalPage title="Cookie Policy" html={html} filename={FILENAME} />
+  );
+}

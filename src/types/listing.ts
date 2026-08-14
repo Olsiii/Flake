@@ -1,10 +1,4 @@
-export const PROPERTY_TYPES = [
-  "single-family",
-  "condo",
-  "townhouse",
-  "multi-family",
-  "land",
-] as const;
+export const PROPERTY_TYPES = ["house", "apartment", "office", "land"] as const;
 export type PropertyType = (typeof PROPERTY_TYPES)[number];
 
 export const LISTING_STATUSES = [
