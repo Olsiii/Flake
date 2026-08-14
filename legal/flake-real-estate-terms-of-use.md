@@ -10,7 +10,7 @@ These Terms of Use ("Terms") govern your access to and use of the Flake Real Est
 
 ## 2. Description of Service
 
-Flake provides an online platform for searching, viewing, and inquiring about residential real estate listings in Kosovo, including tools such as map-based search, saved searches, saved listings, valuation estimates, mortgage/affordability calculators, and communication with listing agents. Flake is a technology platform and, unless otherwise stated, does not itself act as a licensed real estate broker or agent in any individual transaction.
+Flake provides an online platform for searching, viewing, and inquiring about residential real estate listings in Kosovo, including tools such as map-based search, saved searches, saved listings, valuation estimates, and communication with listing agents. Flake is a technology platform and, unless otherwise stated, does not itself act as a licensed real estate broker or agent in any individual transaction.
 
 ## 3. Eligibility and Accounts
 
@@ -32,7 +32,7 @@ We may suspend or terminate access for any account that violates this section.
 
 Property listings, prices, photos, and descriptions displayed on the Platform may be submitted by agents, brokers, property owners, or other third parties, and may in the future be sourced in part from third-party data feeds. **Flake does not guarantee the accuracy, completeness, or current availability of any listing.** Prices, availability, and property details can change without notice, and you should independently verify any information before making a decision — including through direct contact with the listed agent and, where appropriate, a licensed professional (notary, lawyer, surveyor).
 
-Valuation estimates, affordability/mortgage calculations, and similar tools provided on the Platform are automated estimates for informational purposes only. They are **not** appraisals, and should not be relied on as the sole basis for any financial or purchase decision.
+Valuation estimates and similar tools provided on the Platform are automated estimates for informational purposes only. They are **not** appraisals, and should not be relied on as the sole basis for any financial or purchase decision.
 
 ## 6. No Real Estate, Legal, or Financial Advice
 
@@ -83,7 +83,3 @@ These Terms are governed by the laws of the Republic of Kosovo, without regard t
 Questions about these Terms can be sent to: **flakeeestate@gmail.com**
 
 ---
-
-### ⚠️ Before you publish this
-
-This is a starting template, not legal advice. Real estate sites collect personal data (names, phone numbers, sometimes financial pre-qualification info) and operate under Kosovo's Law on Personal Data Protection — and if you ever have EU visitors, GDPR can apply too. Before this goes live, it's worth having a Kosovo-licensed lawyer review it.

@@ -75,6 +75,3 @@ Questions or requests regarding this Privacy Policy: **flakeeestate@gmail.com**
 
 ---
 
-### ⚠️ Before you publish this
-
-This is a starting template, not legal advice. Kosovo's Law on Personal Data Protection (and GDPR, if you ever serve EU visitors) impose specific requirements around consent, data subject rights, and cross-border transfers — have a Kosovo-licensed lawyer review this before it goes live, especially the sections on data sharing with agents and international transfers to your cloud providers (Supabase, Cloudflare, Mapbox, Resend, Anthropic/OpenAI).

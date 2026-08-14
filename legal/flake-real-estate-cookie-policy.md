@@ -42,6 +42,3 @@ Questions about this Cookie Policy: **flakeeestate@gmail.com**
 
 ---
 
-### ⚠️ Before you publish this
-
-This is a starting template, not legal advice. Fill in real cookie names/providers once implemented, and confirm with a Kosovo-licensed lawyer whether your specific cookie mix requires opt-in consent (typical for analytics/marketing cookies) versus disclosure-only (typical for strictly necessary cookies) under Kosovo's data protection law and GDPR if EU visitors are in scope.

@@ -122,6 +122,18 @@ function SignUpForm() {
         </button>
       </form>
 
+      <p className="mt-3 text-center text-xs text-neutral-500">
+        By creating an account, you agree to our{" "}
+        <Link href="/terms" className="hover:underline">
+          Terms of Use
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="hover:underline">
+          Privacy Policy
+        </Link>
+        .
+      </p>
+
       <div className="my-4 flex items-center gap-3 text-xs text-neutral-400">
         <div className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
         or
