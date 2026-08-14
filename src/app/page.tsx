@@ -91,7 +91,7 @@ export default async function Home() {
         <FeaturedListings listings={featured} />
       </Suspense>
 
-      <section className="mx-auto max-w-6xl px-4 py-12 lg:px-8">
+      <section className="mx-auto w-full max-w-6xl px-4 py-12 lg:px-8">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <Step
             number="1"
@@ -111,7 +111,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-4xl px-4 py-12 lg:px-8">
+      <section className="mx-auto w-full max-w-4xl px-4 py-12 lg:px-8">
         <h2 className="text-h1 text-center">Frequently asked questions</h2>
         <div className="mt-8">
           <Faq items={FAQ_ITEMS} />

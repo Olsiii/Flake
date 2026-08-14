@@ -249,7 +249,14 @@ export function MapPanel({
       const container = document.createElement("div");
       const mbPopup = new mapboxgl.Popup({
         closeButton: false,
-        closeOnClick: true,
+        // Mapbox's closeOnClick listens for the next map click to dismiss
+        // itself — but that "next click" fires for the SAME click that's
+        // opening this popup (it's a layer click bubbling to the map's
+        // generic click handler), so the popup would open and immediately
+        // self-close. Closing on outside-click is handled manually below
+        // instead, via a plain "click" listener that only fires for
+        // clicks that miss the pin/cluster layers entirely.
+        closeOnClick: false,
         maxWidth: "300px",
         offset: 14,
         className: "flake-map-popup",
@@ -260,6 +267,17 @@ export function MapPanel({
       mbPopup.on("close", () => setPopup(null));
       mapboxPopupRef.current = mbPopup;
       setPopup({ container, listing });
+    });
+
+    map.on("click", (e) => {
+      if (!mapboxPopupRef.current) return;
+      const hit = map.queryRenderedFeatures(e.point, {
+        layers: ["unclustered-point", "clusters"],
+      });
+      if (hit.length === 0) {
+        mapboxPopupRef.current.remove();
+        mapboxPopupRef.current = null;
+      }
     });
 
     for (const layer of ["clusters", "unclustered-point"]) {

@@ -64,7 +64,10 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
   }
 
   return (
-    <div className="w-72 overflow-hidden">
+    <div
+      className="w-72 cursor-pointer overflow-hidden"
+      onClick={() => onViewDetails(listing.id)}
+    >
       <div className="relative aspect-[4/3] bg-neutral-100">
         {images.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element -- external Supabase Storage URLs
@@ -90,7 +93,10 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
 
         <button
           type="button"
-          onClick={() => toggleSave(listing.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleSave(listing.id);
+          }}
           aria-label={saved ? "Remove from saved homes" : "Save home"}
           className={`btn-icon absolute top-2 right-2 ${saved ? "text-accent-600" : ""}`}
         >
@@ -103,7 +109,10 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
               <button
                 key={i}
                 type="button"
-                onClick={() => setActiveImage(i)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveImage(i);
+                }}
                 aria-label={`Photo ${i + 1}`}
                 className={`h-1.5 w-1.5 rounded-full ${
                   i === activeImage ? "bg-white" : "bg-white/50"
@@ -118,20 +127,19 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
         <div className="text-lg font-bold tracking-tight">
           {formatPrice(listing)}
         </div>
-        <button
-          type="button"
-          onClick={() => onViewDetails(listing.id)}
-          className="mt-0.5 block truncate text-left text-sm font-medium text-neutral-900 hover:underline"
-        >
+        <div className="mt-0.5 truncate text-sm font-medium text-neutral-900 hover:underline">
           {listing.title}
-        </button>
+        </div>
         <div className="text-2xs mt-0.5 truncate text-neutral-500">
           {listing.address}, {listing.city}, {listing.state}
         </div>
 
         <button
           type="button"
-          onClick={() => setShowContactForm(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowContactForm(true);
+          }}
           className="btn btn-primary mt-3 w-full"
         >
           Check availability

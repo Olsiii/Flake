@@ -359,7 +359,7 @@ function Logo() {
       ref={imgRef}
       src="/no-bg-flake.png"
       alt="Flake"
-      className="h-8 w-auto"
+      className="h-14 w-auto"
       onError={() => setError(true)}
     />
   );
