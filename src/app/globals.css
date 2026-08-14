@@ -174,3 +174,15 @@ body {
     @apply rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)] dark:border dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none;
   }
 }
+
+/* Map pin popup (src/components/map-pin-popup.tsx) — strip Mapbox's
+   default padded/square popup chrome so the card fills it edge to edge. */
+.mapboxgl-popup.flake-map-popup .mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+.mapboxgl-popup.flake-map-popup .mapboxgl-popup-tip {
+  border-top-color: #fff;
+}

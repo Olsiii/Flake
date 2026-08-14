@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import mapboxgl from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+import { MapPinPopup } from "@/components/map-pin-popup";
 import type { MapBounds, SearchListing } from "@/types/listing";
 
 const SOURCE_ID = "listings";
@@ -65,6 +68,7 @@ export function MapPanel({
   hasPolygon,
   initialBounds,
 }: MapPanelProps) {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
@@ -72,7 +76,12 @@ export function MapPanel({
   const pendingListingsRef = useRef<SearchListing[]>(listings);
   const highlightedIdsRef = useRef<Set<string>>(new Set());
   const initialBoundsRef = useRef(initialBounds);
+  const mapboxPopupRef = useRef<mapboxgl.Popup | null>(null);
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const [popup, setPopup] = useState<{
+    container: HTMLDivElement;
+    listing: SearchListing;
+  } | null>(null);
 
   // Callbacks change identity across renders (they close over parent state);
   // keep the latest version in refs so the map-init effect can stay []‑deps.
@@ -224,8 +233,33 @@ export function MapPanel({
     });
 
     map.on("click", "unclustered-point", (e) => {
-      const id = e.features?.[0]?.properties?.id;
-      if (id) onPinClickRef.current(id);
+      const feature = e.features?.[0];
+      const id = feature?.properties?.id;
+      if (!id) return;
+      onPinClickRef.current(id);
+
+      const listing = pendingListingsRef.current.find((l) => l.id === id);
+      if (!listing) return;
+      const coordinates = (feature!.geometry as GeoJSON.Point).coordinates as [
+        number,
+        number,
+      ];
+
+      mapboxPopupRef.current?.remove();
+      const container = document.createElement("div");
+      const mbPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: true,
+        maxWidth: "300px",
+        offset: 14,
+        className: "flake-map-popup",
+      })
+        .setLngLat(coordinates)
+        .setDOMContent(container)
+        .addTo(map);
+      mbPopup.on("close", () => setPopup(null));
+      mapboxPopupRef.current = mbPopup;
+      setPopup({ container, listing });
     });
 
     for (const layer of ["clusters", "unclustered-point"]) {
@@ -330,6 +364,15 @@ export function MapPanel({
           </button>
         )}
       </div>
+
+      {popup &&
+        createPortal(
+          <MapPinPopup
+            listing={popup.listing}
+            onViewDetails={(id) => router.push(`/listing/${id}`)}
+          />,
+          popup.container,
+        )}
     </div>
   );
 }

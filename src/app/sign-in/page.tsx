@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
+import { PasswordInput } from "@/components/password-input";
 
 function SignInForm() {
   const router = useRouter();
@@ -67,13 +68,11 @@ function SignInForm() {
           onChange={(e) => setEmail(e.target.value)}
           className="input"
         />
-        <input
-          required
-          type="password"
-          placeholder="Password"
+        <PasswordInput
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="input"
+          onChange={setPassword}
+          placeholder="Password"
+          autoComplete="current-password"
         />
         <button
           type="submit"

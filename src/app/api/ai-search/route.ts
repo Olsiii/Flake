@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "@/lib/anthropic";
+import { isRateLimited } from "@/lib/rate-limit";
 import {
   PROPERTY_TYPES,
   type AiDetectableFilterKey,
@@ -88,6 +89,13 @@ const EXTRACT_TOOL: Anthropic.Tool = {
 };
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "ai-search", 20, 5 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   const body = (await request.json().catch(() => null)) as {
     query?: string;
   } | null;

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getSupabaseServer } from "@/lib/supabase-server";
+import { isRateLimited } from "@/lib/rate-limit";
+import { brandedEmailHtml, escapeHtml } from "@/lib/email-template";
 import {
   getAgentNotificationEmail,
   getResendClient,
@@ -20,6 +22,13 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "tour-requests", 5, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   const body = (await request
     .json()
     .catch(() => null)) as TourRequestPayload | null;
@@ -133,6 +142,11 @@ async function sendTourRequestEmails(
     from,
     to: body.email,
     subject: `Tour requested for ${listingTitle}`,
-    text: `Hi ${body.name},\n\nYour tour request for "${listingTitle}" on ${formattedTime} has been sent to the agent. They'll confirm with you shortly.\n\n— The team`,
+    text: `Hi ${body.name},\n\nYour tour request for "${listingTitle}" on ${formattedTime} has been sent to the agent. They'll confirm with you shortly.\n\n— The team at Flake`,
+    html: brandedEmailHtml(
+      `<p>Hi ${escapeHtml(body.name)},</p>` +
+        `<p>Your tour request for "${escapeHtml(listingTitle)}" on ${escapeHtml(formattedTime)} has been sent to the agent. They'll confirm with you shortly.</p>` +
+        `<p>— The team at Flake</p>`,
+    ),
   });
 }

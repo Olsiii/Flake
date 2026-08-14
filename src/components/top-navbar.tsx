@@ -357,9 +357,9 @@ function Logo() {
     // eslint-disable-next-line @next/next/no-img-element -- needs onError fallback to the text wordmark
     <img
       ref={imgRef}
-      src="/Logo-Light.png"
+      src="/horizontal-2.png"
       alt="Flake"
-      className="h-9 w-auto"
+      className="h-8 w-auto"
       onError={() => setError(true)}
     />
   );

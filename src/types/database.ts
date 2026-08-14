@@ -35,6 +35,12 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      listing_images: {
+        Row: ListingImageRow;
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
       collections: {
         Row: CollectionRow;
         Insert: CollectionInsert;
@@ -187,6 +193,14 @@ interface ListingLookupRow {
   address: string;
   city: string;
   state: string;
+}
+
+interface ListingImageRow {
+  [key: string]: unknown;
+  id: string;
+  listing_id: string;
+  url: string;
+  sort_order: number;
 }
 
 interface CollectionRow {

@@ -6,7 +6,6 @@ import { ListingSummary } from "./listing-summary";
 import { ValuationCard } from "./valuation-card";
 import { ListingDescription } from "./listing-description";
 import { NeighborhoodCard } from "./neighborhood-card";
-import { MortgageCalculator } from "./mortgage-calculator";
 import { AgentCard } from "./agent-card";
 import { SITE_URL } from "@/lib/site";
 
@@ -108,7 +107,6 @@ export default async function ListingPage({
             {listing.neighborhood && (
               <NeighborhoodCard neighborhood={listing.neighborhood} />
             )}
-            <MortgageCalculator price={listing.price} />
           </div>
 
           <div className="flex min-w-0 flex-col gap-6 lg:sticky lg:top-6">

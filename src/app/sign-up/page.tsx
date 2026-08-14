@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
+import { PasswordInput } from "@/components/password-input";
 
 function SignUpForm() {
   const router = useRouter();
@@ -13,14 +14,19 @@ function SignUpForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkEmail, setCheckEmail] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitting(true);
     setError(null);
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      return;
+    }
+    setSubmitting(true);
     const supabase = getSupabaseBrowser();
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -93,14 +99,19 @@ function SignUpForm() {
           onChange={(e) => setEmail(e.target.value)}
           className="input"
         />
-        <input
-          required
-          type="password"
+        <PasswordInput
+          value={password}
+          onChange={setPassword}
           minLength={6}
           placeholder="Password (min. 6 characters)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="input"
+          autoComplete="new-password"
+        />
+        <PasswordInput
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          minLength={6}
+          placeholder="Confirm password"
+          autoComplete="new-password"
         />
         <button
           type="submit"

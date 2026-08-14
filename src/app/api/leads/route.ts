@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { isRateLimited } from "@/lib/rate-limit";
+import { brandedEmailHtml, escapeHtml } from "@/lib/email-template";
 import {
   getAgentNotificationEmail,
   getFlakeNotificationEmail,
@@ -20,6 +22,13 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "leads", 5, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   const body = (await request.json().catch(() => null)) as LeadPayload | null;
   if (!body?.name?.trim() || !body.email?.trim()) {
     return NextResponse.json(
@@ -88,7 +97,12 @@ async function sendLeadEmails(body: LeadPayload) {
     from,
     to: body.email,
     subject: `We received your inquiry about ${listingTitle}`,
-    text: `Hi ${body.name},\n\nThanks for reaching out about "${listingTitle}". An agent will be in touch shortly.\n\n— The team`,
+    text: `Hi ${body.name},\n\nThanks for reaching out about "${listingTitle}". An agent will be in touch shortly.\n\n— The team at Flake`,
+    html: brandedEmailHtml(
+      `<p>Hi ${escapeHtml(body.name)},</p>` +
+        `<p>Thanks for reaching out about "${escapeHtml(listingTitle)}". An agent will be in touch shortly.</p>` +
+        `<p>— The team at Flake</p>`,
+    ),
   });
 }
 
