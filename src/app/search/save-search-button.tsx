@@ -6,13 +6,9 @@ import { useUser } from "@/hooks/use-user";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import type { ListingFilters, MapBounds } from "@/types/listing";
 import { filtersToParams } from "./url-state";
+import { useLanguage } from "@/i18n/language-provider";
 
-const ALERT_OPTIONS = [
-  { value: "off", label: "No alerts" },
-  { value: "instant", label: "Instant" },
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-] as const;
+const ALERT_VALUES = ["off", "instant", "daily", "weekly"] as const;
 
 export function SaveSearchButton({
   filters,
@@ -21,7 +17,20 @@ export function SaveSearchButton({
   filters: ListingFilters;
   bounds: MapBounds | null;
 }) {
+  const { t } = useLanguage();
   const { user } = useUser();
+
+  const ALERT_OPTIONS = ALERT_VALUES.map((value) => ({
+    value,
+    label:
+      value === "off"
+        ? t.search.noAlerts
+        : value === "instant"
+          ? t.search.instant
+          : value === "daily"
+            ? t.search.daily
+            : t.search.weekly,
+  }));
   const router = useRouter();
   const pathname = usePathname();
 
@@ -52,7 +61,7 @@ export function SaveSearchButton({
     const supabase = getSupabaseBrowser();
     const { error } = await supabase.from("saved_searches").insert({
       user_id: user.id,
-      name: name.trim() || "Untitled search",
+      name: name.trim() || t.search.untitledSearch,
       filters: { ...filters, bounds },
       alert_frequency: alertFrequency,
     });
@@ -77,17 +86,17 @@ export function SaveSearchButton({
         onClick={handleClick}
         className="btn-sm btn-secondary shrink-0"
       >
-        Save this search
+        {t.search.saveThisSearch}
       </button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="card w-full max-w-sm p-4">
-            <h2 className="text-h2">Save this search</h2>
+            <h2 className="text-h2">{t.search.saveSearchModalTitle}</h2>
 
             {saved ? (
               <p className="text-success-700 dark:text-success-400 mt-3 text-sm">
-                Saved! Find it on your dashboard.
+                {t.search.savedConfirmation}
               </p>
             ) : (
               <form onSubmit={handleSubmit} className="mt-3 space-y-3">
@@ -98,13 +107,13 @@ export function SaveSearchButton({
                 )}
                 <input
                   required
-                  placeholder="Name this search"
+                  placeholder={t.search.nameThisSearch}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="input"
                 />
                 <label className="label">
-                  Email me about new matches
+                  {t.search.emailMeAboutMatches}
                   <select
                     value={alertFrequency}
                     onChange={(e) =>
@@ -128,14 +137,14 @@ export function SaveSearchButton({
                     onClick={() => setOpen(false)}
                     className="btn btn-ghost"
                   >
-                    Cancel
+                    {t.common.cancel}
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
                     className="btn btn-primary"
                   >
-                    {submitting ? "Saving…" : "Save search"}
+                    {submitting ? t.common.saving : t.common.save}
                   </button>
                 </div>
               </form>

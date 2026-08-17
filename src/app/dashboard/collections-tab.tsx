@@ -6,9 +6,11 @@ import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useUser } from "@/hooks/use-user";
 import { EmptyState } from "@/components/empty-state";
 import { ListRowsSkeleton } from "@/components/skeleton";
+import { useLanguage } from "@/i18n/language-provider";
 import type { Collection } from "@/types/collection";
 
 export function CollectionsTab() {
+  const { t } = useLanguage();
   const { user } = useUser();
   const [collections, setCollections] = useState<Collection[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export function CollectionsTab() {
   }, [user]);
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this collection?")) return;
+    if (!confirm(t.dashboard.deleteCollectionConfirm)) return;
     setCollections((prev) => prev?.filter((c) => c.id !== id) ?? null);
     const supabase = getSupabaseBrowser();
     await supabase.from("collections").delete().eq("id", id);
@@ -42,9 +44,9 @@ export function CollectionsTab() {
   if (collections.length === 0) {
     return (
       <EmptyState
-        title="No collections yet"
-        description='Use "Add to Collection" on any listing to start one.'
-        action={{ label: "Start browsing", href: "/search" }}
+        title={t.dashboard.noCollectionsTitle}
+        description={t.dashboard.noCollectionsDesc}
+        action={{ label: t.dashboard.startBrowsing, href: "/search" }}
       />
     );
   }
@@ -60,14 +62,14 @@ export function CollectionsTab() {
             {c.name}
           </Link>
           {c.is_shared && (
-            <span className="text-2xs text-neutral-400">shared</span>
+            <span className="text-2xs text-neutral-400">{t.dashboard.shared}</span>
           )}
           <button
             type="button"
             onClick={() => handleDelete(c.id)}
             className="btn-sm btn-danger-ghost"
           >
-            Delete
+            {t.dashboard.delete}
           </button>
         </div>
       ))}

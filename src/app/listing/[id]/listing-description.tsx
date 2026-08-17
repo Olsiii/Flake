@@ -1,4 +1,5 @@
 import type { ListingDetail } from "@/types/listing";
+import { getDictionary } from "@/i18n/server";
 
 function Fact({
   label,
@@ -19,7 +20,20 @@ function Fact({
   );
 }
 
-export function ListingDescription({ listing }: { listing: ListingDetail }) {
+export async function ListingDescription({
+  listing,
+}: {
+  listing: ListingDetail;
+}) {
+  const t = await getDictionary();
+
+  const PROPERTY_TYPE_LABELS: Record<ListingDetail["property_type"], string> = {
+    house: t.common.propertyTypeHouse,
+    apartment: t.common.propertyTypeApartment,
+    office: t.common.propertyTypeOffice,
+    land: t.common.propertyTypeLand,
+  };
+
   return (
     <section>
       {listing.description && (
@@ -28,30 +42,33 @@ export function ListingDescription({ listing }: { listing: ListingDetail }) {
         </div>
       )}
 
-      <h2 className="text-eyebrow mb-2">Facts</h2>
+      <h2 className="text-eyebrow mb-2">{t.listing.facts}</h2>
       <div>
         <Fact
-          label="Property type"
-          value={listing.property_type.replace("-", " ")}
-          capitalize
+          label={t.listing.propertyType}
+          value={PROPERTY_TYPE_LABELS[listing.property_type]}
         />
         <Fact
-          label="Year built"
+          label={t.listing.yearBuilt}
           value={listing.year_built ? String(listing.year_built) : "—"}
         />
         <Fact
-          label="Lot size"
+          label={t.listing.lotSize}
           value={
             listing.lot_size ? `${listing.lot_size.toLocaleString()} m²` : "—"
           }
         />
         <Fact
-          label="Building fee"
+          label={t.listing.buildingFee}
           value={
-            listing.hoa_fee ? `€${listing.hoa_fee.toLocaleString()}/mo` : "None"
+            listing.hoa_fee
+              ? `€${listing.hoa_fee.toLocaleString()}${t.search.perMonthSuffix}`
+              : t.listing.none
           }
         />
-        {listing.mls_id && <Fact label="Reference #" value={listing.mls_id} />}
+        {listing.mls_id && (
+          <Fact label={t.listing.referenceNumber} value={listing.mls_id} />
+        )}
       </div>
     </section>
   );

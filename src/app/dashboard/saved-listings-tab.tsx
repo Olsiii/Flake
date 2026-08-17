@@ -7,9 +7,11 @@ import { useSavedListingIds } from "@/hooks/use-saved-listings";
 import { ListingCard } from "../search/listing-card";
 import { EmptyState } from "@/components/empty-state";
 import { ListingGridSkeleton } from "@/components/skeleton";
+import { useLanguage } from "@/i18n/language-provider";
 import type { SearchListing } from "@/types/listing";
 
 export function SavedListingsTab() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [listings, setListings] = useState<SearchListing[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +41,9 @@ export function SavedListingsTab() {
   if (visible.length === 0) {
     return (
       <EmptyState
-        title="No saved listings yet"
-        description="Tap the heart icon on any listing to save it here."
-        action={{ label: "Start browsing", href: "/search" }}
+        title={t.dashboard.noSavedListingsTitle}
+        description={t.dashboard.noSavedListingsDesc}
+        action={{ label: t.dashboard.startBrowsing, href: "/search" }}
       />
     );
   }

@@ -8,13 +8,9 @@ import { useCities } from "@/hooks/use-cities";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { slugify } from "@/lib/slug";
 import { PROPERTY_TYPES, type PropertyType } from "@/types/listing";
-
-const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
-  house: "Houses",
-  apartment: "Apartments",
-  office: "Offices",
-  land: "Land",
-};
+import { useLanguage } from "@/i18n/language-provider";
+import { LanguageSwitch } from "@/components/language-switch";
+import { Logo } from "@/components/logo";
 
 interface MegaColumn {
   heading: string;
@@ -30,22 +26,32 @@ interface NavItem {
   hasMenu?: boolean;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { id: "search", label: "Search", href: "/search", matchPrefix: "/search", hasMenu: true },
-  { id: "cities", label: "Cities", href: null, matchPrefix: "/cities", hasMenu: true },
-  { id: "get-started", label: "Get Started", href: "/get-started", matchPrefix: "/get-started" },
-  { id: "dashboard", label: "Dashboard", href: "/dashboard", matchPrefix: "/dashboard", hasMenu: true },
-  { id: "collections", label: "Collections", href: "/dashboard?tab=collections", matchPrefix: "/collections" },
-];
-
 export function TopNavbar() {
   const { user, loading } = useUser();
+  const { t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
   const cities = useCities();
+
+  const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
+    house: t.nav.houses,
+    apartment: t.nav.apartments,
+    office: t.nav.offices,
+    land: t.nav.land,
+  };
+
+  const NAV_ITEMS: NavItem[] = [
+    { id: "search", label: t.nav.search, href: "/search", matchPrefix: "/search", hasMenu: true },
+    { id: "cities", label: t.nav.cities, href: null, matchPrefix: "/cities", hasMenu: true },
+    { id: "get-started", label: t.nav.getStarted, href: "/get-started", matchPrefix: "/get-started" },
+    { id: "dashboard", label: t.nav.dashboard, href: "/dashboard", matchPrefix: "/dashboard", hasMenu: true },
+    { id: "collections", label: t.nav.collections, href: "/dashboard?tab=collections", matchPrefix: "/collections" },
+  ];
+
   const [openId, setOpenId] = useState<string | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpandedId, setMobileExpandedId] = useState<string | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
   // Close any open menu on navigation — setState-during-render is React's
@@ -57,6 +63,7 @@ export function TopNavbar() {
     setOpenId(null);
     setAccountOpen(false);
     setMobileOpen(false);
+    setMobileExpandedId(null);
   }
 
   useEffect(() => {
@@ -67,6 +74,17 @@ export function TopNavbar() {
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, [accountOpen]);
+
+  // Full-screen overlay — lock background scroll while it's open, same as
+  // any modal.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileOpen]);
 
   // Menu-trigger items with no href (e.g. "Cities") open on click for
   // touch/keyboard users. On a real mouse, hover already opened it before
@@ -102,6 +120,19 @@ export function TopNavbar() {
     () => (cities ?? []).slice().sort((a, b) => a.city.localeCompare(b.city)),
     [cities],
   );
+
+  // The sign-in/sign-up split-screen layout is a standalone auth surface
+  // with its own logo and no site chrome — hide the navbar there. Placed
+  // after every hook above so hook call order stays identical regardless
+  // of route.
+  if (
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/admin")
+  ) {
+    return null;
+  }
+
   const cityLink = (city: { city: string; state: string }) => ({
     label: `${city.city}, ${city.state}`,
     href: `/cities/${slugify(city.city)}`,
@@ -110,26 +141,26 @@ export function TopNavbar() {
   const megaColumns: Record<string, MegaColumn[]> = {
     search: [
       {
-        heading: "Browse by type",
-        links: PROPERTY_TYPES.map((t) => ({
-          label: PROPERTY_TYPE_LABELS[t],
-          href: `/search?propertyTypes=${t}`,
+        heading: t.nav.browseByType,
+        links: PROPERTY_TYPES.map((pt) => ({
+          label: PROPERTY_TYPE_LABELS[pt],
+          href: `/search?propertyTypes=${pt}`,
         })),
       },
       {
-        heading: "Popular cities",
+        heading: t.nav.popularCities,
         links: popularCities.map(cityLink),
       },
     ],
     cities: [
       {
-        heading: "A – M",
+        heading: t.nav.aToM,
         links: alphaCities
           .filter((c) => c.city[0].toUpperCase() <= "M")
           .map(cityLink),
       },
       {
-        heading: "N – Z",
+        heading: t.nav.nToZ,
         links: alphaCities
           .filter((c) => c.city[0].toUpperCase() > "M")
           .map(cityLink),
@@ -137,19 +168,19 @@ export function TopNavbar() {
     ],
     dashboard: [
       {
-        heading: "My activity",
+        heading: t.nav.myActivity,
         links: [
-          { label: "Saved Listings", href: "/dashboard?tab=saved-listings" },
-          { label: "Saved Searches", href: "/dashboard?tab=saved-searches" },
-          { label: "Tour Requests", href: "/dashboard?tab=tour-requests" },
-          { label: "Collections", href: "/dashboard?tab=collections" },
+          { label: t.nav.savedListings, href: "/dashboard?tab=saved-listings" },
+          { label: t.nav.savedSearches, href: "/dashboard?tab=saved-searches" },
+          { label: t.nav.tourRequests, href: "/dashboard?tab=tour-requests" },
+          { label: t.nav.collections, href: "/dashboard?tab=collections" },
         ],
       },
       {
-        heading: "Quick links",
+        heading: t.nav.quickLinks,
         links: [
-          { label: "Browse listings", href: "/search" },
-          { label: "Retake the quiz", href: "/get-started" },
+          { label: t.nav.browseListings, href: "/search" },
+          { label: t.nav.retakeQuiz, href: "/get-started" },
         ],
       },
     ],
@@ -170,7 +201,7 @@ export function TopNavbar() {
             <button
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
-              aria-label="Toggle menu"
+              aria-label={t.nav.toggleMenu}
               aria-expanded={mobileOpen}
               className="flex h-10 w-10 items-center justify-center rounded-md text-neutral-700 hover:bg-neutral-100"
             >
@@ -215,19 +246,22 @@ export function TopNavbar() {
             })}
           </div>
 
-          <Link
-            href="/"
-            className="absolute left-1/2 flex -translate-x-1/2 items-center"
-          >
+          {/* flex-1 + justify-center (not absolute centering) so this
+              never overlaps the side groups when they're unbalanced —
+              e.g. mobile's hamburger-only left side vs. the wider
+              language-switch + sign-in right side. */}
+          <Link href="/" className="flex flex-1 items-center justify-center">
             <Logo />
           </Link>
 
           <div className="flex items-center gap-4">
+            <LanguageSwitch />
+
             <a
               href="mailto:flakeeestate@gmail.com"
               className="hidden text-sm text-neutral-600 hover:text-neutral-900 sm:inline"
             >
-              Get help
+              {t.nav.getHelp}
             </a>
 
             {loading ? null : user ? (
@@ -235,7 +269,7 @@ export function TopNavbar() {
                 <button
                   type="button"
                   onClick={() => setAccountOpen((v) => !v)}
-                  aria-label="Account menu"
+                  aria-label={t.nav.accountMenu}
                   className="bg-brand-500 flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium text-white"
                 >
                   {(user.email ?? "?").charAt(0).toUpperCase()}
@@ -251,14 +285,14 @@ export function TopNavbar() {
                       onClick={() => setAccountOpen(false)}
                       className="block px-3 py-2.5 text-sm text-neutral-800 hover:bg-neutral-50 hover:text-neutral-950"
                     >
-                      Dashboard
+                      {t.nav.dashboard}
                     </Link>
                     <button
                       type="button"
                       onClick={handleSignOut}
                       className="block w-full px-3 py-2.5 text-left text-sm text-neutral-800 hover:bg-neutral-50 hover:text-neutral-950"
                     >
-                      Sign out
+                      {t.nav.signOut}
                     </button>
                   </div>
                 )}
@@ -268,7 +302,7 @@ export function TopNavbar() {
                 href={`/sign-in?redirect=${encodeURIComponent(pathname)}`}
                 className="bg-brand-500 hover:bg-brand-600 inline-flex min-h-10 items-center justify-center rounded-full px-5 text-sm font-bold whitespace-nowrap text-white transition-colors"
               >
-                Sign in
+                {t.nav.signIn}
               </Link>
             )}
           </div>
@@ -288,7 +322,7 @@ export function TopNavbar() {
                   <div className="mt-3 flex flex-col gap-3">
                     {col.links.length === 0 ? (
                       <span className="text-sm text-neutral-400">
-                        Loading…
+                        {t.nav.loadingEllipsis}
                       </span>
                     ) : (
                       col.links.map((link) => (
@@ -309,58 +343,89 @@ export function TopNavbar() {
         )}
 
         {mobileOpen && (
-          <div className="flex flex-col border-t border-neutral-200 lg:hidden">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href ?? "/search"}
-                onClick={() => setMobileOpen(false)}
-                className="px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50"
+          <div className="fixed inset-x-0 top-[99px] bottom-0 z-40 overflow-y-auto bg-white lg:hidden">
+            <nav className="flex flex-col divide-y divide-neutral-100">
+              {NAV_ITEMS.map((item) => {
+                const expanded = mobileExpandedId === item.id;
+                if (!item.hasMenu) {
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href ?? "/search"}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex min-h-14 items-center px-5 text-base font-medium text-neutral-900"
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                }
+                return (
+                  <div key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMobileExpandedId(expanded ? null : item.id)
+                      }
+                      aria-expanded={expanded}
+                      className="flex min-h-14 w-full items-center justify-between px-5 text-base font-medium text-neutral-900"
+                    >
+                      {item.label}
+                      <span className={expanded ? "rotate-180" : ""}>
+                        <ChevronIcon />
+                      </span>
+                    </button>
+                    {expanded && (
+                      <div className="space-y-4 bg-neutral-50 px-5 pt-1 pb-4">
+                        {megaColumns[item.id]?.map((col) => (
+                          <div key={col.heading}>
+                            <div className="text-2xs font-semibold tracking-wide text-neutral-500 uppercase">
+                              {col.heading}
+                            </div>
+                            <div className="mt-2 flex flex-col gap-3">
+                              {col.links.length === 0 ? (
+                                <span className="text-sm text-neutral-400">
+                                  {t.nav.loadingEllipsis}
+                                </span>
+                              ) : (
+                                col.links.map((link) => (
+                                  <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className="text-accent-700 text-sm"
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        {item.href && (
+                          <Link
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            className="text-accent-700 block text-sm font-medium"
+                          >
+                            {item.label} →
+                          </Link>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              <a
+                href="mailto:flakeeestate@gmail.com"
+                className="flex min-h-14 items-center px-5 text-base font-medium text-neutral-900"
               >
-                {item.label}
-              </Link>
-            ))}
-            <a
-              href="mailto:flakeeestate@gmail.com"
-              className="px-4 py-3 text-sm text-neutral-500 hover:bg-neutral-50"
-            >
-              Get help
-            </a>
+                {t.nav.getHelp}
+              </a>
+            </nav>
           </div>
         )}
       </div>
     </div>
-  );
-}
-
-function Logo() {
-  const [error, setError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  // A missing logo file 404s fast enough that the browser's native `error`
-  // event can fire before React hydrates and attaches the onError handler
-  // below — so also check img.complete on mount to catch that race.
-  useEffect(() => {
-    const img = imgRef.current;
-    if (img?.complete && img.naturalWidth === 0) setError(true);
-  }, []);
-
-  if (error) {
-    return (
-      <span className="text-lg font-semibold tracking-tight text-neutral-950">
-        Flake
-      </span>
-    );
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element -- needs onError fallback to the text wordmark
-    <img
-      ref={imgRef}
-      src="/no-bg-flake.png"
-      alt="Flake"
-      className="h-20 w-auto"
-      onError={() => setError(true)}
-    />
   );
 }
 

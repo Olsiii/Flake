@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DEFAULT_FILTERS, type ListingFilters } from "@/types/listing";
 import { filtersToParams } from "./search/url-state";
+import { useLanguage } from "@/i18n/language-provider";
 
 interface AiSearchResponse {
   filters: Partial<ListingFilters>;
 }
 
 export function HomeSearchBox() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export function HomeSearchBox() {
       const params = filtersToParams(filters, null);
       router.push(`/search?${params.toString()}`);
     } catch {
-      setError("Couldn't process that search — try again.");
+      setError(t.home.searchError);
       setLoading(false);
     }
   }
@@ -46,7 +48,7 @@ export function HomeSearchBox() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder='Try "3 bed house near downtown under €150k"'
+          placeholder={t.home.searchPlaceholder}
           className="input w-full"
         />
         <button
@@ -54,7 +56,7 @@ export function HomeSearchBox() {
           disabled={loading || !query.trim()}
           className="btn bg-neutral-50 text-brand-600 hover:bg-neutral-200 shrink-0 disabled:pointer-events-none disabled:opacity-50"
         >
-          {loading ? "Searching…" : "Search"}
+          {loading ? t.common.searching : t.common.search}
         </button>
       </form>
       {error && (

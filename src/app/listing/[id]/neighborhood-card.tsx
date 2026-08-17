@@ -2,12 +2,15 @@ import Link from "next/link";
 import type { Neighborhood } from "@/types/listing";
 import { ScoreBar } from "@/components/score-bar";
 import { slugify } from "@/lib/slug";
+import { getDictionary } from "@/i18n/server";
 
-export function NeighborhoodCard({
+export async function NeighborhoodCard({
   neighborhood,
 }: {
   neighborhood: Neighborhood;
 }) {
+  const t = await getDictionary();
+
   return (
     <section className="card p-4">
       <div className="flex items-baseline justify-between gap-2">
@@ -16,7 +19,7 @@ export function NeighborhoodCard({
           href={`/neighborhoods/${slugify(neighborhood.city)}/${neighborhood.slug}`}
           className="text-accent-600 dark:text-accent-400 shrink-0 text-xs font-medium hover:underline"
         >
-          Full guide →
+          {t.listing.fullGuide}
         </Link>
       </div>
       {neighborhood.description && (
@@ -28,16 +31,16 @@ export function NeighborhoodCard({
       <div className="mt-4 space-y-3">
         {neighborhood.walk_score != null && (
           <ScoreBar
-            label="Walk Score"
+            label={t.listing.walkScore}
             score={neighborhood.walk_score}
-            hint="higher = more walkable"
+            hint={t.listing.walkScoreHint}
           />
         )}
         {neighborhood.crime_score != null && (
           <ScoreBar
-            label="Crime Index"
+            label={t.listing.crimeIndex}
             score={neighborhood.crime_score}
-            hint="lower = safer"
+            hint={t.listing.crimeIndexHint}
           />
         )}
       </div>

@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { EmptyState } from "@/components/empty-state";
 import { ListingGrid } from "@/components/listing-grid";
 import { Pagination } from "@/components/pagination";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SITE_URL } from "@/lib/site";
+import { getDictionary } from "@/i18n/server";
 import {
   CITY_PAGE_SIZE,
   getCityListings,
@@ -48,6 +50,7 @@ export default async function CityPage({
   const { city: citySlug } = await params;
   const city = await resolveCity(citySlug);
   if (!city) notFound();
+  const t = await getDictionary();
 
   const page = parsePage((await searchParams).page);
   const [{ listings, totalCount }, neighborhood] = await Promise.all([
@@ -60,11 +63,22 @@ export default async function CityPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 lg:px-8">
-      <h1 className="text-h1">
-        Homes for Sale in {city.city}, {city.state}
+      <Breadcrumbs
+        items={[
+          { label: t.breadcrumbs.home, href: "/" },
+          { label: city.city },
+        ]}
+      />
+      <h1 className="text-h1 mt-2">
+        {t.cities.homesForSaleIn
+          .replace("{city}", city.city)
+          .replace("{state}", city.state)}
       </h1>
       <p className="mt-2 text-neutral-600 dark:text-neutral-400">
-        {totalCount} listing{totalCount === 1 ? "" : "s"} currently available.
+        {(totalCount === 1
+          ? t.cities.listingsAvailable
+          : t.cities.listingsAvailablePlural
+        ).replace("{count}", String(totalCount))}
       </p>
 
       {neighborhood && (
@@ -72,7 +86,7 @@ export default async function CityPage({
           href={`/neighborhoods/${citySlug}/${neighborhood.slug}`}
           className="text-accent-600 dark:text-accent-400 mt-4 inline-block text-sm font-medium hover:underline"
         >
-          Explore the {neighborhood.name} neighborhood guide →
+          {t.cities.exploreNeighborhood.replace("{name}", neighborhood.name)}
         </Link>
       )}
 
@@ -81,9 +95,9 @@ export default async function CityPage({
           <ListingGrid listings={listings} />
         ) : (
           <EmptyState
-            title={`No active listings in ${city.city} right now`}
-            description="Check back soon, or browse other cities."
-            action={{ label: "Browse all listings", href: "/search" }}
+            title={t.cities.noActiveListingsTitle.replace("{city}", city.city)}
+            description={t.cities.checkBackSoon}
+            action={{ label: t.cities.browseAllListings, href: "/search" }}
           />
         )}
       </div>

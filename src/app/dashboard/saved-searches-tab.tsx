@@ -10,6 +10,7 @@ import {
   filtersToParams,
   summarizeFilters,
 } from "../search/url-state";
+import { useLanguage } from "@/i18n/language-provider";
 
 const ALERT_OPTIONS = ["off", "instant", "daily", "weekly"] as const;
 
@@ -22,7 +23,15 @@ interface SavedSearchRow {
 }
 
 export function SavedSearchesTab() {
+  const { t } = useLanguage();
   const { user } = useUser();
+
+  const ALERT_LABELS: Record<(typeof ALERT_OPTIONS)[number], string> = {
+    off: t.search.noAlerts,
+    instant: t.search.instant,
+    daily: t.search.daily,
+    weekly: t.search.weekly,
+  };
   const [searches, setSearches] = useState<SavedSearchRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +73,7 @@ export function SavedSearchesTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this saved search?")) return;
+    if (!confirm(t.dashboard.deleteSearchConfirm)) return;
     setSearches((prev) => prev?.filter((s) => s.id !== id) ?? null);
     const supabase = getSupabaseBrowser();
     await supabase.from("saved_searches").delete().eq("id", id);
@@ -78,9 +87,9 @@ export function SavedSearchesTab() {
   if (searches.length === 0) {
     return (
       <EmptyState
-        title="No saved searches yet"
-        description='Use "Save this search" on the search page to get alerted about new matches.'
-        action={{ label: "Start browsing", href: "/search" }}
+        title={t.dashboard.noSavedSearchesTitle}
+        description={t.dashboard.noSavedSearchesDesc}
+        action={{ label: t.dashboard.startBrowsing, href: "/search" }}
       />
     );
   }
@@ -102,7 +111,7 @@ export function SavedSearchesTab() {
               className="min-h-9 w-40 rounded-md border border-transparent px-2 py-1 text-sm font-medium hover:border-neutral-200 focus:border-neutral-300 dark:hover:border-neutral-700 dark:focus:border-neutral-600"
             />
             <span className="flex-1 text-sm text-neutral-500">
-              {summarizeFilters(filters)}
+              {summarizeFilters(filters, t)}
             </span>
             <select
               value={s.alert_frequency}
@@ -116,7 +125,7 @@ export function SavedSearchesTab() {
             >
               {ALERT_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt === "off" ? "No alerts" : opt}
+                  {ALERT_LABELS[opt]}
                 </option>
               ))}
             </select>
@@ -124,14 +133,14 @@ export function SavedSearchesTab() {
               href={`/search?${params.toString()}`}
               className="btn-sm btn-ghost text-accent-600 dark:text-accent-400"
             >
-              View results
+              {t.dashboard.viewResults}
             </a>
             <button
               type="button"
               onClick={() => handleDelete(s.id)}
               className="btn-sm btn-danger-ghost"
             >
-              Delete
+              {t.dashboard.delete}
             </button>
           </div>
         );

@@ -29,10 +29,11 @@ export async function getListingDetail(
     { data: images, error: imagesError },
     agentResult,
     neighborhoodResult,
+    { data: point },
   ] = await Promise.all([
     supabase
       .from("listing_images")
-      .select("id, url, sort_order, is_floor_plan, is_3d_tour")
+      .select("id, url, sort_order, is_floor_plan, is_3d_tour, is_video")
       .eq("listing_id", id)
       .order("sort_order", { ascending: true }),
     listing.agent_id
@@ -51,6 +52,11 @@ export async function getListingDetail(
           .eq("id", listing.neighborhood_id)
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
+    // listings.location is a PostGIS geography(point) — PostgREST can't
+    // read it back out as usable lat/lng directly, same round-trip
+    // problem the admin property form hit (see set_listing_location's
+    // migration comment). listing_lat_lng() does the ST_Y/ST_X unwrap.
+    supabase.rpc("listing_lat_lng", { p_listing_id: id }),
   ]);
 
   if (imagesError) throw imagesError;
@@ -74,10 +80,18 @@ export async function getListingDetail(
     city: listing.city,
     state: listing.state,
     zip: listing.zip,
+    lat: point?.[0]?.lat ?? null,
+    lng: point?.[0]?.lng ?? null,
     hoa_fee: listing.hoa_fee != null ? Number(listing.hoa_fee) : null,
-    days_on_market: listing.days_on_market,
+    days_on_market: Math.max(
+      0,
+      Math.floor(
+        (Date.now() - new Date(listing.listed_at).getTime()) / 86_400_000,
+      ),
+    ),
     is_hot_home: listing.is_hot_home,
     created_at: listing.created_at,
+    updated_at: listing.updated_at,
     images: (images ?? []) as ListingImage[],
     agent: (agentResult.data as Agent | null) ?? null,
     neighborhood: (neighborhoodResult.data as Neighborhood | null) ?? null,

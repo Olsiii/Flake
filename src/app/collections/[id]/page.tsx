@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { CollectionDetailClient } from "./collection-detail-client";
+import { getDictionary } from "@/i18n/server";
 import type { Collection, CollectionListing } from "@/types/collection";
 
 export async function generateMetadata({
@@ -31,6 +32,7 @@ export default async function CollectionPage({
 }) {
   const { id } = await params;
   const supabase = await getSupabaseServer();
+  const t = await getDictionary();
 
   let collection: Collection | null;
   let userId: string | undefined;
@@ -52,8 +54,8 @@ export default async function CollectionPage({
   } catch (err) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center text-sm text-neutral-500">
-        Couldn&apos;t load this collection:{" "}
-        {err instanceof Error ? err.message : "Unknown error"}
+        {t.collections.couldntLoad}{" "}
+        {err instanceof Error ? err.message : t.listing.unknownError}
       </div>
     );
   }
@@ -69,7 +71,7 @@ export default async function CollectionPage({
   if (itemsError) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center text-sm text-neutral-500">
-        Couldn&apos;t load these listings: {itemsError.message}
+        {t.collections.couldntLoadListings} {itemsError.message}
       </div>
     );
   }

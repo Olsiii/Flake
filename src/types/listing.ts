@@ -110,6 +110,7 @@ export interface ListingImage {
   sort_order: number;
   is_floor_plan: boolean;
   is_3d_tour: boolean;
+  is_video: boolean;
 }
 
 export interface Neighborhood {
@@ -153,10 +154,13 @@ export interface ListingDetail {
   city: string;
   state: string;
   zip: string;
+  lat: number | null;
+  lng: number | null;
   hoa_fee: number | null;
   days_on_market: number;
   is_hot_home: boolean;
   created_at: string;
+  updated_at: string;
   images: ListingImage[];
   agent: Agent | null;
   neighborhood: Neighborhood | null;

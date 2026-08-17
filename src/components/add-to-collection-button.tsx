@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "@/hooks/use-user";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
+import { useLanguage } from "@/i18n/language-provider";
 import type { Collection } from "@/types/collection";
 
 type CollectionSummary = Pick<Collection, "id" | "name" | "is_shared">;
@@ -20,6 +21,7 @@ export function AddToCollectionButton({
   className,
   children,
 }: AddToCollectionButtonProps) {
+  const { t } = useLanguage();
   const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
@@ -132,7 +134,7 @@ export function AddToCollectionButton({
       .single();
 
     if (createError || !collection) {
-      setError(createError?.message ?? "Couldn't create collection");
+      setError(createError?.message ?? t.collections.couldntCreate);
       setCreating(false);
       return;
     }
@@ -153,7 +155,7 @@ export function AddToCollectionButton({
   return (
     <>
       <button type="button" onClick={handleOpen} className={className}>
-        {children ?? "Add to Collection"}
+        {children ?? t.collections.addToCollectionTitle}
       </button>
 
       {open && (
@@ -163,11 +165,11 @@ export function AddToCollectionButton({
         >
           <div className="card w-full max-w-sm p-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-h2">Add to Collection</h2>
+              <h2 className="text-h2">{t.collections.addToCollectionTitle}</h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close"
+                aria-label={t.common.close}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
               >
                 ×
@@ -182,10 +184,10 @@ export function AddToCollectionButton({
 
             <div className="mt-3 max-h-56 space-y-1 overflow-y-auto">
               {collections === null ? (
-                <p className="text-sm text-neutral-500">Loading…</p>
+                <p className="text-sm text-neutral-500">{t.collections.loading}</p>
               ) : collections.length === 0 ? (
                 <p className="text-sm text-neutral-500">
-                  No collections yet — create one below.
+                  {t.collections.noCollectionsYet}
                 </p>
               ) : (
                 collections.map((c) => (
@@ -199,7 +201,7 @@ export function AddToCollectionButton({
                       {c.name}
                       {c.is_shared && (
                         <span className="text-2xs ml-1.5 text-neutral-400">
-                          shared
+                          {t.collections.shared}
                         </span>
                       )}
                     </span>
@@ -224,7 +226,7 @@ export function AddToCollectionButton({
               <input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="New collection name"
+                placeholder={t.collections.newCollectionName}
                 className="input-sm min-w-0 flex-1"
               />
               <label className="flex items-center gap-1.5 text-xs text-neutral-500">
@@ -234,14 +236,14 @@ export function AddToCollectionButton({
                   onChange={(e) => setNewShared(e.target.checked)}
                   className="accent-accent-600 h-4 w-4"
                 />
-                Shared
+                {t.collections.shared}
               </label>
               <button
                 type="submit"
                 disabled={creating || !newName.trim()}
                 className="btn-sm btn-primary shrink-0"
               >
-                Create
+                {t.collections.create}
               </button>
             </form>
           </div>

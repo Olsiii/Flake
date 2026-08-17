@@ -1,8 +1,24 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { CookieSettingsLink } from "./cookie-settings-link";
+import { useLanguage } from "@/i18n/language-provider";
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { t } = useLanguage();
+  const pathname = usePathname();
+
+  // Same standalone-auth-surface rationale as TopNavbar — see the comment
+  // there.
+  if (
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/admin")
+  ) {
+    return null;
+  }
 
   return (
     <footer className="border-t border-neutral-300 bg-neutral-200">
@@ -13,20 +29,19 @@ export function Footer() {
               Flake
             </span>
             <p className="mt-2 max-w-xs text-sm text-neutral-600">
-              Search in plain English, save what you like, and get matched to
-              a home that actually fits.
+              {t.footer.tagline}
             </p>
           </div>
 
           <div>
-            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">Explore</div>
+            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">{t.footer.explore}</div>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <Link
                   href="/search"
                   className="text-neutral-600 hover:text-neutral-950"
                 >
-                  Search listings
+                  {t.footer.searchListings}
                 </Link>
               </li>
               <li>
@@ -34,7 +49,7 @@ export function Footer() {
                   href="/get-started"
                   className="text-neutral-600 hover:text-neutral-950"
                 >
-                  Take the quiz
+                  {t.footer.takeQuiz}
                 </Link>
               </li>
               <li>
@@ -42,21 +57,21 @@ export function Footer() {
                   href="/dashboard"
                   className="text-neutral-600 hover:text-neutral-950"
                 >
-                  Dashboard
+                  {t.footer.dashboard}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">Account</div>
+            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">{t.footer.account}</div>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <Link
                   href="/sign-in"
                   className="text-neutral-600 hover:text-neutral-950"
                 >
-                  Sign in
+                  {t.footer.signIn}
                 </Link>
               </li>
               <li>
@@ -64,14 +79,14 @@ export function Footer() {
                   href="/sign-up"
                   className="text-neutral-600 hover:text-neutral-950"
                 >
-                  Create account
+                  {t.footer.createAccount}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">Contact</div>
+            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">{t.footer.contact}</div>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <a
@@ -85,14 +100,14 @@ export function Footer() {
           </div>
 
           <div>
-            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">Legal</div>
+            <div className="text-2xs font-semibold tracking-wide text-neutral-600 uppercase">{t.footer.legal}</div>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <Link
                   href="/terms"
                   className="text-neutral-600 hover:text-neutral-950"
                 >
-                  Terms of use
+                  {t.footer.termsOfUse}
                 </Link>
               </li>
               <li>
@@ -100,7 +115,7 @@ export function Footer() {
                   href="/privacy"
                   className="text-neutral-600 hover:text-neutral-950"
                 >
-                  Privacy policy
+                  {t.footer.privacyPolicy}
                 </Link>
               </li>
               <li>
@@ -108,18 +123,18 @@ export function Footer() {
                   href="/cookie-policy"
                   className="text-neutral-600 hover:text-neutral-950"
                 >
-                  Cookie policy
+                  {t.footer.cookiePolicy}
                 </Link>
               </li>
               <li>
-                <CookieSettingsLink />
+                <CookieSettingsLink label={t.footer.cookieSettings} />
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-10 border-t border-neutral-300 pt-6 text-xs text-neutral-600">
-          © {year} Flake. All rights reserved.
+          © {year} Flake. {t.footer.rightsReserved}
         </div>
       </div>
     </footer>

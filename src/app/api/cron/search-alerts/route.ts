@@ -34,9 +34,15 @@ function filterRpcParams(filters: ListingFilters) {
 
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
+  // Fail closed, not open: an unset secret used to mean "skip the check
+  // entirely", which left this route fully unauthenticated (confirmed
+  // live — GET with no auth header returned 200 and ran the whole job) in
+  // any environment that forgot to set CRON_SECRET, prod included. Only
+  // local dev gets a pass, so `curl localhost:3000/api/cron/...` still
+  // works without needing a secret in .env.local.
+  if (process.env.NODE_ENV === "production" || cronSecret) {
     const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   }

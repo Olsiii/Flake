@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { isRateLimited } from "@/lib/rate-limit";
 
 const VALUATION_TTL_MS = 24 * 60 * 60 * 1000;
 const COMP_RADIUS_MILES = 10;
@@ -40,6 +41,27 @@ export async function GET(
 
 async function computeValuation(request: Request, { id }: { id: string }) {
   const force = new URL(request.url).searchParams.get("force") === "true";
+
+  // This route is fully public (any visitor's listing-page load hits the
+  // cache-read path). force=true additionally bypasses the cache and does
+  // a real PostGIS nearest_comps query plus a `valuations` insert every
+  // time — confirmed live during a security review: 8 unauthenticated
+  // force=true requests took the table from 1 row to 9 with zero
+  // throttling. force gets its own tighter limit on top of the general
+  // one since it's the expensive, state-mutating path.
+  if (isRateLimited(request, "valuation", 30, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+  if (force && isRateLimited(request, "valuation-force", 3, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many recalculation requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   const supabase = getSupabaseAdmin();
 
   const { data: listing, error: listingError } = await supabase

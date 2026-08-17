@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useSavedListingIds } from "@/hooks/use-saved-listings";
 import { ContactAgentForm } from "@/components/contact-agent-form";
+import { useLanguage } from "@/i18n/language-provider";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 import type { SearchListing } from "@/types/listing";
 
 const priceFormatter = new Intl.NumberFormat("en-GB", {
@@ -12,9 +14,11 @@ const priceFormatter = new Intl.NumberFormat("en-GB", {
   maximumFractionDigits: 0,
 });
 
-function formatPrice(listing: SearchListing): string {
+function formatPrice(listing: SearchListing, t: Dictionary): string {
   const formatted = priceFormatter.format(listing.price);
-  return listing.status === "for-rent" ? `${formatted}/mo` : formatted;
+  return listing.status === "for-rent"
+    ? `${formatted}${t.search.perMonthSuffix}`
+    : formatted;
 }
 
 interface MapPinPopupProps {
@@ -25,6 +29,7 @@ interface MapPinPopupProps {
 /** Rendered into a mapboxgl.Popup's DOM node via a portal — see the
  * click handler on the "unclustered-point" layer in map-panel.tsx. */
 export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
+  const { t } = useLanguage();
   const [images, setImages] = useState<string[]>(
     listing.primary_image_url ? [listing.primary_image_url] : [],
   );
@@ -32,6 +37,19 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
   const [showContactForm, setShowContactForm] = useState(false);
   const { savedIds, toggleSave } = useSavedListingIds();
   const saved = savedIds.has(listing.id);
+
+  const PROPERTY_TYPE_LABELS: Record<SearchListing["property_type"], string> = {
+    house: t.common.propertyTypeHouse,
+    apartment: t.common.propertyTypeApartment,
+    office: t.common.propertyTypeOffice,
+    land: t.common.propertyTypeLand,
+  };
+  const STATUS_LABELS: Record<SearchListing["status"], string> = {
+    "for-sale": t.common.statusForSale,
+    pending: t.common.statusPending,
+    sold: t.common.statusSold,
+    "for-rent": t.common.statusForRent,
+  };
 
   useEffect(() => {
     const supabase = getSupabaseBrowser();
@@ -56,7 +74,7 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
           onClick={() => setShowContactForm(false)}
           className="mb-2 text-xs font-medium text-neutral-500 hover:text-neutral-900"
         >
-          ← Back
+          ← {t.common.back}
         </button>
         <ContactAgentForm listingId={listing.id} />
       </div>
@@ -78,16 +96,16 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-neutral-400">
-            No photo
+            {t.common.noPhoto}
           </div>
         )}
 
         <div className="absolute top-2 left-2 flex gap-1">
-          <span className="text-2xs rounded-full bg-white/90 px-2 py-0.5 font-semibold text-neutral-800 capitalize shadow-sm">
-            {listing.property_type.replace("-", " ")}
+          <span className="text-2xs rounded-full bg-white/90 px-2 py-0.5 font-semibold text-neutral-800 shadow-sm">
+            {PROPERTY_TYPE_LABELS[listing.property_type]}
           </span>
-          <span className="text-2xs rounded-full bg-white/90 px-2 py-0.5 font-semibold text-neutral-800 capitalize shadow-sm">
-            {listing.status.replace("-", " ")}
+          <span className="text-2xs rounded-full bg-white/90 px-2 py-0.5 font-semibold text-neutral-800 shadow-sm">
+            {STATUS_LABELS[listing.status]}
           </span>
         </div>
 
@@ -97,7 +115,7 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
             e.stopPropagation();
             toggleSave(listing.id);
           }}
-          aria-label={saved ? "Remove from saved homes" : "Save home"}
+          aria-label={saved ? t.search.removeFromSaved : t.search.saveHome}
           className={`btn-icon absolute top-2 right-2 ${saved ? "text-accent-600" : ""}`}
         >
           <HeartIcon filled={saved} />
@@ -113,7 +131,7 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
                   e.stopPropagation();
                   setActiveImage(i);
                 }}
-                aria-label={`Photo ${i + 1}`}
+                aria-label={t.search.photoLabel.replace("{n}", String(i + 1))}
                 className={`h-1.5 w-1.5 rounded-full ${
                   i === activeImage ? "bg-white" : "bg-white/50"
                 }`}
@@ -125,7 +143,7 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
 
       <div className="p-3">
         <div className="text-lg font-bold tracking-tight">
-          {formatPrice(listing)}
+          {formatPrice(listing, t)}
         </div>
         <div className="mt-0.5 truncate text-sm font-medium text-neutral-900 hover:underline">
           {listing.title}
@@ -142,7 +160,7 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
           }}
           className="btn btn-primary mt-3 w-full"
         >
-          Check availability
+          {t.search.checkAvailability}
         </button>
       </div>
     </div>

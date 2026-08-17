@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AiDetectableFilterKey, ListingFilters } from "@/types/listing";
+import { useLanguage } from "@/i18n/language-provider";
 
 interface AiSearchBoxProps {
   onApply: (
@@ -17,6 +18,7 @@ interface AiSearchResponse {
 }
 
 export function AiSearchBox({ onApply }: AiSearchBoxProps) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export function AiSearchBox({ onApply }: AiSearchBoxProps) {
       const data = (await res.json()) as AiSearchResponse;
       onApply(data.filters, data.detectedKeys);
     } catch {
-      setError("Couldn't process that search — try again.");
+      setError(t.search.searchError);
     } finally {
       setLoading(false);
     }
@@ -53,7 +55,7 @@ export function AiSearchBox({ onApply }: AiSearchBoxProps) {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder='Try "3 bed house near downtown under €150k"'
+        placeholder={t.search.aiPlaceholder}
         className="input-sm w-full max-w-xl"
       />
       <button
@@ -61,7 +63,7 @@ export function AiSearchBox({ onApply }: AiSearchBoxProps) {
         disabled={loading || !query.trim()}
         className="btn-sm btn-primary shrink-0"
       >
-        {loading ? "Searching…" : "Search"}
+        {loading ? t.search.searching : t.search.search}
       </button>
       {error && (
         <span className="text-danger-600 dark:text-danger-400 text-xs">

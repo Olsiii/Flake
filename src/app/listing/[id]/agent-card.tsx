@@ -6,9 +6,11 @@ import type { Agent } from "@/types/listing";
 import {
   ContactAgentForm,
   ErrorMessage,
-  SuccessMessage,
   submitJson,
+  useUtmParams,
 } from "@/components/contact-agent-form";
+import { useLanguage } from "@/i18n/language-provider";
+import { Modal } from "@/components/modal";
 
 type Tab = "contact" | "tour";
 
@@ -18,10 +20,11 @@ interface AgentCardProps {
 }
 
 export function AgentCard({ agent, listingId }: AgentCardProps) {
+  const { t } = useLanguage();
   const [tab, setTab] = useState<Tab>("contact");
 
   return (
-    <section className="card p-4">
+    <section id="agent-card" className="card scroll-mt-6 p-4">
       <div className="flex items-center gap-3">
         {agent.photo_url ? (
           <Image
@@ -53,7 +56,7 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
               : "text-neutral-500"
           }`}
         >
-          Contact Agent
+          {t.listing.contactAgent}
         </button>
         <button
           type="button"
@@ -64,7 +67,7 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
               : "text-neutral-500"
           }`}
         >
-          Request a Tour
+          {t.listing.requestATour}
         </button>
       </div>
 
@@ -75,6 +78,10 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
           <RequestTourForm listingId={listingId} />
         )}
       </div>
+
+      <p className="mt-3 text-center text-xs text-neutral-400">
+        {t.listing.responseTimePromise}
+      </p>
     </section>
   );
 }
@@ -82,6 +89,8 @@ export function AgentCard({ agent, listingId }: AgentCardProps) {
 const inputClass = "input";
 
 function RequestTourForm({ listingId }: { listingId: string }) {
+  const { t } = useLanguage();
+  const utm = useUtmParams();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -89,7 +98,7 @@ function RequestTourForm({ listingId }: { listingId: string }) {
     preferredTime: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -100,28 +109,33 @@ function RequestTourForm({ listingId }: { listingId: string }) {
       await submitJson("/api/tour-requests", {
         listingId,
         ...form,
+        ...utm,
         preferredTime: new Date(form.preferredTime).toISOString(),
       });
-      setSuccess(true);
+      setModalOpen(true);
+      setForm({ name: "", email: "", phone: "", preferredTime: "" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t.listing.somethingWrong);
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (success) {
-    return (
-      <SuccessMessage text="Tour requested! The agent will confirm your preferred time by email." />
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={t.listing.thankYouTitle}
+      >
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          {t.listing.tourSuccessMessage}
+        </p>
+      </Modal>
       {error && <ErrorMessage text={error} />}
       <input
         required
-        placeholder="Name"
+        placeholder={t.listing.name}
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
         className={inputClass}
@@ -129,14 +143,14 @@ function RequestTourForm({ listingId }: { listingId: string }) {
       <input
         required
         type="email"
-        placeholder="Email"
+        placeholder={t.listing.email}
         value={form.email}
         onChange={(e) => setForm({ ...form, email: e.target.value })}
         className={inputClass}
       />
       <input
         type="tel"
-        placeholder="Phone (optional)"
+        placeholder={t.listing.phone}
         value={form.phone}
         onChange={(e) => setForm({ ...form, phone: e.target.value })}
         className={inputClass}
@@ -153,7 +167,7 @@ function RequestTourForm({ listingId }: { listingId: string }) {
         disabled={submitting}
         className="btn btn-primary w-full"
       >
-        {submitting ? "Requesting…" : "Request tour"}
+        {submitting ? t.listing.requesting : t.listing.requestTourBtn}
       </button>
     </form>
   );

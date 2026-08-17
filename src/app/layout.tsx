@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TopNavbar } from "@/components/top-navbar";
 import { Footer } from "@/components/footer";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
+import { MobileTabBar } from "@/components/mobile-tab-bar";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { SITE_URL } from "@/lib/site";
+import { LanguageProvider } from "@/i18n/language-provider";
+import { getServerLocale } from "@/i18n/server";
+import { dictionaries } from "@/i18n/dictionaries";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,23 +22,59 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const DEFAULT_TITLE = "Flake";
+const DEFAULT_DESCRIPTION =
+  "Search listings, save collections, and get matched fast.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Flake",
-  description: "Search listings, save collections, and get matched fast.",
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESCRIPTION,
+  openGraph: {
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    siteName: "Flake",
+    url: SITE_URL,
+    type: "website",
+    // No `images` here — the opengraph-image.tsx file convention supplies
+    // the default automatically, and each page that needs a different one
+    // (e.g. the listing detail page's own generateMetadata) overrides it.
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+  },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getServerLocale();
+  const t = dictionaries[locale];
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <TopNavbar />
-        <div className="flex-1">{children}</div>
-        <Footer />
-        <CookieConsentBanner />
+        <a
+          href="#main-content"
+          className="focus:bg-accent-500 sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-md focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-neutral-950"
+        >
+          {t.common.skipToContent}
+        </a>
+        <LanguageProvider initialLocale={locale}>
+          <TopNavbar />
+          <div id="main-content" className="flex-1 pb-16 sm:pb-0">
+            {children}
+          </div>
+          <Footer />
+          <CookieConsentBanner />
+          <GoogleAnalytics />
+          <Suspense fallback={null}>
+            <MobileTabBar />
+          </Suspense>
+        </LanguageProvider>
       </body>
     </html>
   );

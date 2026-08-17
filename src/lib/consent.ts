@@ -4,6 +4,12 @@ export const CONSENT_STORAGE_KEY = "cookie_consent";
 /** Fired on `window` when something (e.g. the footer's "Cookie Settings"
  * link) wants the banner to reopen regardless of any stored decision. */
 export const OPEN_CONSENT_BANNER_EVENT = "flake:open-cookie-settings";
+/** Fired on `window` whenever saveConsent() runs — lets anything gated by
+ * hasConsent() (e.g. the GA loader) react immediately instead of only
+ * picking up a decision on next page load. Storage events don't cover
+ * this: they only fire in *other* tabs, never the tab that made the
+ * change. */
+export const CONSENT_UPDATED_EVENT = "flake:consent-updated";
 
 export type ConsentCategory = "functional" | "analytics" | "marketing";
 
@@ -45,6 +51,7 @@ export function saveConsent(
     timestamp: new Date().toISOString(),
   };
   window.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(record));
+  window.dispatchEvent(new Event(CONSENT_UPDATED_EVENT));
   return record;
 }
 

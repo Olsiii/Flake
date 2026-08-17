@@ -4,35 +4,55 @@ import {
   getListingImagesBucket,
   getListingImagePublicUrl,
 } from "@/lib/storage";
+import { isRateLimited } from "@/lib/rate-limit";
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const ALLOWED_CONTENT_TYPES = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
 ]);
 
 const EXTENSION_BY_CONTENT_TYPE: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mov",
 };
 
 // Supabase signed upload URLs are valid for 2 hours — not configurable via
 // createSignedUploadUrl, unlike the R2/S3 presigned PUT this replaced.
 const SIGNED_URL_TTL_SECONDS = 60 * 60 * 2;
 
-// NOTE: this route doesn't check who's calling yet — there's no auth
-// session wiring in the app yet. Once there is, gate this behind
-// "caller is the agent who owns listingId" before shipping to prod.
+// Gated by proxy.ts's admin-cookie check (everything under /api/admin/*).
 export async function POST(request: Request) {
+  if (isRateLimited(request, "admin-uploads-sign", 60, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const listingId = typeof body?.listingId === "string" ? body.listingId : null;
   const contentType =
     typeof body?.contentType === "string" ? body.contentType : null;
 
-  if (!listingId) {
+  // listingId lands directly in the storage key below — the admin form
+  // only ever sends a real UUID (either an existing listing's id or a
+  // client-generated draft id), but validating the shape here means a
+  // malformed/crafted value can't do anything unexpected to the storage
+  // path regardless of what calls this route later.
+  if (!listingId || !UUID_RE.test(listingId)) {
     return NextResponse.json(
-      { error: "listingId is required" },
+      { error: "listingId must be a valid UUID" },
       { status: 400 },
     );
   }
@@ -67,5 +87,6 @@ export async function POST(request: Request) {
     publicUrl: getListingImagePublicUrl(key),
     key,
     expiresIn: SIGNED_URL_TTL_SECONDS,
+    isVideo: contentType.startsWith("video/"),
   });
 }

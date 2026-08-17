@@ -5,6 +5,8 @@ import type { SearchListing } from "@/types/listing";
 import { ListingCard } from "./listing-card";
 import { EmptyState } from "@/components/empty-state";
 import { ListingGridSkeleton } from "@/components/skeleton";
+import { BackToTop } from "@/components/back-to-top";
+import { useLanguage } from "@/i18n/language-provider";
 
 interface ResultsGridProps {
   listings: SearchListing[];
@@ -29,6 +31,7 @@ export function ResultsGrid({
   onSelect,
   onToggleSave,
 }: ResultsGridProps) {
+  const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,8 +57,8 @@ export function ResultsGrid({
       {!error && !loading && listings.length === 0 && (
         <div className="flex h-full items-center justify-center">
           <EmptyState
-            title="No listings in this area"
-            description="Try zooming out on the map or clearing a filter."
+            title={t.search.noListingsTitle}
+            description={t.search.noListingsDesc}
           />
         </div>
       )}
@@ -79,10 +82,16 @@ export function ResultsGrid({
       {loading && listings.length > 0 && (
         <div className="pointer-events-none sticky bottom-2 mt-4 flex justify-center">
           <span className="rounded-full bg-neutral-900/90 px-3 py-1 text-xs text-white shadow-md">
-            Updating results…
+            {t.search.updatingResults}
           </span>
         </div>
       )}
+
+      <BackToTop
+        containerRef={containerRef}
+        bottomClassName="bottom-20 sm:bottom-6"
+        visibilityClassName="md:hidden"
+      />
     </div>
   );
 }

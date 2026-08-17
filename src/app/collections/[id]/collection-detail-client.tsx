@@ -6,6 +6,7 @@ import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useSavedListingIds } from "@/hooks/use-saved-listings";
 import { ListingCard } from "../../search/listing-card";
 import { EmptyState } from "@/components/empty-state";
+import { useLanguage } from "@/i18n/language-provider";
 import type { SearchListing } from "@/types/listing";
 import type { Collection, CollectionListing } from "@/types/collection";
 
@@ -46,6 +47,7 @@ export function CollectionDetailClient({
   isOwner,
   shareUrl,
 }: CollectionDetailClientProps) {
+  const { t } = useLanguage();
   const router = useRouter();
   const [collection, setCollection] = useState(initialCollection);
   const [items, setItems] = useState(initialItems);
@@ -117,7 +119,7 @@ export function CollectionDetailClient({
             <h1 className="text-h1">{collection.name}</h1>
           )}
           <p className="mt-1 text-sm text-neutral-500">
-            {items.length} {items.length === 1 ? "listing" : "listings"}
+            {items.length} {items.length === 1 ? t.collections.listing : t.collections.listings}
           </p>
         </div>
 
@@ -128,7 +130,7 @@ export function CollectionDetailClient({
               onClick={toggleShared}
               className="btn-sm btn-secondary"
             >
-              {collection.is_shared ? "Stop sharing" : "Make shareable"}
+              {collection.is_shared ? t.collections.stopSharing : t.collections.makeShareable}
             </button>
             {shareUrl && (
               <button
@@ -136,7 +138,7 @@ export function CollectionDetailClient({
                 onClick={handleCopyLink}
                 className="btn-sm btn-primary"
               >
-                {copied ? "Link copied!" : "Copy share link"}
+                {copied ? t.collections.linkCopied : t.collections.copyShareLink}
               </button>
             )}
           </div>
@@ -146,9 +148,9 @@ export function CollectionDetailClient({
       {items.length === 0 ? (
         <div className="mt-8">
           <EmptyState
-            title="No listings in this collection yet"
-            description="Browse listings and use “Add to Collection” to start adding some."
-            action={{ label: "Browse listings", href: "/search" }}
+            title={t.collections.noListingsYetTitle}
+            description={t.collections.noListingsYetDesc}
+            action={{ label: t.collections.browseListings, href: "/search" }}
           />
         </div>
       ) : (
@@ -164,7 +166,7 @@ export function CollectionDetailClient({
               <textarea
                 defaultValue={item.note ?? ""}
                 onBlur={(e) => handleNoteBlur(item.item_id, e.target.value)}
-                placeholder="Add a note…"
+                placeholder={t.collections.addNotePlaceholder}
                 rows={2}
                 className="focus:border-accent-500 focus:ring-accent-500/20 w-full rounded-md border border-neutral-200 px-2 py-1.5 text-xs focus:ring-2 focus:outline-none dark:border-neutral-800 dark:bg-neutral-950"
               />
@@ -174,7 +176,7 @@ export function CollectionDetailClient({
                   onClick={() => handleRemove(item.item_id)}
                   className="btn-sm btn-danger-ghost self-start"
                 >
-                  Remove from collection
+                  {t.collections.removeFromCollection}
                 </button>
               )}
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { useLanguage } from "@/i18n/language-provider";
 
 interface PasswordInputProps {
   value: string;
@@ -8,6 +9,10 @@ interface PasswordInputProps {
   placeholder: string;
   minLength?: number;
   autoComplete?: string;
+  /** Extra classes appended after `.input` — e.g. to pin light styling on
+   * a themed (always-colored) panel that shouldn't follow the site's
+   * light/dark toggle. */
+  inputClassName?: string;
 }
 
 export function PasswordInput({
@@ -16,7 +21,9 @@ export function PasswordInput({
   placeholder,
   minLength,
   autoComplete,
+  inputClassName,
 }: PasswordInputProps) {
+  const { t } = useLanguage();
   const [visible, setVisible] = useState(false);
   const id = useId();
 
@@ -31,12 +38,12 @@ export function PasswordInput({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="input pr-10"
+        className={`input pr-10 ${inputClassName ?? ""}`}
       />
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? "Hide password" : "Show password"}
+        aria-label={visible ? t.auth.hidePassword : t.auth.showPassword}
         aria-controls={id}
         tabIndex={-1}
         className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"

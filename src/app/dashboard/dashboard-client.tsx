@@ -5,22 +5,31 @@ import { CollectionsTab } from "./collections-tab";
 import { SavedListingsTab } from "./saved-listings-tab";
 import { SavedSearchesTab } from "./saved-searches-tab";
 import { TourRequestsTab } from "./tour-requests-tab";
+import { useLanguage } from "@/i18n/language-provider";
 
-const TABS = [
-  { id: "saved-listings", label: "Saved Listings" },
-  { id: "collections", label: "Collections" },
-  { id: "saved-searches", label: "Saved Searches" },
-  { id: "tour-requests", label: "Tour Requests" },
+const TAB_IDS_LIST = [
+  "saved-listings",
+  "collections",
+  "saved-searches",
+  "tour-requests",
 ] as const;
 
-type TabId = (typeof TABS)[number]["id"];
+type TabId = (typeof TAB_IDS_LIST)[number];
 
-const TAB_IDS = new Set<string>(TABS.map((t) => t.id));
+const TAB_IDS = new Set<string>(TAB_IDS_LIST);
 
 /** Deep-linkable via ?tab= so the top nav / sidebar can jump straight to a tab. */
 export function DashboardClient() {
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const TABS: { id: TabId; label: string }[] = [
+    { id: "saved-listings", label: t.dashboard.tabSavedListings },
+    { id: "collections", label: t.dashboard.tabCollections },
+    { id: "saved-searches", label: t.dashboard.tabSavedSearches },
+    { id: "tour-requests", label: t.dashboard.tabTourRequests },
+  ];
   const requested = searchParams.get("tab");
   const tab: TabId = (
     requested && TAB_IDS.has(requested) ? requested : "saved-listings"
@@ -32,7 +41,7 @@ export function DashboardClient() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8">
-      <h1 className="text-h1">Dashboard</h1>
+      <h1 className="text-h1">{t.dashboard.title}</h1>
 
       <div className="mt-4 flex gap-1 overflow-x-auto border-b border-neutral-200 dark:border-neutral-800">
         {TABS.map((t) => (

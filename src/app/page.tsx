@@ -5,46 +5,16 @@ import { getSupabaseServer } from "@/lib/supabase-server";
 import { HomeSearchBox } from "./home-search-box";
 import { FeaturedListings } from "./featured-listings";
 import { Faq } from "@/components/faq";
+import { getDictionary } from "@/i18n/server";
 import type { SearchListing } from "@/types/listing";
 
 export const metadata: Metadata = {
   title: "Flake",
 };
 
-const FAQ_ITEMS = [
-  {
-    question: "How does Flake's AI search work?",
-    answer:
-      "Type what you're looking for in plain English — like \"3 bed house near downtown under €150k\" — and Flake extracts the price, beds, property type, and location filters for you automatically, then falls back to keyword matching if it can't find a clear match.",
-  },
-  {
-    question: "How accurate is the price estimate on a listing?",
-    answer:
-      "The estimate on each listing page is an automated calculation based on comparable nearby listings — it's meant to give you a ballpark, not an appraisal, so treat it as a starting point for your own research.",
-  },
-  {
-    question: "Do I need an account to browse or save homes?",
-    answer:
-      "You can browse and search without one. Creating a collection and sharing its link doesn't require an account either — but saving individual listings, saving searches, and getting alerts do, since those are tied to your profile.",
-  },
-  {
-    question: "Can Flake notify me when new matching listings show up?",
-    answer:
-      "Yes — save a search from the results page and Flake will email you when new listings match your filters, so you don't have to keep checking back.",
-  },
-  {
-    question: "How do I contact an agent or schedule a tour?",
-    answer:
-      "Every listing page has a \"Contact Agent\" and \"Request a Tour\" form right next to the agent's info — submit either one and both the agent and our team get notified.",
-  },
-  {
-    question: "What does the 2-minute quiz actually do?",
-    answer:
-      "It asks a few quick questions about what you're looking for, then pre-filters your search results so the homes you see actually fit — no more scrolling past listings that were never going to work.",
-  },
-];
-
 export default async function Home() {
+  const t = await getDictionary();
+
   let featured: SearchListing[] = [];
   try {
     const supabase = await getSupabaseServer();
@@ -59,11 +29,10 @@ export default async function Home() {
     <div className="flex flex-1 flex-col">
       <section className="bg-brand-500 px-4 py-20 text-center">
         <h1 className="text-display mx-auto max-w-2xl text-neutral-50">
-          Find the home that actually fits.
+          {t.home.heroTitle}
         </h1>
         <p className="text-brand-100 mx-auto mt-4 max-w-xl">
-          Search in plain English, save what you like into shareable
-          collections, or take a 2-minute quiz to get matched instantly.
+          {t.home.heroSubtitle}
         </p>
 
         <div className="mx-auto mt-8 max-w-xl">
@@ -75,14 +44,14 @@ export default async function Home() {
             href="/search"
             className="text-accent-300 hover:text-accent-200 font-medium hover:underline"
           >
-            Browse all listings
+            {t.home.browseAll}
           </Link>
           <span className="text-brand-300">·</span>
           <Link
             href="/get-started"
             className="text-accent-300 hover:text-accent-200 font-medium hover:underline"
           >
-            Take the matching quiz
+            {t.home.takeQuiz}
           </Link>
         </div>
       </section>
@@ -95,26 +64,26 @@ export default async function Home() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <Step
             number="1"
-            title="Search or ask"
-            description="Type a plain-English query or use filters — beds, baths, price, property type, and more."
+            title={t.home.step1Title}
+            description={t.home.step1Desc}
           />
           <Step
             number="2"
-            title="Save & share"
-            description="Add listings to a collection, share the link with anyone, and collect notes without them needing an account."
+            title={t.home.step2Title}
+            description={t.home.step2Desc}
           />
           <Step
             number="3"
-            title="Get matched"
-            description="Answer a few quick questions and we'll pre-filter search results to what actually fits you."
+            title={t.home.step3Title}
+            description={t.home.step3Desc}
           />
         </div>
       </section>
 
       <section className="mx-auto w-full max-w-4xl px-4 py-12 lg:px-8">
-        <h2 className="text-h1 text-center">Frequently asked questions</h2>
+        <h2 className="text-h1 text-center">{t.home.faqTitle}</h2>
         <div className="mt-8">
-          <Faq items={FAQ_ITEMS} />
+          <Faq items={t.home.faqItems} />
         </div>
       </section>
     </div>

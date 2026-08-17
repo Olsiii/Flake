@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Skeleton } from "@/components/skeleton";
+import { useLanguage } from "@/i18n/language-provider";
 
 const priceFormatter = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -19,6 +20,7 @@ interface ValuationState {
 }
 
 export function ValuationCard({ listingId }: { listingId: string }) {
+  const { t } = useLanguage();
   const [state, setState] = useState<ValuationState>({ status: "loading" });
 
   const fetchValuation = useCallback(
@@ -51,11 +53,11 @@ export function ValuationCard({ listingId }: { listingId: string }) {
       } catch {
         setState({
           status: "error",
-          message: "Couldn't reach the estimate service.",
+          message: t.listing.estimateServiceError,
         });
       }
     },
-    [listingId],
+    [listingId, t],
   );
 
   useEffect(() => {
@@ -66,20 +68,20 @@ export function ValuationCard({ listingId }: { listingId: string }) {
   return (
     <section className="card p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-eyebrow">Get Estimate</h2>
+        <h2 className="text-eyebrow">{t.listing.getEstimate}</h2>
         {state.status === "ready" && (
           <button
             type="button"
             onClick={() => fetchValuation(true)}
             className="text-accent-600 dark:text-accent-400 text-xs font-medium hover:underline"
           >
-            Recalculate
+            {t.listing.recalculate}
           </button>
         )}
       </div>
 
       {state.status === "loading" && (
-        <div className="mt-2 space-y-2" aria-label="Calculating estimate">
+        <div className="mt-2 space-y-2" aria-label={t.listing.calculatingEstimate}>
           <Skeleton className="h-7 w-32" />
           <Skeleton className="h-3 w-48" />
         </div>
@@ -101,12 +103,12 @@ export function ValuationCard({ listingId }: { listingId: string }) {
             {priceFormatter.format(state.estimatedValue!)}
           </div>
           <div className="mt-0.5 text-xs text-neutral-500">
-            Range: {priceFormatter.format(state.confidenceLow!)} –{" "}
-            {priceFormatter.format(state.confidenceHigh!)}
+            {t.listing.estimateRange
+              .replace("{low}", priceFormatter.format(state.confidenceLow!))
+              .replace("{high}", priceFormatter.format(state.confidenceHigh!))}
           </div>
           <p className="mt-2 text-xs text-neutral-400">
-            Automated estimate based on comparable nearby listings — not an
-            appraisal.
+            {t.listing.estimateDisclaimer}
           </p>
         </div>
       )}

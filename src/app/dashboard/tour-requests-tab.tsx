@@ -5,6 +5,7 @@ import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useUser } from "@/hooks/use-user";
 import { EmptyState } from "@/components/empty-state";
 import { ListRowsSkeleton } from "@/components/skeleton";
+import { useLanguage } from "@/i18n/language-provider";
 
 interface TourRequestRow {
   id: string;
@@ -33,7 +34,15 @@ const STATUS_STYLES: Record<TourRequestRow["status"], string> = {
 };
 
 export function TourRequestsTab() {
+  const { t } = useLanguage();
   const { user } = useUser();
+
+  const STATUS_LABELS: Record<TourRequestRow["status"], string> = {
+    requested: t.dashboard.statusRequested,
+    confirmed: t.dashboard.statusConfirmed,
+    completed: t.dashboard.statusCompleted,
+    cancelled: t.dashboard.statusCancelled,
+  };
   const [requests, setRequests] = useState<TourRequestRow[] | null>(null);
   const [listingsById, setListingsById] = useState<
     Record<string, ListingLookup>
@@ -78,9 +87,9 @@ export function TourRequestsTab() {
   if (requests.length === 0) {
     return (
       <EmptyState
-        title="No tour requests yet"
-        description="Request a tour from any listing page and it'll show up here."
-        action={{ label: "Start browsing", href: "/search" }}
+        title={t.dashboard.noTourRequestsTitle}
+        description={t.dashboard.noTourRequestsDesc}
+        action={{ label: t.dashboard.startBrowsing, href: "/search" }}
       />
     );
   }
@@ -104,9 +113,9 @@ export function TourRequestsTab() {
               })}
             </span>
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[r.status]}`}
+              className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[r.status]}`}
             >
-              {r.status}
+              {STATUS_LABELS[r.status]}
             </span>
           </div>
         );

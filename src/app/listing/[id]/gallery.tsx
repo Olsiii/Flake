@@ -3,14 +3,9 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { ListingImage } from "@/types/listing";
+import { useLanguage } from "@/i18n/language-provider";
 
 type Tab = "photos" | "floor-plan" | "3d-tour";
-
-const TAB_LABELS: Record<Tab, string> = {
-  photos: "Photos",
-  "floor-plan": "Floor Plan",
-  "3d-tour": "3D Tour",
-};
 
 export function Gallery({
   images,
@@ -19,6 +14,12 @@ export function Gallery({
   images: ListingImage[];
   title: string;
 }) {
+  const { t } = useLanguage();
+  const TAB_LABELS: Record<Tab, string> = {
+    photos: t.listing.photos,
+    "floor-plan": t.listing.floorPlan,
+    "3d-tour": t.listing.tour3d,
+  };
   const groups = useMemo(
     () => ({
       photos: images.filter((i) => !i.is_floor_plan && !i.is_3d_tour),
@@ -46,7 +47,7 @@ export function Gallery({
   if (images.length === 0) {
     return (
       <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-neutral-100 text-sm text-neutral-400 dark:bg-neutral-900">
-        No photos available
+        {t.listing.noPhotosAvailable}
       </div>
     );
   }
@@ -73,7 +74,7 @@ export function Gallery({
 
       {current.length === 0 ? (
         <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-neutral-100 text-sm text-neutral-400 dark:bg-neutral-900">
-          No {TAB_LABELS[tab].toLowerCase()} available
+          {t.listing.noneAvailable.replace("{type}", TAB_LABELS[tab])}
         </div>
       ) : (
         <>
@@ -146,6 +147,7 @@ function Lightbox({
   onClose: () => void;
   title: string;
 }) {
+  const { t } = useLanguage();
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -162,7 +164,7 @@ function Lightbox({
       <button
         type="button"
         onClick={onClose}
-        aria-label="Close"
+        aria-label={t.listing.close}
         className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
       >
         ✕
@@ -175,7 +177,7 @@ function Lightbox({
             onClick={() =>
               onIndexChange((index - 1 + images.length) % images.length)
             }
-            aria-label="Previous"
+            aria-label={t.listing.previous}
             className="absolute left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
           >
             ‹
@@ -183,7 +185,7 @@ function Lightbox({
           <button
             type="button"
             onClick={() => onIndexChange((index + 1) % images.length)}
-            aria-label="Next"
+            aria-label={t.listing.next}
             className="absolute right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
           >
             ›
@@ -202,7 +204,9 @@ function Lightbox({
       </div>
 
       <div className="absolute bottom-4 text-sm text-white/70">
-        {index + 1} / {images.length}
+        {t.listing.lightboxCounter
+          .replace("{current}", String(index + 1))
+          .replace("{total}", String(images.length))}
       </div>
     </div>
   );

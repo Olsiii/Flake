@@ -6,6 +6,16 @@ import {
   type PropertyType,
   type SortBy,
 } from "@/types/listing";
+import type { Dictionary } from "@/i18n/dictionaries/en";
+
+function propertyTypeLabel(type: PropertyType, t: Dictionary): string {
+  return {
+    house: t.common.propertyTypeHouse,
+    apartment: t.common.propertyTypeApartment,
+    office: t.common.propertyTypeOffice,
+    land: t.common.propertyTypeLand,
+  }[type];
+}
 
 /** Round-trips filters + map bounds through URL query params so a saved
  * search's "view results" link reproduces the same /search view. */
@@ -93,7 +103,7 @@ export const priceFormatter = new Intl.NumberFormat("en-GB", {
 });
 
 /** Short human-readable summary of active filters, for the saved-searches list. */
-export function summarizeFilters(filters: ListingFilters): string {
+export function summarizeFilters(filters: ListingFilters, t: Dictionary): string {
   const parts: string[] = [];
 
   if (filters.minPrice != null || filters.maxPrice != null) {
@@ -101,30 +111,39 @@ export function summarizeFilters(filters: ListingFilters): string {
       filters.minPrice != null ? priceFormatter.format(filters.minPrice) : "";
     const max =
       filters.maxPrice != null ? priceFormatter.format(filters.maxPrice) : "";
-    parts.push(min && max ? `${min}–${max}` : min ? `${min}+` : `up to ${max}`);
+    parts.push(
+      min && max
+        ? `${min}–${max}`
+        : min
+          ? `${min}+`
+          : t.search.summaryUpTo.replace("{value}", max),
+    );
   }
-  if (filters.minBeds != null) parts.push(`${filters.minBeds}+ beds`);
-  if (filters.minBaths != null) parts.push(`${filters.minBaths}+ baths`);
+  if (filters.minBeds != null)
+    parts.push(t.search.summaryBedsSuffix.replace("{count}", String(filters.minBeds)));
+  if (filters.minBaths != null)
+    parts.push(t.search.summaryBathsSuffix.replace("{count}", String(filters.minBaths)));
   if (filters.propertyTypes.length > 0)
     parts.push(
-      filters.propertyTypes.map((t) => t.replace("-", " ")).join(", "),
+      filters.propertyTypes.map((pt) => propertyTypeLabel(pt, t)).join(", "),
     );
   if (filters.minSqft != null || filters.maxSqft != null) {
     parts.push(
       `${filters.minSqft?.toLocaleString() ?? "0"}–${filters.maxSqft?.toLocaleString() ?? "∞"} m²`,
     );
   }
-  if (!filters.hoaAllowed) parts.push("no building fee");
+  if (!filters.hoaAllowed) parts.push(t.search.summaryNoBuildingFee);
   if (filters.city) parts.push(filters.city);
   if (filters.keyword) parts.push(`"${filters.keyword}"`);
 
-  return parts.length > 0 ? parts.join(" · ") : "All listings";
+  return parts.length > 0 ? parts.join(" · ") : t.search.summaryAllListings;
 }
 
 /** Short label for one AI-detected filter, for the /search "detected filters" chip row. */
 export function describeDetectedFilter(
   key: AiDetectableFilterKey,
   filters: ListingFilters,
+  t: Dictionary,
 ): string | null {
   switch (key) {
     case "minPrice":
@@ -133,15 +152,22 @@ export function describeDetectedFilter(
         : null;
     case "maxPrice":
       return filters.maxPrice != null
-        ? `Under ${priceFormatter.format(filters.maxPrice)}`
+        ? t.search.summaryUnder.replace(
+            "{value}",
+            priceFormatter.format(filters.maxPrice),
+          )
         : null;
     case "minBeds":
-      return filters.minBeds != null ? `${filters.minBeds}+ beds` : null;
+      return filters.minBeds != null
+        ? t.search.summaryBedsSuffix.replace("{count}", String(filters.minBeds))
+        : null;
     case "minBaths":
-      return filters.minBaths != null ? `${filters.minBaths}+ baths` : null;
+      return filters.minBaths != null
+        ? t.search.summaryBathsSuffix.replace("{count}", String(filters.minBaths))
+        : null;
     case "propertyTypes":
       return filters.propertyTypes.length > 0
-        ? filters.propertyTypes.map((t) => t.replace("-", " ")).join(", ")
+        ? filters.propertyTypes.map((pt) => propertyTypeLabel(pt, t)).join(", ")
         : null;
     case "minSqft":
       return filters.minSqft != null
@@ -149,7 +175,10 @@ export function describeDetectedFilter(
         : null;
     case "maxSqft":
       return filters.maxSqft != null
-        ? `Under ${filters.maxSqft.toLocaleString()} m²`
+        ? t.search.summaryUnder.replace(
+            "{value}",
+            `${filters.maxSqft.toLocaleString()} m²`,
+          )
         : null;
     case "city":
       return filters.city;

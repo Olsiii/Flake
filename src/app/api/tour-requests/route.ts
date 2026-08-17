@@ -15,6 +15,11 @@ interface TourRequestPayload {
   email: string;
   phone?: string | null;
   preferredTime: string;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  utm_term?: string | null;
+  utm_content?: string | null;
 }
 
 function isValidEmail(email: string): boolean {
@@ -99,6 +104,11 @@ export async function POST(request: Request) {
       phone: body.phone?.trim() || null,
       requested_time: requestedTime.toISOString(),
       status: "requested",
+      utm_source: body.utm_source || null,
+      utm_medium: body.utm_medium || null,
+      utm_campaign: body.utm_campaign || null,
+      utm_term: body.utm_term || null,
+      utm_content: body.utm_content || null,
     });
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 });

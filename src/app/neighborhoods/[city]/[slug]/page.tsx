@@ -4,7 +4,9 @@ import { EmptyState } from "@/components/empty-state";
 import { ListingGrid } from "@/components/listing-grid";
 import { Pagination } from "@/components/pagination";
 import { ScoreBar } from "@/components/score-bar";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SITE_URL } from "@/lib/site";
+import { getDictionary } from "@/i18n/server";
 import {
   NEIGHBORHOOD_PAGE_SIZE,
   getNeighborhoodBySlug,
@@ -50,6 +52,7 @@ export default async function NeighborhoodPage({
   const { city: citySlug, slug } = await params;
   const neighborhood = await getNeighborhoodBySlug(citySlug, slug);
   if (!neighborhood) notFound();
+  const t = await getDictionary();
 
   const page = parsePage((await searchParams).page);
   const { listings, totalCount } = await getNeighborhoodListings(
@@ -101,7 +104,14 @@ export default async function NeighborhoodPage({
         }}
       />
 
-      <h1 className="text-h1">{neighborhood.name}</h1>
+      <Breadcrumbs
+        items={[
+          { label: t.breadcrumbs.home, href: "/" },
+          { label: neighborhood.city, href: `/cities/${citySlug}` },
+          { label: neighborhood.name },
+        ]}
+      />
+      <h1 className="text-h1 mt-2">{neighborhood.name}</h1>
       <p className="mt-1 text-neutral-500">
         {neighborhood.city}, {neighborhood.state}
       </p>
@@ -114,16 +124,16 @@ export default async function NeighborhoodPage({
       <div className="mt-6 max-w-sm space-y-3">
         {neighborhood.walk_score != null && (
           <ScoreBar
-            label="Walk Score"
+            label={t.neighborhoods.walkScore}
             score={neighborhood.walk_score}
-            hint="higher = more walkable"
+            hint={t.neighborhoods.walkScoreHint}
           />
         )}
         {neighborhood.crime_score != null && (
           <ScoreBar
-            label="Crime Index"
+            label={t.neighborhoods.crimeIndex}
             score={neighborhood.crime_score}
-            hint="lower = safer"
+            hint={t.neighborhoods.crimeIndexHint}
           />
         )}
       </div>
@@ -139,9 +149,14 @@ export default async function NeighborhoodPage({
         </ul>
       )}
 
-      <h2 className="text-h2 mt-10">Current Listings in {neighborhood.name}</h2>
+      <h2 className="text-h2 mt-10">
+        {t.neighborhoods.currentListingsIn.replace("{name}", neighborhood.name)}
+      </h2>
       <p className="mt-1 text-sm text-neutral-500">
-        {totalCount} listing{totalCount === 1 ? "" : "s"} available.
+        {(totalCount === 1
+          ? t.neighborhoods.listingAvailable
+          : t.neighborhoods.listingsAvailable
+        ).replace("{count}", String(totalCount))}
       </p>
 
       <div className="mt-4">
@@ -149,9 +164,9 @@ export default async function NeighborhoodPage({
           <ListingGrid listings={listings} />
         ) : (
           <EmptyState
-            title="No active listings here right now"
-            description="Check back soon, or browse other cities and neighborhoods."
-            action={{ label: "Browse all listings", href: "/search" }}
+            title={t.neighborhoods.noActiveListingsTitle}
+            description={t.neighborhoods.checkBackSoon}
+            action={{ label: t.neighborhoods.browseAllListings, href: "/search" }}
           />
         )}
       </div>

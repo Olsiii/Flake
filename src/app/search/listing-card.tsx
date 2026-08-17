@@ -1,6 +1,7 @@
 "use client";
 
 import { AddToCollectionButton } from "@/components/add-to-collection-button";
+import { useLanguage } from "@/i18n/language-provider";
 import type { SearchListing } from "@/types/listing";
 
 interface ListingCardProps {
@@ -18,11 +19,6 @@ const priceFormatter = new Intl.NumberFormat("en-GB", {
   maximumFractionDigits: 0,
 });
 
-function formatPrice(listing: SearchListing): string {
-  const formatted = priceFormatter.format(listing.price);
-  return listing.status === "for-rent" ? `${formatted}/mo` : formatted;
-}
-
 export function ListingCard({
   listing,
   selected,
@@ -31,6 +27,22 @@ export function ListingCard({
   onSelect,
   onToggleSave,
 }: ListingCardProps) {
+  const { t } = useLanguage();
+
+  const STATUS_LABELS: Record<SearchListing["status"], string> = {
+    "for-sale": t.common.statusForSale,
+    pending: t.common.statusPending,
+    sold: t.common.statusSold,
+    "for-rent": t.common.statusForRent,
+  };
+
+  function formatPrice(listing: SearchListing): string {
+    const formatted = priceFormatter.format(listing.price);
+    return listing.status === "for-rent"
+      ? `${formatted}${t.search.perMonthSuffix}`
+      : formatted;
+  }
+
   function handleSaveClick(e: React.MouseEvent) {
     e.stopPropagation();
     onToggleSave(listing.id);
@@ -61,20 +73,20 @@ export function ListingCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-neutral-400">
-            No photo
+            {t.common.noPhoto}
           </div>
         )}
 
         {listing.is_hot_home && (
           <span className="text-2xs absolute top-2 left-2 rounded-full bg-neutral-900/90 px-2 py-0.5 font-semibold text-white shadow-sm">
-            🔥 Hot Home
+            {t.search.hotHome}
           </span>
         )}
 
         <button
           type="button"
           onClick={handleSaveClick}
-          aria-label={saved ? "Remove from saved homes" : "Save home"}
+          aria-label={saved ? t.search.removeFromSaved : t.search.saveHome}
           className={`btn-icon absolute top-2 right-2 ${
             saved ? "text-accent-600 dark:text-accent-400" : ""
           }`}
@@ -98,13 +110,13 @@ export function ListingCard({
           <span className="text-xl font-bold tracking-tight">
             {formatPrice(listing)}
           </span>
-          <span className="text-2xs shrink-0 text-neutral-500 capitalize">
-            {listing.status.replace("-", " ")}
+          <span className="text-2xs shrink-0 text-neutral-500">
+            {STATUS_LABELS[listing.status]}
           </span>
         </div>
         <div className="mt-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">
-          {listing.beds != null && `${listing.beds} bd`}
-          {listing.baths != null && ` · ${listing.baths} ba`}
+          {listing.beds != null && `${listing.beds} ${t.search.bedsAbbrev}`}
+          {listing.baths != null && ` · ${listing.baths} ${t.search.bathsAbbrev}`}
           {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} m²`}
         </div>
         <div className="mt-1.5 truncate text-xs text-neutral-500">

@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { getDictionary } from "@/i18n/server";
 
-export function Pagination({
+export async function Pagination({
   page,
   totalPages,
   basePath,
@@ -10,6 +11,7 @@ export function Pagination({
   basePath: string;
 }) {
   if (totalPages <= 1) return null;
+  const t = await getDictionary();
 
   return (
     <nav
@@ -21,26 +23,26 @@ export function Pagination({
           href={`${basePath}?page=${page - 1}`}
           className="btn-sm btn-secondary"
         >
-          ← Previous
+          ← {t.listing.previous}
         </Link>
       ) : (
         <span className="btn-sm text-neutral-300 dark:text-neutral-700">
-          ← Previous
+          ← {t.listing.previous}
         </span>
       )}
       <span className="text-neutral-500">
-        Page {page} of {totalPages}
+        {t.common.page} {page} {t.common.of} {totalPages}
       </span>
       {page < totalPages ? (
         <Link
           href={`${basePath}?page=${page + 1}`}
           className="btn-sm btn-secondary"
         >
-          Next →
+          {t.listing.next} →
         </Link>
       ) : (
         <span className="btn-sm text-neutral-300 dark:text-neutral-700">
-          Next →
+          {t.listing.next} →
         </span>
       )}
     </nav>

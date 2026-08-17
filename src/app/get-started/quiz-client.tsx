@@ -14,14 +14,7 @@ import { useUser } from "@/hooks/use-user";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { filtersToParams } from "../search/url-state";
 import { translateAnswersToFilters } from "./translate-answers";
-
-const REASON_LABELS: Record<QuizReason, string> = {
-  "first-home": "Buying my first home",
-  upsizing: "Upsizing",
-  downsizing: "Downsizing",
-  investment: "Investment property",
-  "just-browsing": "Just browsing",
-};
+import { useLanguage } from "@/i18n/language-provider";
 
 const STEP_COUNT = 6;
 
@@ -34,8 +27,35 @@ function toggleInArray<T>(list: T[], value: T): T[] {
 }
 
 export function QuizClient() {
+  const { t } = useLanguage();
   const { user } = useUser();
   const router = useRouter();
+
+  const REASON_LABELS: Record<QuizReason, string> = {
+    "first-home": t.quiz.reasonFirstHome,
+    upsizing: t.quiz.reasonUpsizing,
+    downsizing: t.quiz.reasonDownsizing,
+    investment: t.quiz.reasonInvestment,
+    "just-browsing": t.quiz.reasonJustBrowsing,
+  };
+
+  const PROPERTY_TYPE_LABELS: Record<
+    (typeof PROPERTY_TYPES)[number],
+    string
+  > = {
+    house: t.common.propertyTypeHouse,
+    apartment: t.common.propertyTypeApartment,
+    office: t.common.propertyTypeOffice,
+    land: t.common.propertyTypeLand,
+  };
+
+  const AMENITY_LABELS: Record<(typeof QUIZ_AMENITIES)[number]["value"], string> = {
+    "no-hoa": t.quiz.amenityNoHoa,
+    garage: t.quiz.amenityGarage,
+    pool: t.quiz.amenityPool,
+    "new-construction": t.quiz.amenityNewConstruction,
+    "move-in-ready": t.quiz.amenityMoveInReady,
+  };
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>(DEFAULT_QUIZ_ANSWERS);
   const [submitting, setSubmitting] = useState(false);
@@ -70,7 +90,7 @@ export function QuizClient() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-10">
       <div>
-        <h1 className="text-h1">Find your match</h1>
+        <h1 className="text-h1">{t.quiz.findYourMatch}</h1>
         <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
           <div
             className="bg-accent-600 h-full rounded-full transition-all"
@@ -78,18 +98,20 @@ export function QuizClient() {
           />
         </div>
         <p className="mt-2 text-xs text-neutral-500">
-          Step {step + 1} of {STEP_COUNT}
+          {t.quiz.stepOf
+            .replace("{current}", String(step + 1))
+            .replace("{total}", String(STEP_COUNT))}
         </p>
       </div>
 
       <div className="min-h-56">
         {step === 0 && (
-          <StepShell title="What's your budget?">
+          <StepShell title={t.quiz.whatsYourBudget}>
             <div className="flex items-center gap-2">
               <input
                 type="number"
                 inputMode="numeric"
-                placeholder="Min"
+                placeholder={t.common.min}
                 value={answers.minPrice ?? ""}
                 onChange={(e) =>
                   patch({
@@ -102,7 +124,7 @@ export function QuizClient() {
               <input
                 type="number"
                 inputMode="numeric"
-                placeholder="Max"
+                placeholder={t.common.max}
                 value={answers.maxPrice ?? ""}
                 onChange={(e) =>
                   patch({
@@ -116,10 +138,10 @@ export function QuizClient() {
         )}
 
         {step === 1 && (
-          <StepShell title="Any must-have beds or baths?">
+          <StepShell title={t.quiz.mustHaveBedsBaths}>
             <div className="flex items-center gap-4">
               <label className="flex flex-col gap-1 text-sm">
-                Beds
+                {t.quiz.beds}
                 <select
                   value={answers.minBeds ?? ""}
                   onChange={(e) =>
@@ -129,7 +151,7 @@ export function QuizClient() {
                   }
                   className={inputClass}
                 >
-                  <option value="">Any</option>
+                  <option value="">{t.common.any}</option>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <option key={n} value={n}>
                       {n}+
@@ -138,7 +160,7 @@ export function QuizClient() {
                 </select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                Baths
+                {t.quiz.baths}
                 <select
                   value={answers.minBaths ?? ""}
                   onChange={(e) =>
@@ -148,7 +170,7 @@ export function QuizClient() {
                   }
                   className={inputClass}
                 >
-                  <option value="">Any</option>
+                  <option value="">{t.common.any}</option>
                   {[1, 1.5, 2, 3, 4].map((n) => (
                     <option key={n} value={n}>
                       {n}+
@@ -161,12 +183,12 @@ export function QuizClient() {
         )}
 
         {step === 2 && (
-          <StepShell title="What type of property?">
+          <StepShell title={t.quiz.whatType}>
             <div className="flex flex-wrap gap-2">
               {PROPERTY_TYPES.map((type) => (
                 <ChoiceChip
                   key={type}
-                  label={type.replace("-", " ")}
+                  label={PROPERTY_TYPE_LABELS[type]}
                   selected={answers.propertyTypes.includes(type)}
                   onClick={() =>
                     patch({
@@ -180,7 +202,7 @@ export function QuizClient() {
         )}
 
         {step === 3 && (
-          <StepShell title="What's bringing you here?">
+          <StepShell title={t.quiz.whatsBringingYou}>
             <div className="flex flex-col gap-2">
               {QUIZ_REASONS.map((reason) => (
                 <button
@@ -201,23 +223,23 @@ export function QuizClient() {
         )}
 
         {step === 4 && (
-          <StepShell title="Preferred city or area?">
+          <StepShell title={t.quiz.preferredCity}>
             <input
               value={answers.city}
               onChange={(e) => patch({ city: e.target.value })}
-              placeholder="e.g. Prishtina"
+              placeholder={t.quiz.preferredCityPlaceholder}
               className={`${inputClass} w-full`}
             />
           </StepShell>
         )}
 
         {step === 5 && (
-          <StepShell title="Any must-haves?">
+          <StepShell title={t.quiz.anyMustHaves}>
             <div className="flex flex-wrap gap-2">
               {QUIZ_AMENITIES.map((a) => (
                 <ChoiceChip
                   key={a.value}
-                  label={a.label}
+                  label={AMENITY_LABELS[a.value]}
                   selected={answers.amenities.includes(a.value)}
                   onClick={() =>
                     patch({
@@ -242,7 +264,7 @@ export function QuizClient() {
           disabled={step === 0}
           className="btn btn-ghost"
         >
-          Back
+          {t.quiz.back}
         </button>
         {isLast ? (
           <button
@@ -251,7 +273,7 @@ export function QuizClient() {
             disabled={submitting}
             className="btn btn-primary"
           >
-            {submitting ? "Finding matches…" : "See my matches"}
+            {submitting ? t.quiz.findingMatches : t.quiz.seeMyMatches}
           </button>
         ) : (
           <button
@@ -259,7 +281,7 @@ export function QuizClient() {
             onClick={() => setStep((s) => Math.min(STEP_COUNT - 1, s + 1))}
             className="btn btn-primary"
           >
-            Next
+            {t.quiz.next}
           </button>
         )}
       </div>

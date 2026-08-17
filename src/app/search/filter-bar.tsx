@@ -11,6 +11,8 @@ import {
 } from "@/types/listing";
 import { SaveSearchButton } from "./save-search-button";
 import { priceFormatter } from "./url-state";
+import { useLanguage } from "@/i18n/language-provider";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
 interface FilterBarProps {
   filters: ListingFilters;
@@ -27,42 +29,65 @@ function numberOrNull(value: string): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
-function priceSummary(filters: ListingFilters): string | null {
+function priceSummary(filters: ListingFilters, t: Dictionary): string | null {
   const { minPrice, maxPrice } = filters;
   if (minPrice == null && maxPrice == null) return null;
   if (minPrice != null && maxPrice != null)
     return `${priceFormatter.format(minPrice)} – ${priceFormatter.format(maxPrice)}`;
   if (minPrice != null) return `${priceFormatter.format(minPrice)}+`;
-  return `Up to ${priceFormatter.format(maxPrice!)}`;
+  return t.search.upTo.replace("{value}", priceFormatter.format(maxPrice!));
 }
 
-function bedsBathsSummary(filters: ListingFilters): string | null {
+function bedsBathsSummary(filters: ListingFilters, t: Dictionary): string | null {
   const { minBeds, minBaths } = filters;
   if (minBeds == null && minBaths == null) return null;
   const parts: string[] = [];
-  if (minBeds != null) parts.push(`${minBeds}+ bd`);
-  if (minBaths != null) parts.push(`${minBaths}+ ba`);
+  if (minBeds != null) parts.push(`${minBeds}+ ${t.search.bedsAbbrev}`);
+  if (minBaths != null) parts.push(`${minBaths}+ ${t.search.bathsAbbrev}`);
   return parts.join(", ");
 }
 
-function homeTypeSummary(filters: ListingFilters): string | null {
+function homeTypeSummary(
+  filters: ListingFilters,
+  t: Dictionary,
+  labels: Record<PropertyType, string>,
+): string | null {
   if (filters.propertyTypes.length === 0) return null;
   if (filters.propertyTypes.length === 1)
-    return filters.propertyTypes[0].replace("-", " ");
-  return `${filters.propertyTypes.length} home types`;
+    return labels[filters.propertyTypes[0]];
+  return t.search.homeTypesCount.replace(
+    "{count}",
+    String(filters.propertyTypes.length),
+  );
 }
 
-function moreSummary(filters: ListingFilters): string | null {
+function moreSummary(filters: ListingFilters, t: Dictionary): string | null {
   const count =
     Number(filters.minSqft != null) +
     Number(filters.maxSqft != null) +
     Number(filters.minYearBuilt != null) +
     Number(filters.maxYearBuilt != null) +
     Number(!filters.hoaAllowed);
-  return count > 0 ? `More · ${count}` : null;
+  return count > 0 ? t.search.moreCount.replace("{count}", String(count)) : null;
 }
 
 export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
+  const { t } = useLanguage();
+
+  const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
+    house: t.common.propertyTypeHouse,
+    apartment: t.common.propertyTypeApartment,
+    office: t.common.propertyTypeOffice,
+    land: t.common.propertyTypeLand,
+  };
+
+  const SORT_LABELS: Record<(typeof SORT_OPTIONS)[number]["value"], string> = {
+    newest: t.search.sortNewest,
+    price_asc: t.search.sortPriceAsc,
+    price_desc: t.search.sortPriceDesc,
+    dom: t.search.sortDom,
+  };
+
   function set<K extends keyof ListingFilters>(
     key: K,
     value: ListingFilters[K],
@@ -72,7 +97,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
 
   function togglePropertyType(type: PropertyType) {
     const next = filters.propertyTypes.includes(type)
-      ? filters.propertyTypes.filter((t) => t !== type)
+      ? filters.propertyTypes.filter((pt) => pt !== type)
       : [...filters.propertyTypes, type];
     set("propertyTypes", next);
   }
@@ -82,21 +107,21 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
   return (
     <div className="flex items-center gap-2 overflow-x-auto border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-950">
       <FilterPill
-        label="Price"
-        value={priceSummary(filters)}
-        active={priceSummary(filters) != null}
+        label={t.search.price}
+        value={priceSummary(filters, t)}
+        active={priceSummary(filters, t) != null}
       >
         {(close) => (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <NumberInput
-                placeholder="Min"
+                placeholder={t.common.min}
                 value={filters.minPrice}
                 onChange={(v) => set("minPrice", v)}
               />
               <span className="text-neutral-400">–</span>
               <NumberInput
-                placeholder="Max"
+                placeholder={t.common.max}
                 value={filters.maxPrice}
                 onChange={(v) => set("maxPrice", v)}
               />
@@ -107,27 +132,28 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                 set("maxPrice", null);
               }}
               onDone={close}
+              t={t}
             />
           </div>
         )}
       </FilterPill>
 
       <FilterPill
-        label="Beds & Baths"
-        value={bedsBathsSummary(filters)}
-        active={bedsBathsSummary(filters) != null}
+        label={t.search.bedsAndBaths}
+        value={bedsBathsSummary(filters, t)}
+        active={bedsBathsSummary(filters, t) != null}
       >
         {(close) => (
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <label className="label flex-1">
-                Beds
+                {t.search.beds}
                 <select
                   className="input-sm w-full"
                   value={filters.minBeds ?? ""}
                   onChange={(e) => set("minBeds", numberOrNull(e.target.value))}
                 >
-                  <option value="">Any</option>
+                  <option value="">{t.common.any}</option>
                   {BEDS_OPTIONS.map((n) => (
                     <option key={n} value={n}>
                       {n}+
@@ -136,7 +162,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                 </select>
               </label>
               <label className="label flex-1">
-                Baths
+                {t.search.baths}
                 <select
                   className="input-sm w-full"
                   value={filters.minBaths ?? ""}
@@ -144,7 +170,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                     set("minBaths", numberOrNull(e.target.value))
                   }
                 >
-                  <option value="">Any</option>
+                  <option value="">{t.common.any}</option>
                   {BATHS_OPTIONS.map((n) => (
                     <option key={n} value={n}>
                       {n}+
@@ -159,15 +185,16 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                 set("minBaths", null);
               }}
               onDone={close}
+              t={t}
             />
           </div>
         )}
       </FilterPill>
 
       <FilterPill
-        label="Home Type"
-        value={homeTypeSummary(filters)}
-        active={homeTypeSummary(filters) != null}
+        label={t.search.homeType}
+        value={homeTypeSummary(filters, t, PROPERTY_TYPE_LABELS)}
+        active={homeTypeSummary(filters, t, PROPERTY_TYPE_LABELS) != null}
       >
         {(close) => (
           <div className="space-y-3">
@@ -177,44 +204,45 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                   key={type}
                   type="button"
                   onClick={() => togglePropertyType(type)}
-                  className={`min-h-9 rounded-full border px-3 py-1.5 text-xs capitalize transition-colors ${
+                  className={`min-h-9 rounded-full border px-3 py-1.5 text-xs transition-colors ${
                     filters.propertyTypes.includes(type)
                       ? "border-accent-600 bg-accent-600 text-white"
                       : "border-neutral-300 text-neutral-700 hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300"
                   }`}
                 >
-                  {type.replace("-", " ")}
+                  {PROPERTY_TYPE_LABELS[type]}
                 </button>
               ))}
             </div>
             <PillActions
               onClear={() => set("propertyTypes", [])}
               onDone={close}
+              t={t}
             />
           </div>
         )}
       </FilterPill>
 
       <FilterPill
-        label="More"
-        value={moreSummary(filters)}
-        active={moreSummary(filters) != null}
+        label={t.search.more}
+        value={moreSummary(filters, t)}
+        active={moreSummary(filters, t) != null}
       >
         {(close) => (
           <div className="space-y-4">
             <div>
               <span className="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                Square meters
+                {t.search.squareMeters}
               </span>
               <div className="flex items-center gap-2">
                 <NumberInput
-                  placeholder="Min"
+                  placeholder={t.common.min}
                   value={filters.minSqft}
                   onChange={(v) => set("minSqft", v)}
                 />
                 <span className="text-neutral-400">–</span>
                 <NumberInput
-                  placeholder="Max"
+                  placeholder={t.common.max}
                   value={filters.maxSqft}
                   onChange={(v) => set("maxSqft", v)}
                 />
@@ -222,17 +250,17 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
             </div>
             <div>
               <span className="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                Year built
+                {t.search.yearBuilt}
               </span>
               <div className="flex items-center gap-2">
                 <NumberInput
-                  placeholder="Min"
+                  placeholder={t.common.min}
                   value={filters.minYearBuilt}
                   onChange={(v) => set("minYearBuilt", v)}
                 />
                 <span className="text-neutral-400">–</span>
                 <NumberInput
-                  placeholder="Max"
+                  placeholder={t.common.max}
                   value={filters.maxYearBuilt}
                   onChange={(v) => set("maxYearBuilt", v)}
                 />
@@ -240,7 +268,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                Building fee allowed
+                {t.search.buildingFeeAllowed}
               </span>
               <button
                 type="button"
@@ -269,14 +297,15 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                 set("hoaAllowed", true);
               }}
               onDone={close}
+              t={t}
             />
           </div>
         )}
       </FilterPill>
 
       <FilterPill
-        label="Sort"
-        value={currentSort?.label ?? null}
+        label={t.search.sort}
+        value={currentSort ? SORT_LABELS[currentSort.value] : null}
         active={false}
       >
         {(close) => (
@@ -295,7 +324,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                     : "hover:bg-neutral-50 dark:hover:bg-neutral-800"
                 }`}
               >
-                {opt.label}
+                {SORT_LABELS[opt.value]}
               </button>
             ))}
           </div>
@@ -309,7 +338,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
           onClick={() => onChange(DEFAULT_FILTERS)}
           className="btn-sm btn-ghost text-accent-600 dark:text-accent-400"
         >
-          Reset
+          {t.search.reset}
         </button>
       </div>
     </div>
@@ -405,9 +434,11 @@ function FilterPill({ label, value, active, children }: FilterPillProps) {
 function PillActions({
   onClear,
   onDone,
+  t,
 }: {
   onClear: () => void;
   onDone: () => void;
+  t: Dictionary;
 }) {
   return (
     <div className="flex items-center justify-between border-t border-neutral-100 pt-3 dark:border-neutral-800">
@@ -416,10 +447,10 @@ function PillActions({
         onClick={onClear}
         className="text-xs font-medium text-neutral-500 hover:underline"
       >
-        Clear
+        {t.search.clear}
       </button>
       <button type="button" onClick={onDone} className="btn-sm btn-primary">
-        Done
+        {t.search.done}
       </button>
     </div>
   );

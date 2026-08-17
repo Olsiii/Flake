@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   OPEN_CONSENT_BANNER_EVENT,
   getConsent,
   saveConsent,
   type ConsentCategory,
 } from "@/lib/consent";
+import { useLanguage } from "@/i18n/language-provider";
 
 type Toggles = Record<ConsentCategory, boolean>;
 
@@ -18,6 +20,13 @@ const DEFAULT_TOGGLES: Toggles = {
 };
 
 export function CookieConsentBanner() {
+  const { t } = useLanguage();
+  const pathname = usePathname();
+  const hasTabBar = !(
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/admin")
+  );
   const [visible, setVisible] = useState(false);
   const [customizing, setCustomizing] = useState(false);
   const [toggles, setToggles] = useState<Toggles>(DEFAULT_TOGGLES);
@@ -59,18 +68,21 @@ export function CookieConsentBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-200 bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+    <div
+      className={`fixed inset-x-0 z-50 border-t border-neutral-200 bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.08)] ${
+        hasTabBar ? "bottom-14 sm:bottom-0" : "bottom-0"
+      }`}
+    >
       <div className="mx-auto max-w-5xl px-4 py-4 lg:px-8">
         {!customizing ? (
           <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-neutral-700">
-              We use cookies to run core features like login and saved
-              searches, and optionally for analytics.{" "}
+              {t.cookieConsent.message}{" "}
               <Link
                 href="/cookie-policy"
                 className="text-accent-700 hover:text-accent-900 font-medium hover:underline"
               >
-                Learn more
+                {t.cookieConsent.learnMore}
               </Link>
             </p>
             <div className="flex shrink-0 flex-wrap gap-2">
@@ -79,7 +91,7 @@ export function CookieConsentBanner() {
                 onClick={() => setCustomizing(true)}
                 className="btn-sm btn-secondary"
               >
-                Customize
+                {t.cookieConsent.customize}
               </button>
               <button
                 type="button"
@@ -92,7 +104,7 @@ export function CookieConsentBanner() {
                 }
                 className="btn-sm btn-secondary"
               >
-                Reject non-essential
+                {t.cookieConsent.rejectNonEssential}
               </button>
               <button
                 type="button"
@@ -101,39 +113,39 @@ export function CookieConsentBanner() {
                 }
                 className="btn-sm btn-primary"
               >
-                Accept all
+                {t.cookieConsent.acceptAll}
               </button>
             </div>
           </div>
         ) : (
           <div>
             <p className="text-sm font-semibold text-neutral-950">
-              Cookie preferences
+              {t.cookieConsent.preferencesTitle}
             </p>
             <div className="mt-3 space-y-3">
               <ToggleRow
-                label="Strictly necessary"
-                description="Required for sign-in and core site features. Always on."
+                label={t.cookieConsent.strictlyNecessary}
+                description={t.cookieConsent.strictlyNecessaryDesc}
                 checked
                 disabled
               />
               <ToggleRow
-                label="Functional"
-                description="Remembers preferences like saved filters."
+                label={t.cookieConsent.functional}
+                description={t.cookieConsent.functionalDesc}
                 checked={toggles.functional}
-                onChange={(v) => setToggles((t) => ({ ...t, functional: v }))}
+                onChange={(v) => setToggles((prev) => ({ ...prev, functional: v }))}
               />
               <ToggleRow
-                label="Analytics"
-                description="Helps us understand how the site is used."
+                label={t.cookieConsent.analytics}
+                description={t.cookieConsent.analyticsDesc}
                 checked={toggles.analytics}
-                onChange={(v) => setToggles((t) => ({ ...t, analytics: v }))}
+                onChange={(v) => setToggles((prev) => ({ ...prev, analytics: v }))}
               />
               <ToggleRow
-                label="Marketing"
-                description="Personalizes offers and ads, if we ever run any."
+                label={t.cookieConsent.marketing}
+                description={t.cookieConsent.marketingDesc}
                 checked={toggles.marketing}
-                onChange={(v) => setToggles((t) => ({ ...t, marketing: v }))}
+                onChange={(v) => setToggles((prev) => ({ ...prev, marketing: v }))}
               />
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -142,14 +154,14 @@ export function CookieConsentBanner() {
                 onClick={() => setCustomizing(false)}
                 className="btn-sm btn-secondary"
               >
-                Back
+                {t.cookieConsent.back}
               </button>
               <button
                 type="button"
                 onClick={() => choose(toggles)}
                 className="btn-sm btn-primary"
               >
-                Save preferences
+                {t.cookieConsent.savePreferences}
               </button>
             </div>
           </div>

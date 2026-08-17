@@ -2,6 +2,7 @@
 
 import type { AiDetectableFilterKey, ListingFilters } from "@/types/listing";
 import { describeDetectedFilter } from "./url-state";
+import { useLanguage } from "@/i18n/language-provider";
 
 interface DetectedFiltersChipsProps {
   filters: ListingFilters;
@@ -14,13 +15,14 @@ export function DetectedFiltersChips({
   detectedKeys,
   onRemove,
 }: DetectedFiltersChipsProps) {
+  const { t } = useLanguage();
   if (detectedKeys.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900">
-      <span className="text-eyebrow">Detected</span>
+      <span className="text-eyebrow">{t.search.detected}</span>
       {detectedKeys.map((key) => {
-        const label = describeDetectedFilter(key, filters);
+        const label = describeDetectedFilter(key, filters, t);
         if (!label) return null;
         return (
           <button
@@ -31,7 +33,9 @@ export function DetectedFiltersChips({
           >
             <span className="capitalize">{label}</span>
             <span aria-hidden="true">×</span>
-            <span className="sr-only">Remove {label} filter</span>
+            <span className="sr-only">
+              {t.search.removeFilterSr.replace("{label}", label)}
+            </span>
           </button>
         );
       })}

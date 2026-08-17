@@ -7,7 +7,7 @@ interface FaqItem {
   answer: string;
 }
 
-export function Faq({ items }: { items: FaqItem[] }) {
+export function Faq({ items }: { items: readonly FaqItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (

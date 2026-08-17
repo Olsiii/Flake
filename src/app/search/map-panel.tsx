@@ -8,6 +8,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import { MapPinPopup } from "@/components/map-pin-popup";
+import { useLanguage } from "@/i18n/language-provider";
 import type { MapBounds, SearchListing } from "@/types/listing";
 
 const SOURCE_ID = "listings";
@@ -68,6 +69,7 @@ export function MapPanel({
   hasPolygon,
   initialBounds,
 }: MapPanelProps) {
+  const { t } = useLanguage();
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -368,7 +370,7 @@ export function MapPanel({
   if (!token) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-neutral-100 p-6 text-center text-sm text-neutral-500 dark:bg-neutral-900">
-        Set NEXT_PUBLIC_MAPBOX_TOKEN in .env.local to enable the map.
+        {t.search.mapPlaceholder}
       </div>
     );
   }
@@ -383,7 +385,7 @@ export function MapPanel({
           onClick={() => drawRef.current?.changeMode("draw_polygon")}
           className="btn-sm bg-white shadow-md hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
         >
-          Draw search area
+          {t.search.drawSearchArea}
         </button>
         {hasPolygon && (
           <button
@@ -394,7 +396,7 @@ export function MapPanel({
             }}
             className="btn-sm text-danger-600 dark:text-danger-400 bg-white shadow-md hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
           >
-            Clear area
+            {t.search.clearArea}
           </button>
         )}
       </div>

@@ -16,6 +16,7 @@ import { DetectedFiltersChips } from "./detected-filters-chips";
 import { FilterBar } from "./filter-bar";
 import { ResultsGrid } from "./results-grid";
 import { filtersToParams, paramsToFilters } from "./url-state";
+import { useLanguage } from "@/i18n/language-provider";
 
 // mapbox-gl touches the DOM at module scope; keep it out of the server bundle.
 const MapPanel = dynamic(() => import("./map-panel").then((m) => m.MapPanel), {
@@ -23,6 +24,7 @@ const MapPanel = dynamic(() => import("./map-panel").then((m) => m.MapPanel), {
 });
 
 function SearchClientInner() {
+  const { t } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -139,9 +141,9 @@ function SearchClientInner() {
       <button
         type="button"
         onClick={() => setMobileView((v) => (v === "list" ? "map" : "list"))}
-        className="fixed bottom-5 left-1/2 z-10 flex min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full bg-neutral-900 px-5 text-sm font-medium text-white shadow-lg md:hidden dark:bg-white dark:text-neutral-900"
+        className="fixed bottom-20 left-1/2 z-10 flex min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full bg-neutral-900 px-5 text-sm font-medium text-white shadow-lg md:hidden dark:bg-white dark:text-neutral-900"
       >
-        {mobileView === "list" ? "🗺️ Map" : "☰ List"}
+        {mobileView === "list" ? t.search.mapView : t.search.listView}
       </button>
     </div>
   );
