@@ -25,6 +25,8 @@ export function CookieConsentBanner() {
   const hasTabBar = !(
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/reset-password") ||
     pathname.startsWith("/admin")
   );
   const [visible, setVisible] = useState(false);

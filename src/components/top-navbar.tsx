@@ -128,6 +128,8 @@ export function TopNavbar() {
   if (
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/reset-password") ||
     pathname.startsWith("/admin")
   ) {
     return null;
