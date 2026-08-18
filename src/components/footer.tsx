@@ -39,26 +39,6 @@ export function Footer() {
             <p className="mt-2 max-w-xs text-sm text-neutral-600">
               {t.footer.tagline}
             </p>
-            <div className="mt-4 flex items-center gap-3">
-              <a
-                href="https://www.instagram.com/flakeestate/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="text-neutral-600 hover:text-neutral-950"
-              >
-                <InstagramIcon />
-              </a>
-              <a
-                href="https://www.facebook.com/profile.php?id=61593108994565"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="text-neutral-600 hover:text-neutral-950"
-              >
-                <FacebookIcon />
-              </a>
-            </div>
           </div>
 
           <div>
@@ -125,6 +105,26 @@ export function Footer() {
                 </a>
               </li>
             </ul>
+            <div className="mt-3 flex items-center gap-3">
+              <a
+                href="https://www.instagram.com/flakeestate/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="text-neutral-600 hover:text-neutral-950"
+              >
+                <InstagramIcon />
+              </a>
+              <a
+                href="https://www.facebook.com/profile.php?id=61593108994565"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="text-neutral-600 hover:text-neutral-950"
+              >
+                <FacebookIcon />
+              </a>
+            </div>
           </div>
 
           <div>
