@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { isRateLimited } from "@/lib/rate-limit";
 import { brandedEmailHtml, escapeHtml } from "@/lib/email-template";
@@ -74,10 +74,16 @@ export async function POST(request: Request) {
   }
 
   // Best-effort: a lead is captured either way, email delivery shouldn't
-  // block the success response.
-  sendLeadEmails(body).catch((err) => {
-    console.error("Failed to send lead notification emails", err);
-  });
+  // block the success response. `after()` (not a bare fire-and-forget
+  // call) is required here — Vercel freezes the serverless function
+  // right after the response is sent, which silently killed this before
+  // Resend was ever called. `after` keeps the invocation alive until the
+  // promise settles.
+  after(() =>
+    sendLeadEmails(body).catch((err) => {
+      console.error("Failed to send lead notification emails", err);
+    }),
+  );
 
   return NextResponse.json({ ok: true });
 }

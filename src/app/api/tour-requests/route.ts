@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { isRateLimited } from "@/lib/rate-limit";
@@ -120,9 +120,13 @@ export async function POST(request: Request) {
     );
   }
 
-  sendTourRequestEmails(body, listingTitle, requestedTime).catch((err) => {
-    console.error("Failed to send tour request notification emails", err);
-  });
+  // See src/app/api/leads/route.ts for why this needs `after()` and can't
+  // be a bare fire-and-forget call on Vercel.
+  after(() =>
+    sendTourRequestEmails(body, listingTitle, requestedTime).catch((err) => {
+      console.error("Failed to send tour request notification emails", err);
+    }),
+  );
 
   return NextResponse.json({ ok: true });
 }
