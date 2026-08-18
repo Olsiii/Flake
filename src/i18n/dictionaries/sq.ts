@@ -194,7 +194,6 @@ export const sq: Dictionary = {
     nameThisSearch: "Emërto këtë kërkim",
     emailMeAboutMatches: "Më njofto me email për përputhje të reja",
     noAlerts: "Pa njoftime",
-    instant: "Menjëherë",
     daily: "Ditore",
     weekly: "Javore",
     hotHome: "🔥 Shtëpi e Kërkuar",

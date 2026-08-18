@@ -12,13 +12,18 @@ import {
 } from "../search/url-state";
 import { useLanguage } from "@/i18n/language-provider";
 
-const ALERT_OPTIONS = ["off", "instant", "daily", "weekly"] as const;
+// Only the values a user can newly pick — "instant" was removed (the
+// cron only ever runs once/day, so it behaved identically to "daily";
+// see the 20260818010000 migration that normalizes old rows). Rows
+// saved before that change may still carry "instant" in the DB, so the
+// row type below is intentionally broader than this list.
+const ALERT_OPTIONS = ["off", "daily", "weekly"] as const;
 
 interface SavedSearchRow {
   id: string;
   name: string;
   filters: Record<string, unknown>;
-  alert_frequency: (typeof ALERT_OPTIONS)[number];
+  alert_frequency: "off" | "instant" | "daily" | "weekly";
   created_at: string;
 }
 
@@ -28,7 +33,6 @@ export function SavedSearchesTab() {
 
   const ALERT_LABELS: Record<(typeof ALERT_OPTIONS)[number], string> = {
     off: t.search.noAlerts,
-    instant: t.search.instant,
     daily: t.search.daily,
     weekly: t.search.weekly,
   };

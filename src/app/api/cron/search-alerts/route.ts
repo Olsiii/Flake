@@ -102,6 +102,14 @@ export async function GET(request: Request) {
         (l) => new Date(l.created_at).getTime() > checkedFrom.getTime(),
       );
 
+      // Only advance the watermark when there was nothing to send or the
+      // send actually succeeded — otherwise (e.g. RESEND_API_KEY missing
+      // in this environment, so sendDigestEmail returns false without
+      // throwing) these listings would be silently skipped forever: the
+      // next run's "created after last_checked_at" filter would no
+      // longer see them, with no error surfaced anywhere.
+      let shouldAdvanceWatermark = true;
+
       if (newListings.length > 0) {
         const { data: userRow } = await supabase
           .from("users")
@@ -117,14 +125,20 @@ export async function GET(request: Request) {
             listings: newListings,
             siteOrigin,
           });
-          if (sent) emailsSent++;
+          if (sent) {
+            emailsSent++;
+          } else {
+            shouldAdvanceWatermark = false;
+          }
         }
       }
 
-      await supabase
-        .from("saved_searches")
-        .update({ last_checked_at: newCalculatedAt })
-        .eq("id", search.id);
+      if (shouldAdvanceWatermark) {
+        await supabase
+          .from("saved_searches")
+          .update({ last_checked_at: newCalculatedAt })
+          .eq("id", search.id);
+      }
     } catch (err) {
       errors.push(
         `${search.id}: ${err instanceof Error ? err.message : "unknown error"}`,

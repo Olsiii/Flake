@@ -191,7 +191,6 @@ export const en = {
     nameThisSearch: "Name this search",
     emailMeAboutMatches: "Email me about new matches",
     noAlerts: "No alerts",
-    instant: "Instant",
     daily: "Daily",
     weekly: "Weekly",
     hotHome: "🔥 Hot Home",

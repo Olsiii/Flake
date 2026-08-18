@@ -8,7 +8,7 @@ import type { ListingFilters, MapBounds } from "@/types/listing";
 import { filtersToParams } from "./url-state";
 import { useLanguage } from "@/i18n/language-provider";
 
-const ALERT_VALUES = ["off", "instant", "daily", "weekly"] as const;
+const ALERT_VALUES = ["off", "daily", "weekly"] as const;
 
 export function SaveSearchButton({
   filters,
@@ -25,11 +25,9 @@ export function SaveSearchButton({
     label:
       value === "off"
         ? t.search.noAlerts
-        : value === "instant"
-          ? t.search.instant
-          : value === "daily"
-            ? t.search.daily
-            : t.search.weekly,
+        : value === "daily"
+          ? t.search.daily
+          : t.search.weekly,
   }));
   const router = useRouter();
   const pathname = usePathname();
