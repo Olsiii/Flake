@@ -43,6 +43,7 @@ export const en = {
     getHelp: "Get help",
     signIn: "Sign in",
     signOut: "Sign out",
+    signingOut: "Signing out…",
     toggleMenu: "Toggle menu",
     accountMenu: "Account menu",
     browseByType: "Browse by type",

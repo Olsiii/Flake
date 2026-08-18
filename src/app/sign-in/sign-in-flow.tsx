@@ -60,7 +60,9 @@ export function SignInFlow() {
   return (
     <div className="flex w-full min-w-0 flex-col gap-6">
       <div>
-        <h1 className="text-h1 text-white">{t.auth.signIn}</h1>
+        <h1 className="text-h1 text-white">
+          {onSignUp ? t.auth.createAccount : t.auth.signIn}
+        </h1>
       </div>
 
       {resolved ? (

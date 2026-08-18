@@ -50,6 +50,7 @@ export function TopNavbar() {
 
   const [openId, setOpenId] = useState<string | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpandedId, setMobileExpandedId] = useState<string | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
@@ -101,8 +102,17 @@ export function TopNavbar() {
   }, [openId]);
 
   async function handleSignOut() {
+    setSigningOut(true);
     const supabase = getSupabaseBrowser();
-    await supabase.auth.signOut();
+    // The actual sign-out is near-instant, which reads as a jarring blip
+    // rather than a completed action — hold the "Signing out…" state open
+    // for a minimum stretch so it's visible before the account menu closes
+    // and the page navigates away.
+    await Promise.all([
+      supabase.auth.signOut(),
+      new Promise((resolve) => setTimeout(resolve, 500)),
+    ]);
+    setSigningOut(false);
     setAccountOpen(false);
     router.push("/");
     router.refresh();
@@ -292,9 +302,13 @@ export function TopNavbar() {
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="block w-full px-3 py-2.5 text-left text-sm text-neutral-800 hover:bg-neutral-50 hover:text-neutral-950"
+                      disabled={signingOut}
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-neutral-800 hover:bg-neutral-50 hover:text-neutral-950 disabled:cursor-default disabled:opacity-60 disabled:hover:bg-transparent"
                     >
-                      {t.nav.signOut}
+                      {signingOut && (
+                        <span className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700" />
+                      )}
+                      {signingOut ? t.nav.signingOut : t.nav.signOut}
                     </button>
                   </div>
                 )}

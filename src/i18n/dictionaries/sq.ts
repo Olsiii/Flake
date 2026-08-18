@@ -45,6 +45,7 @@ export const sq: Dictionary = {
     getHelp: "Kërko ndihmë",
     signIn: "Kyçu",
     signOut: "Dil",
+    signingOut: "Duke dalë…",
     toggleMenu: "Shfaq/fshih menynë",
     accountMenu: "Menyja e llogarisë",
     browseByType: "Shfleto sipas llojit",
