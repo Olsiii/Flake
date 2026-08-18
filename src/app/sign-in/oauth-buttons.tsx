@@ -1,64 +1,185 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Script from "next/script";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import { useLanguage } from "@/i18n/language-provider";
 
-type Provider = "google" | "apple";
+interface GoogleCredentialResponse {
+  credential: string;
+}
 
-/** Google + Apple only — Facebook intentionally omitted per spec. Both call
- * the real `signInWithOAuth` redirect flow; Google already works end to end
- * (see [[project-flake-infra-gaps]]), Apple will error until the provider
- * is turned on in the Supabase dashboard the same way Google was. */
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+            nonce: string;
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              type: "standard";
+              theme: "outline";
+              size: "large";
+              width: number;
+            },
+          ) => void;
+        };
+      };
+    };
+  }
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
+  );
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/** Google only — Apple was removed for now (re-add by restoring the
+ * redirect-based `signInWithOAuth({ provider: "apple" })` flow once the
+ * Apple provider is turned on in the Supabase dashboard).
+ *
+ * Google uses Google Identity Services (client-side ID token) rather than
+ * Supabase's redirect-based `signInWithOAuth`. The redirect flow bounces
+ * through Supabase's own `<project>.supabase.co` domain, which (a) shows
+ * that raw domain on Google's consent screen instead of the app, since
+ * Google only trusts the cryptographically-verified redirect URI's domain,
+ * and (b) falls back to the Supabase project's configured Site URL when
+ * the app's own origin isn't in the redirect allow-list — which broke
+ * sign-in entirely once Site URL pointed at a not-yet-deployed domain.
+ * The ID-token flow never leaves the app's own origin, sidestepping both.
+ *
+ * The actual account picker comes from Google's own button, not `prompt()`
+ * (One Tap) and not a synthetic click on a hidden button — both were
+ * tried and both silently failed in testing (`prompt()`'s moment-status
+ * callbacks are being phased out under Google's FedCM rollout, and FedCM
+ * requires a direct, browser-trusted click on Google's own element —
+ * `element.click()` on a hidden proxy doesn't count and gets rejected).
+ * So Google's real button is rendered as an invisible layer stacked
+ * exactly on top of our styled button — the user's actual click lands
+ * natively on Google's element (trusted), while what they see underneath
+ * is our design. */
 export function OAuthButtons({ redirectTo }: { redirectTo: string }) {
   const { t } = useLanguage();
-  const [pending, setPending] = useState<Provider | null>(null);
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [googleScriptLoaded, setGoogleScriptLoaded] = useState(false);
+  const googleButtonHostRef = useRef<HTMLDivElement>(null);
+  const googleAttemptRef = useRef(0);
 
-  async function handleOAuth(provider: Provider) {
-    setError(null);
-    setPending(provider);
-    const supabase = getSupabaseBrowser();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
-      },
-    });
-    if (error) {
-      setError(error.message);
-      setPending(null);
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+  useEffect(() => {
+    if (!googleScriptLoaded || !googleClientId || !window.google) return;
+    if (!googleButtonHostRef.current) return;
+
+    let cancelled = false;
+
+    async function setup() {
+      const rawNonce = crypto.randomUUID();
+      const hashedNonce = await sha256Hex(rawNonce);
+      if (cancelled) return;
+
+      window.google!.accounts.id.initialize({
+        client_id: googleClientId!,
+        nonce: hashedNonce,
+        callback: async (response) => {
+          googleAttemptRef.current += 1;
+          const supabase = getSupabaseBrowser();
+          const { error } = await supabase.auth.signInWithIdToken({
+            provider: "google",
+            token: response.credential,
+            nonce: rawNonce,
+          });
+          if (error) {
+            setError(error.message);
+            setPending(false);
+            return;
+          }
+          window.location.href = redirectTo;
+        },
+      });
+      window.google!.accounts.id.renderButton(googleButtonHostRef.current!, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        // Wider than the button can ever render, so the invisible overlay
+        // fully covers our styled button's clickable area at any viewport
+        // width; the wrapper's overflow-hidden clips the excess.
+        width: 400,
+      });
     }
-    // On success the browser navigates away to the provider immediately —
-    // no need to reset `pending`, the component unmounts.
+
+    void setup();
+    return () => {
+      cancelled = true;
+    };
+  }, [googleScriptLoaded, googleClientId, redirectTo]);
+
+  function handleGoogleOverlayClick() {
+    // The real click already landed on Google's element underneath and
+    // its own handling is already in flight — this just gives the
+    // decorative button a pending look while it runs. GIS only calls
+    // back on success; if FedCM silently aborts (it does under some
+    // browser privacy settings, or when rate-limited by rapid retries)
+    // there's no error callback at all, so without this the button would
+    // stay stuck looking "pending" forever with no feedback.
+    setError(null);
+    setPending(true);
+    const attempt = ++googleAttemptRef.current;
+    window.setTimeout(() => {
+      if (googleAttemptRef.current === attempt) {
+        setPending(false);
+        setError(t.authFlow.genericError);
+      }
+    }, 8000);
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-2">
-      <button
-        type="button"
-        onClick={() => handleOAuth("google")}
-        disabled={pending != null}
-        className="btn w-full justify-center gap-2.5 border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50"
-      >
-        <GoogleIcon />
-        {t.auth.continueWithGoogle}
-      </button>
-      <button
-        type="button"
-        onClick={() => handleOAuth("apple")}
-        disabled={pending != null}
-        className="btn w-full justify-center gap-2.5 border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50"
-      >
-        <AppleIcon />
-        {t.authFlow.continueWithApple}
-      </button>
-      {error && (
-        <p className="text-danger-700 rounded-md bg-white/90 px-3 py-2 text-xs">
-          {error}
-        </p>
-      )}
-    </div>
+    <>
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        strategy="afterInteractive"
+        onLoad={() => setGoogleScriptLoaded(true)}
+      />
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="relative">
+          {/* Decorative — matches the app's design, but never receives
+              clicks; the real Google button overlaid on top does. */}
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-hidden="true"
+            disabled={pending}
+            className="btn w-full justify-center gap-2.5 border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50"
+          >
+            <GoogleIcon />
+            {t.auth.continueWithGoogle}
+          </button>
+          {/* Google's real button — invisible, stacked exactly on top so
+              the user's click natively lands on Google's own element. */}
+          <div
+            ref={googleButtonHostRef}
+            onClick={handleGoogleOverlayClick}
+            className="absolute inset-0 overflow-hidden opacity-0"
+          />
+        </div>
+        {error && (
+          <p className="text-danger-700 rounded-md bg-white/90 px-3 py-2 text-xs">
+            {error}
+          </p>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -81,19 +202,6 @@ function GoogleIcon() {
         fill="#EA4335"
         d="M12 4.77c1.76 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.6l4.01 3.11C6.23 6.88 8.88 4.77 12 4.77Z"
       />
-    </svg>
-  );
-}
-
-function AppleIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-4.5 w-4.5 shrink-0"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M16.36 1.1c.1 1.02-.29 2.02-.9 2.75-.63.75-1.68 1.34-2.7 1.26-.12-1 .34-2.04.93-2.72.65-.76 1.77-1.33 2.67-1.29ZM19.83 17.36c-.3.7-.66 1.36-1.09 1.98-.6.87-1.09 1.47-1.47 1.8-.59.55-1.22.83-1.9.85-.49 0-1.08-.14-1.76-.43-.68-.28-1.31-.42-1.88-.42-.6 0-1.24.14-1.94.42-.7.29-1.26.44-1.7.46-.65.03-1.3-.26-1.94-.87-.41-.35-.93-.98-1.55-1.87-.66-.95-1.21-2.06-1.64-3.32-.46-1.36-.69-2.68-.69-3.96 0-1.47.32-2.73.95-3.79a5.58 5.58 0 0 1 1.99-2.02 5.33 5.33 0 0 1 2.69-.76c.52 0 1.19.16 2.03.48.83.32 1.36.48 1.6.48.18 0 .78-.19 1.78-.56 1-.36 1.79-.48 2.39-.44.26.03 1.28.24 2.1.99a4.72 4.72 0 0 0-.5.53c-.51.6-.85 1.4-.9 2.28-.05.98.28 1.86.87 2.5.28.3.66.56 1.15.77-.13.4-.28.79-.44 1.16-.14.31-.28.6-.43.87Z" />
     </svg>
   );
 }

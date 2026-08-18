@@ -451,7 +451,6 @@ export const en = {
     newToProduct: "New to {product}?",
     createAccountLink: "Create account",
     alreadyHaveAccountLink: "Sign in instead",
-    continueWithApple: "Continue with Apple",
     legalPrefix: "By submitting, I accept",
     legalTerms: "terms of use",
     genericError: "Something went wrong. Please try again.",

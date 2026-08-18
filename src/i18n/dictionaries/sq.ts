@@ -457,7 +457,6 @@ export const sq: Dictionary = {
     newToProduct: "I ri në {product}?",
     createAccountLink: "Krijo llogari",
     alreadyHaveAccountLink: "Kyçu në vend të kësaj",
-    continueWithApple: "Vazhdo me Apple",
     legalPrefix: "Duke dërguar, pranoj",
     legalTerms: "kushtet e përdorimit",
     genericError: "Diçka shkoi keq. Provo përsëri.",
