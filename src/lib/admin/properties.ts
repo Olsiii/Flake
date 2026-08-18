@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { slugify } from "@/lib/slug";
+import { translateListToAlbanian, translateToAlbanian } from "@/lib/translate";
 import { PROPERTY_TYPES, type PropertyType } from "@/types/listing";
 import type {
   AdminPropertyRow,
@@ -75,13 +76,29 @@ async function upsertNeighborhood(
   if (findError) throw findError;
 
   const fields: Record<string, unknown> = {};
-  if (payload.neighborhoodDescription?.trim()) {
-    fields.description = payload.neighborhoodDescription.trim();
+  const neighborhoodDescription = payload.neighborhoodDescription?.trim();
+  const highlights =
+    payload.highlights.length > 0 ? payload.highlights : null;
+
+  // Run both translations concurrently — they're independent Claude calls.
+  const [descriptionSq, highlightsSq] = await Promise.all([
+    neighborhoodDescription
+      ? translateToAlbanian(neighborhoodDescription)
+      : Promise.resolve(null),
+    highlights ? translateListToAlbanian(highlights) : Promise.resolve(null),
+  ]);
+
+  if (neighborhoodDescription) {
+    fields.description = neighborhoodDescription;
+    fields.description_sq = descriptionSq;
   }
   if (payload.walkScore != null) fields.walk_score = payload.walkScore;
   if (payload.crimeScore != null) fields.crime_score = payload.crimeScore;
-  if (payload.highlights.length > 0) {
-    fields.local_insights = payload.highlights;
+  if (highlights) {
+    fields.local_insights = highlights;
+    // Column is not-null (default '[]') — fall back to an empty array
+    // rather than passing null through when translation fails.
+    fields.local_insights_sq = highlightsSq ?? [];
   }
 
   if (existing) {
@@ -177,14 +194,19 @@ export async function createProperty(
   payload: PropertyPayload,
 ): Promise<AdminPropertyRow> {
   const supabase = getSupabaseAdmin();
-  const neighborhoodId = await upsertNeighborhood(supabase, payload);
+  const description = payload.description?.trim() || null;
+  const [neighborhoodId, descriptionSq] = await Promise.all([
+    upsertNeighborhood(supabase, payload),
+    description ? translateToAlbanian(description) : Promise.resolve(null),
+  ]);
 
   const { data: listing, error } = await supabase
     .from("listings")
     .insert({
       ...(payload.id ? { id: payload.id } : {}),
       title: payload.title.trim(),
-      description: payload.description?.trim() || null,
+      description,
+      description_sq: descriptionSq,
       price: payload.price,
       status: payload.listingType,
       property_type: payload.propertyType ?? "house",
@@ -227,13 +249,18 @@ export async function updateProperty(
   payload: PropertyPayload,
 ): Promise<AdminPropertyRow> {
   const supabase = getSupabaseAdmin();
-  const neighborhoodId = await upsertNeighborhood(supabase, payload);
+  const description = payload.description?.trim() || null;
+  const [neighborhoodId, descriptionSq] = await Promise.all([
+    upsertNeighborhood(supabase, payload),
+    description ? translateToAlbanian(description) : Promise.resolve(null),
+  ]);
 
   const { data: listing, error } = await supabase
     .from("listings")
     .update({
       title: payload.title.trim(),
-      description: payload.description?.trim() || null,
+      description,
+      description_sq: descriptionSq,
       price: payload.price,
       status: payload.listingType,
       property_type: payload.propertyType ?? "house",

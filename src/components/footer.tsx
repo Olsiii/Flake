@@ -11,13 +11,19 @@ export function Footer() {
   const pathname = usePathname();
 
   // Same standalone-auth-surface rationale as TopNavbar — see the comment
-  // there.
+  // there. /search is here for a different reason: it's an edge-to-edge
+  // map/list app view (h-dvh, its own fixed mobile toggle) rather than a
+  // page meant to scroll — a footer competing for that same viewport
+  // budget in the body flex column is what was squeezing/overflowing the
+  // search layout (map, mobile view toggle, tab bar) off the bottom of
+  // the screen.
   if (
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
     pathname.startsWith("/forgot-password") ||
     pathname.startsWith("/reset-password") ||
-    pathname.startsWith("/admin")
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/search")
   ) {
     return null;
   }

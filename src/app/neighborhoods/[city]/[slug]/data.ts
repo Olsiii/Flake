@@ -16,7 +16,7 @@ export async function getNeighborhoodBySlug(
   const { data, error } = await supabase
     .from("neighborhoods")
     .select(
-      "id, name, city, state, slug, description, crime_score, walk_score, local_insights",
+      "id, name, city, state, slug, description, description_sq, crime_score, walk_score, local_insights, local_insights_sq",
     )
     .eq("slug", slug)
     .maybeSingle();

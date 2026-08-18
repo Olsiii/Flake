@@ -1,5 +1,6 @@
 import type { ListingDetail } from "@/types/listing";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getServerLocale } from "@/i18n/server";
+import { localize } from "@/lib/localize";
 
 function Fact({
   label,
@@ -25,7 +26,7 @@ export async function ListingDescription({
 }: {
   listing: ListingDetail;
 }) {
-  const t = await getDictionary();
+  const [t, locale] = await Promise.all([getDictionary(), getServerLocale()]);
 
   const PROPERTY_TYPE_LABELS: Record<ListingDetail["property_type"], string> = {
     house: t.common.propertyTypeHouse,
@@ -38,7 +39,7 @@ export async function ListingDescription({
     <section>
       {listing.description && (
         <div className="mb-6 space-y-3 text-sm whitespace-pre-line text-neutral-700 dark:text-neutral-300">
-          {listing.description}
+          {localize(listing.description, listing.description_sq, locale)}
         </div>
       )}
 

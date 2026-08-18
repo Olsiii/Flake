@@ -12,7 +12,8 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { BackToTop } from "@/components/back-to-top";
 import { SITE_URL } from "@/lib/site";
 import { slugify } from "@/lib/slug";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getServerLocale } from "@/i18n/server";
+import { localize } from "@/lib/localize";
 
 export async function generateMetadata({
   params,
@@ -24,8 +25,12 @@ export async function generateMetadata({
     const listing = await getListingDetail(id);
     if (!listing) return { title: "Listing" };
 
+    const locale = await getServerLocale();
+    const localizedDescription = listing.description
+      ? localize(listing.description, listing.description_sq, locale)
+      : null;
     const description =
-      listing.description?.slice(0, 155) ??
+      localizedDescription?.slice(0, 155) ??
       `${listing.beds ?? "—"} bd, ${listing.baths ?? "—"} ba ${listing.property_type.replace("-", " ")} at ${listing.address}, ${listing.city}, ${listing.state}.`;
     const title = `${listing.title} | Flake`;
     const canonical = `${SITE_URL}/listing/${listing.id}`;
@@ -53,7 +58,7 @@ export default async function ListingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const t = await getDictionary();
+  const [t, locale] = await Promise.all([getDictionary(), getServerLocale()]);
 
   let listing;
   try {
@@ -73,7 +78,9 @@ export default async function ListingPage({
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
     name: listing.title,
-    description: listing.description ?? undefined,
+    description: listing.description
+      ? localize(listing.description, listing.description_sq, locale)
+      : undefined,
     url: `${SITE_URL}/listing/${listing.id}`,
     datePosted: listing.created_at,
     image: listing.images.map((img) => img.url),

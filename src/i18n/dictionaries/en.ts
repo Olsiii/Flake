@@ -338,6 +338,7 @@ export const en = {
     noTourRequestsDesc:
       "Request a tour from any listing page and it'll show up here.",
     startBrowsing: "Start browsing",
+    view: "View",
     delete: "Delete",
     deleteCollectionConfirm: "Delete this collection?",
     deleteSearchConfirm: "Delete this saved search?",
@@ -378,6 +379,8 @@ export const en = {
     loading: "Loading…",
     addToCollectionTitle: "Add to Collection",
     couldntCreate: "Couldn't create collection",
+    add: "Add",
+    added: "Added",
   },
   cities: {
     homesForSaleIn: "Homes for Sale in {city}, {state}",

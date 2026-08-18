@@ -120,9 +120,11 @@ export interface Neighborhood {
   state: string;
   slug: string;
   description: string | null;
+  description_sq: string | null;
   crime_score: number | null;
   walk_score: number | null;
   local_insights: string[];
+  local_insights_sq: string[] | null;
 }
 
 /** Row shape returned by listings_by_city/listings_by_neighborhood — a SearchListing plus the total match count, for pagination. */
@@ -142,6 +144,7 @@ export interface ListingDetail {
   mls_id: string | null;
   title: string;
   description: string | null;
+  description_sq: string | null;
   price: number;
   status: ListingStatus;
   property_type: PropertyType;

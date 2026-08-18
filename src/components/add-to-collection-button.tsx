@@ -32,6 +32,9 @@ export function AddToCollectionButton({
     null,
   );
   const [memberIds, setMemberIds] = useState<Set<string>>(new Set());
+  // Which collection just transitioned to "added", so its confirmation
+  // animation only plays once instead of replaying on every re-render.
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [newShared, setNewShared] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -100,6 +103,13 @@ export function AddToCollectionButton({
       else next.add(collectionId);
       return next;
     });
+
+    if (!isMember) {
+      setJustAddedId(collectionId);
+      setTimeout(() => {
+        setJustAddedId((prev) => (prev === collectionId ? null : prev));
+      }, 400);
+    }
 
     if (isMember) {
       await supabase
@@ -190,32 +200,42 @@ export function AddToCollectionButton({
                   {t.collections.noCollectionsYet}
                 </p>
               ) : (
-                collections.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => toggleMembership(c.id)}
-                    className="flex min-h-11 w-full items-center justify-between rounded-md px-2 text-left text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800"
-                  >
-                    <span className="truncate">
-                      {c.name}
-                      {c.is_shared && (
-                        <span className="text-2xs ml-1.5 text-neutral-400">
-                          {t.collections.shared}
-                        </span>
-                      )}
-                    </span>
-                    <span
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[10px] ${
-                        memberIds.has(c.id)
-                          ? "border-accent-600 bg-accent-600 text-white"
-                          : "border-neutral-300 dark:border-neutral-700"
-                      }`}
+                collections.map((c) => {
+                  const isMember = memberIds.has(c.id);
+                  return (
+                    <div
+                      key={c.id}
+                      className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md px-2"
                     >
-                      {memberIds.has(c.id) ? "✓" : ""}
-                    </span>
-                  </button>
-                ))
+                      <span className="truncate text-left text-sm">
+                        {c.name}
+                        {c.is_shared && (
+                          <span className="text-2xs ml-1.5 text-neutral-400">
+                            {t.collections.shared}
+                          </span>
+                        )}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleMembership(c.id)}
+                        className={`text-2xs flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 font-semibold transition-colors ${
+                          isMember
+                            ? "bg-accent-600 text-white"
+                            : "border border-neutral-300 text-neutral-600 hover:border-accent-600 hover:text-accent-600 dark:border-neutral-700 dark:text-neutral-400"
+                        }`}
+                      >
+                        {isMember && (
+                          <span
+                            className={justAddedId === c.id ? "animate-pop" : ""}
+                          >
+                            ✓
+                          </span>
+                        )}
+                        {isMember ? t.collections.added : t.collections.add}
+                      </button>
+                    </div>
+                  );
+                })
               )}
             </div>
 

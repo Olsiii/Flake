@@ -6,7 +6,8 @@ import { Pagination } from "@/components/pagination";
 import { ScoreBar } from "@/components/score-bar";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SITE_URL } from "@/lib/site";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getServerLocale } from "@/i18n/server";
+import { localize, localizeList } from "@/lib/localize";
 import {
   NEIGHBORHOOD_PAGE_SIZE,
   getNeighborhoodBySlug,
@@ -52,7 +53,15 @@ export default async function NeighborhoodPage({
   const { city: citySlug, slug } = await params;
   const neighborhood = await getNeighborhoodBySlug(citySlug, slug);
   if (!neighborhood) notFound();
-  const t = await getDictionary();
+  const [t, locale] = await Promise.all([getDictionary(), getServerLocale()]);
+  const description = neighborhood.description
+    ? localize(neighborhood.description, neighborhood.description_sq, locale)
+    : null;
+  const localInsights = localizeList(
+    neighborhood.local_insights,
+    neighborhood.local_insights_sq,
+    locale,
+  );
 
   const page = parsePage((await searchParams).page);
   const { listings, totalCount } = await getNeighborhoodListings(
@@ -69,7 +78,7 @@ export default async function NeighborhoodPage({
     "@context": "https://schema.org",
     "@type": "Place",
     name: neighborhood.name,
-    description: neighborhood.description ?? undefined,
+    description: description ?? undefined,
     url: `${SITE_URL}/neighborhoods/${citySlug}/${slug}`,
     address: {
       "@type": "PostalAddress",
@@ -115,9 +124,9 @@ export default async function NeighborhoodPage({
       <p className="mt-1 text-neutral-500">
         {neighborhood.city}, {neighborhood.state}
       </p>
-      {neighborhood.description && (
+      {description && (
         <p className="mt-4 max-w-3xl text-neutral-700 dark:text-neutral-300">
-          {neighborhood.description}
+          {description}
         </p>
       )}
 
@@ -138,9 +147,9 @@ export default async function NeighborhoodPage({
         )}
       </div>
 
-      {neighborhood.local_insights.length > 0 && (
+      {localInsights.length > 0 && (
         <ul className="mt-6 max-w-2xl space-y-1.5 text-sm text-neutral-700 dark:text-neutral-300">
-          {neighborhood.local_insights.map((insight) => (
+          {localInsights.map((insight) => (
             <li key={insight} className="flex gap-2">
               <span className="text-accent-600 dark:text-accent-400">•</span>
               {insight}

@@ -13,7 +13,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:migrate": "tsx scripts/migrate.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "backfill-translations": "tsx scripts/backfill-translations.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",

@@ -2,14 +2,23 @@ import Link from "next/link";
 import type { Neighborhood } from "@/types/listing";
 import { ScoreBar } from "@/components/score-bar";
 import { slugify } from "@/lib/slug";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getServerLocale } from "@/i18n/server";
+import { localize, localizeList } from "@/lib/localize";
 
 export async function NeighborhoodCard({
   neighborhood,
 }: {
   neighborhood: Neighborhood;
 }) {
-  const t = await getDictionary();
+  const [t, locale] = await Promise.all([getDictionary(), getServerLocale()]);
+  const description = neighborhood.description
+    ? localize(neighborhood.description, neighborhood.description_sq, locale)
+    : null;
+  const localInsights = localizeList(
+    neighborhood.local_insights,
+    neighborhood.local_insights_sq,
+    locale,
+  );
 
   return (
     <section className="card p-4">
@@ -22,9 +31,9 @@ export async function NeighborhoodCard({
           {t.listing.fullGuide}
         </Link>
       </div>
-      {neighborhood.description && (
+      {description && (
         <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-          {neighborhood.description}
+          {description}
         </p>
       )}
 
@@ -45,9 +54,9 @@ export async function NeighborhoodCard({
         )}
       </div>
 
-      {neighborhood.local_insights.length > 0 && (
+      {localInsights.length > 0 && (
         <ul className="mt-4 space-y-1.5 text-sm text-neutral-700 dark:text-neutral-300">
-          {neighborhood.local_insights.map((insight) => (
+          {localInsights.map((insight) => (
             <li key={insight} className="flex gap-2">
               <span className="text-accent-600 dark:text-accent-400">•</span>
               {insight}

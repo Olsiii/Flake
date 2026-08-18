@@ -91,7 +91,15 @@ function SearchClientInner() {
   }, []);
 
   return (
-    <div className="flex h-dvh flex-col">
+    // #main-content's height is content-driven (it has to be, so pages
+    // with more than one screen of content still scroll normally) — it
+    // does NOT shrink to "the space left below the navbar" the way a
+    // flex-1 child normally would. So this page can't rely on h-full
+    // here; it has to independently derive its own available height from
+    // the viewport, minus TopNavbar's rendered height (h-24 + its 3px
+    // accent bar + 1px border = 6.25rem) and, on mobile only, the fixed
+    // MobileTabBar's reserved pb-16 (4rem) — see layout.tsx.
+    <div className="flex h-[calc(100dvh-6.25rem-4rem)] flex-col sm:h-[calc(100dvh-6.25rem)]">
       {/* This is a dense map/list layout with no room for a visible page
           title — sr-only so the page still has exactly one real h1 for
           accessibility and SEO. */}
@@ -142,10 +150,16 @@ function SearchClientInner() {
         </div>
       </div>
 
+      {/* bottom-20 (5rem) alone doesn't clear the MobileTabBar on devices
+          with a large safe-area-inset-bottom (home indicator) — the tab
+          bar's own height is ~3.5rem plus that inset, so this button's
+          edge could sit behind/under it. Add the inset explicitly so it
+          always clears the tab bar with a consistent gap. */}
       <button
         type="button"
         onClick={() => setMobileView((v) => (v === "list" ? "map" : "list"))}
-        className="fixed bottom-20 left-1/2 z-10 flex min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full bg-neutral-900 px-5 text-sm font-medium text-white shadow-lg md:hidden dark:bg-white dark:text-neutral-900"
+        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+        className="fixed left-1/2 z-10 flex min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full bg-neutral-900 px-5 text-sm font-medium text-white shadow-lg md:hidden dark:bg-white dark:text-neutral-900"
       >
         {mobileView === "list" ? t.search.mapView : t.search.listView}
       </button>

@@ -64,6 +64,9 @@ export function CollectionsTab() {
           {c.is_shared && (
             <span className="text-2xs text-neutral-400">{t.dashboard.shared}</span>
           )}
+          <Link href={`/collections/${c.id}`} className="btn-sm btn-secondary">
+            {t.dashboard.view}
+          </Link>
           <button
             type="button"
             onClick={() => handleDelete(c.id)}

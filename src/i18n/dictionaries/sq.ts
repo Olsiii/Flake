@@ -344,6 +344,7 @@ export const sq: Dictionary = {
     noTourRequestsDesc:
       "Kërko një vizitë nga çdo faqe shpalljeje dhe do të shfaqet këtu.",
     startBrowsing: "Fillo të shfletosh",
+    view: "Shiko",
     delete: "Fshi",
     deleteCollectionConfirm: "Të fshihet ky koleksion?",
     deleteSearchConfirm: "Të fshihet ky kërkim i ruajtur?",
@@ -384,6 +385,8 @@ export const sq: Dictionary = {
     loading: "Duke u ngarkuar…",
     addToCollectionTitle: "Shto në Koleksion",
     couldntCreate: "Nuk mundëm ta krijojmë koleksionin",
+    add: "Shto",
+    added: "U shtua",
   },
   cities: {
     homesForSaleIn: "Shtëpi në Shitje në {city}, {state}",

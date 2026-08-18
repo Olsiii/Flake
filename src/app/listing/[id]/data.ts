@@ -47,7 +47,7 @@ export async function getListingDetail(
       ? supabase
           .from("neighborhoods")
           .select(
-            "id, name, city, state, slug, description, crime_score, walk_score, local_insights",
+            "id, name, city, state, slug, description, description_sq, crime_score, walk_score, local_insights, local_insights_sq",
           )
           .eq("id", listing.neighborhood_id)
           .maybeSingle()
@@ -68,6 +68,7 @@ export async function getListingDetail(
     mls_id: listing.mls_id,
     title: listing.title,
     description: listing.description,
+    description_sq: listing.description_sq,
     price: Number(listing.price),
     status: listing.status,
     property_type: listing.property_type,

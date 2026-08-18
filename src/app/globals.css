@@ -156,13 +156,19 @@ body {
   }
 
   /* Forms */
+  /* text-base, not text-sm: any input/textarea under 16px makes iOS Safari
+     auto-zoom the page on focus, which on a just-mounted or animating
+     modal (e.g. the add-to-collection dialog) desyncs the visual caret
+     from the actual text position until the next reflow — the caret
+     renders well to the right of what you've typed. 16px sidesteps the
+     zoom entirely instead of chasing the symptom. */
   .input {
-    @apply focus:border-accent-500 focus:ring-accent-500/20 block min-h-11 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-600;
+    @apply focus:border-accent-500 focus:ring-accent-500/20 block min-h-11 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-600;
   }
   /* Compact variant for dense toolbars (e.g. the search filter bar), where
      the full-width, 44px-tall .input would be too roomy. */
   .input-sm {
-    @apply focus:border-accent-500 focus:ring-accent-500/20 min-h-9 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-600;
+    @apply focus:border-accent-500 focus:ring-accent-500/20 min-h-9 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-base text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-600;
   }
   .label {
     @apply flex flex-col gap-1 text-xs font-medium text-neutral-500 dark:text-neutral-400;
@@ -186,4 +192,24 @@ body {
 }
 .mapboxgl-popup.flake-map-popup .mapboxgl-popup-tip {
   border-top-color: #fff;
+}
+
+/* One-shot confirmation pop for the add-to-collection "Added" state
+   (src/components/add-to-collection-button.tsx) — the checkbox it
+   replaced gave no feedback on whether a tap actually registered. */
+@keyframes pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-pop {
+  animation: pop 0.3s ease-out;
 }

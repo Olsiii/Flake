@@ -170,12 +170,14 @@ export function MapPinPopup({ listing, onViewDetails }: MapPinPopupProps) {
 function HeartIcon({ filled }: { filled: boolean }) {
   return (
     <svg
+      // Properly symmetric path — see the fix note in
+      // src/app/search/listing-card.tsx's HeartIcon for why.
       viewBox="0 0 24 24"
       fill={filled ? "currentColor" : "none"}
       className="h-4 w-4"
     >
       <path
-        d="M12 20s-7-4.35-9.5-8.5C.87 8.1 2.5 5 5.8 5c1.9 0 3.3 1 4.2 2.4C10.9 6 12.3 5 14.2 5c3.3 0 4.93 3.1 3.3 6.5C19 15.65 12 20 12 20Z"
+        d="M12 19C12 16 5 15 3 11C2 8 4 5 7 5C9 5 10.5 6.5 12 8C13.5 6.5 15 5 17 5C20 5 22 8 21 11C19 15 12 16 12 19Z"
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinejoin="round"
