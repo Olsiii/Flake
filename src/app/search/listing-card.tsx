@@ -1,8 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { AddToCollectionButton } from "@/components/add-to-collection-button";
 import { useLanguage } from "@/i18n/language-provider";
 import type { SearchListing } from "@/types/listing";
+
+/** Matches the `md:` breakpoint search-client.tsx uses to switch between
+ * the mobile single-pane (list/map toggle) and desktop split-pane
+ * layout — selecting a card only makes sense as "highlight it on the
+ * adjacent map" when that map is actually visible next to the list. */
+const DESKTOP_QUERY = "(min-width: 768px)";
 
 interface ListingCardProps {
   listing: SearchListing;
@@ -28,6 +35,7 @@ export function ListingCard({
   onToggleSave,
 }: ListingCardProps) {
   const { t } = useLanguage();
+  const router = useRouter();
 
   const STATUS_LABELS: Record<SearchListing["status"], string> = {
     "for-sale": t.common.statusForSale,
@@ -48,12 +56,25 @@ export function ListingCard({
     onToggleSave(listing.id);
   }
 
+  // Desktop's split list/map pane makes "select" a useful click action —
+  // it highlights the pin in the map right next to the list. On mobile,
+  // list and map are separate full-screen views a tap can't cross, so
+  // selecting there just highlighted a card with nothing visibly
+  // different next to it. Go straight to the listing instead.
+  function handleClick() {
+    if (window.matchMedia(DESKTOP_QUERY).matches) {
+      onSelect?.(listing.id);
+    } else {
+      router.push(`/listing/${listing.id}`);
+    }
+  }
+
   return (
     <div
       data-listing-id={listing.id}
       onMouseEnter={() => onHover?.(listing.id)}
       onMouseLeave={() => onHover?.(null)}
-      onClick={() => onSelect?.(listing.id)}
+      onClick={handleClick}
       className={`card group overflow-hidden transition-shadow ${
         onSelect ? "cursor-pointer" : ""
       } ${
