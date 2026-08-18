@@ -282,6 +282,13 @@ export const sq: Dictionary = {
     backHome: "Kthehu në ballinë",
     browseListings: "Shfleto shpalljet",
   },
+  error: {
+    title: "Diçka shkoi keq",
+    description:
+      "Ndodhi një gabim i papritur. Provoni përsëri, ose kthehuni në ballinë.",
+    retry: "Provo përsëri",
+    backHome: "Kthehu në ballinë",
+  },
   breadcrumbs: {
     home: "Ballina",
   },

@@ -279,6 +279,13 @@ export const en = {
     backHome: "Back to home",
     browseListings: "Browse listings",
   },
+  error: {
+    title: "Something went wrong",
+    description:
+      "An unexpected error occurred. Please try again, or head back to the homepage.",
+    retry: "Try again",
+    backHome: "Back to home",
+  },
   breadcrumbs: {
     home: "Home",
   },
