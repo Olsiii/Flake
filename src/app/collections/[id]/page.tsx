@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { CollectionDetailClient } from "./collection-detail-client";
 import { getDictionary } from "@/i18n/server";
+import { SITE_URL } from "@/lib/site";
 import type { Collection, CollectionListing } from "@/types/collection";
 
 export async function generateMetadata({
@@ -14,12 +15,39 @@ export async function generateMetadata({
   const { id } = await params;
   try {
     const supabase = await getSupabaseServer();
-    const { data } = await supabase
+    const { data: collection } = await supabase
       .from("collections")
-      .select("name")
+      .select("name, is_shared")
       .eq("id", id)
       .maybeSingle();
-    return { title: data ? data.name : "Collection" };
+    if (!collection) return { title: "Collection" };
+
+    const title = `${collection.name} | Flake`;
+
+    // Private collections are only ever visible to their signed-in owner
+    // (RLS returns no row for anyone else) — no reason to give them a
+    // social-share appearance, and they shouldn't be indexed.
+    if (!collection.is_shared) {
+      return { title, robots: { index: false, follow: false } };
+    }
+
+    const { data: items } = await supabase.rpc("get_collection_listings", {
+      p_collection_id: id,
+    });
+    const count = items?.length ?? 0;
+    const description =
+      count > 0
+        ? `A collection of ${count} ${count === 1 ? "home" : "homes"} saved on Flake — ${collection.name}.`
+        : `A saved collection on Flake — ${collection.name}.`;
+    const canonical = `${SITE_URL}/collections/${id}`;
+
+    return {
+      title,
+      description,
+      alternates: { canonical },
+      openGraph: { title, description, url: canonical, type: "website" },
+      twitter: { card: "summary_large_image", title, description },
+    };
   } catch {
     return { title: "Collection" };
   }

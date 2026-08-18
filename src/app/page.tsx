@@ -6,10 +6,12 @@ import { HomeSearchBox } from "./home-search-box";
 import { FeaturedListings } from "./featured-listings";
 import { Faq } from "@/components/faq";
 import { getDictionary } from "@/i18n/server";
+import { SITE_URL } from "@/lib/site";
 import type { SearchListing } from "@/types/listing";
 
 export const metadata: Metadata = {
   title: "Flake",
+  alternates: { canonical: SITE_URL },
 };
 
 export default async function Home() {

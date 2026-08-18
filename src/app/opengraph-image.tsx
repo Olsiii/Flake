@@ -1,20 +1,16 @@
 import { ImageResponse } from "next/og";
+import { getLogoDataUri } from "@/lib/og-logo";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/**
- * Site-wide default social share image — a placeholder generated at
- * request time (cached) until a real photo-based image is supplied, per
- * the plan confirmed in chat. Individual listing pages override this via
- * their own generateMetadata's openGraph.images (the listing's first
- * photo), so this only shows for the homepage and any page that doesn't
- * set its own. Text-only by design — Satori (the renderer behind
- * ImageResponse) only supports a limited SVG subset, and reproducing the
- * real logo mark by hand as path data risks rendering wrong; swap this
- * whole file for a static image once the real asset exists.
- */
-export default function OpengraphImage() {
+/** Site-wide default social share image. Individual routes override this
+ * via their own generateMetadata or their own opengraph-image.tsx (e.g.
+ * listing pages use the listing's first photo) — this only shows for the
+ * homepage and any page that doesn't set its own. */
+export default async function OpengraphImage() {
+  const logoSrc = await getLogoDataUri();
+
   return new ImageResponse(
     (
       <div
@@ -28,26 +24,16 @@ export default function OpengraphImage() {
           backgroundColor: "#6e2a1e",
         }}
       >
+        <img
+          src={logoSrc}
+          width={140}
+          height={140}
+          alt=""
+          style={{ borderRadius: 32 }}
+        />
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 96,
-            height: 96,
-            borderRadius: 24,
-            backgroundColor: "#fcfaf6",
-            fontSize: 56,
-            fontWeight: 700,
-            color: "#6e2a1e",
-            fontFamily: "Georgia, serif",
-          }}
-        >
-          F
-        </div>
-        <div
-          style={{
-            marginTop: 32,
+            marginTop: 28,
             fontSize: 84,
             fontWeight: 700,
             letterSpacing: 8,
@@ -60,12 +46,12 @@ export default function OpengraphImage() {
         <div
           style={{
             marginTop: 16,
-            fontSize: 30,
+            fontSize: 32,
             color: "#e2a594",
             fontFamily: "Georgia, serif",
           }}
         >
-          Find the home that actually fits.
+          Real listings across Kosovo, matched to you in minutes.
         </div>
       </div>
     ),

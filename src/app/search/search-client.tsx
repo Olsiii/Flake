@@ -92,6 +92,10 @@ function SearchClientInner() {
 
   return (
     <div className="flex h-dvh flex-col">
+      {/* This is a dense map/list layout with no room for a visible page
+          title — sr-only so the page still has exactly one real h1 for
+          accessibility and SEO. */}
+      <h1 className="sr-only">{t.search.pageHeading}</h1>
       <AiSearchBox onApply={handleAiFilters} />
       <DetectedFiltersChips
         filters={filters}

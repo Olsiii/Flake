@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 
 const DEFAULT_TITLE = "Flake";
 const DEFAULT_DESCRIPTION =
-  "Search listings, save collections, and get matched fast.";
+  "Search homes across Kosovo in plain English, save favorites to shareable collections, and get matched with the right property in minutes.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -47,6 +47,28 @@ export const metadata: Metadata = {
   },
 };
 
+const siteJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: "Flake",
+      url: SITE_URL,
+      logo: `${SITE_URL}/no-bg-flake.png`,
+    },
+    {
+      "@type": "WebSite",
+      name: "Flake",
+      url: SITE_URL,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/search?keyword={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
+
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getServerLocale();
   const t = dictionaries[locale];
@@ -57,6 +79,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(siteJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
         <a
           href="#main-content"
           className="focus:bg-accent-500 sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-md focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-neutral-950"

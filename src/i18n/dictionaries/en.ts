@@ -154,6 +154,7 @@ export const en = {
     savePreferences: "Save preferences",
   },
   search: {
+    pageHeading: "Search homes across Kosovo",
     aiPlaceholder: 'Try "3 bed house near downtown under €150k"',
     searching: "Searching…",
     search: "Search",

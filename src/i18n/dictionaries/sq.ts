@@ -156,6 +156,7 @@ export const sq: Dictionary = {
     savePreferences: "Ruaj preferencat",
   },
   search: {
+    pageHeading: "Kërko shtëpi në të gjithë Kosovën",
     aiPlaceholder: 'Provo "shtëpi 3 dhoma pranë qendrës nën €150 mijë"',
     searching: "Duke kërkuar…",
     search: "Kërko",

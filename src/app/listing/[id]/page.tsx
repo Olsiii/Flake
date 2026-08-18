@@ -29,25 +29,18 @@ export async function generateMetadata({
       `${listing.beds ?? "—"} bd, ${listing.baths ?? "—"} ba ${listing.property_type.replace("-", " ")} at ${listing.address}, ${listing.city}, ${listing.state}.`;
     const title = `${listing.title} | Flake`;
     const canonical = `${SITE_URL}/listing/${listing.id}`;
-    const ogImage = listing.images[0]?.url;
 
     return {
       title,
       description,
       alternates: { canonical },
-      openGraph: {
-        title,
-        description,
-        url: canonical,
-        type: "website",
-        ...(ogImage ? { images: [{ url: ogImage }] } : {}),
-      },
-      twitter: {
-        card: "summary_large_image",
-        title,
-        description,
-        ...(ogImage ? { images: [ogImage] } : {}),
-      },
+      // No `images` override here — this segment's own opengraph-image.tsx
+      // (a cropped, normalized 1200x630 version of the listing's first
+      // photo) supplies it automatically. Setting `images` explicitly
+      // would take priority over that file-convention route and put the
+      // raw, wrong-aspect-ratio photo URL back in its place.
+      openGraph: { title, description, url: canonical, type: "website" },
+      twitter: { card: "summary_large_image", title, description },
     };
   } catch {
     return { title: "Listing" };
