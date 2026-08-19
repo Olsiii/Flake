@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { isRateLimited } from "@/lib/rate-limit";
+import { isGloballyRateLimited, isRateLimited } from "@/lib/rate-limit";
+import { serverErrorResponse } from "@/lib/api-error";
 
 const VALUATION_TTL_MS = 24 * 60 * 60 * 1000;
 const COMP_RADIUS_MILES = 10;
@@ -32,10 +33,7 @@ export async function GET(
   try {
     return await computeValuation(request, await params);
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unexpected error" },
-      { status: 500 },
-    );
+    return serverErrorResponse("Failed to compute valuation", err);
   }
 }
 
@@ -49,13 +47,24 @@ async function computeValuation(request: Request, { id }: { id: string }) {
   // force=true requests took the table from 1 row to 9 with zero
   // throttling. force gets its own tighter limit on top of the general
   // one since it's the expensive, state-mutating path.
-  if (isRateLimited(request, "valuation", 30, 10 * 60 * 1000)) {
+  if (
+    isRateLimited(request, "valuation", 30, 10 * 60 * 1000) ||
+    isGloballyRateLimited("valuation", 300, 10 * 60 * 1000)
+  ) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
       { status: 429 },
     );
   }
-  if (force && isRateLimited(request, "valuation-force", 3, 10 * 60 * 1000)) {
+  // valuation-force is the expensive, state-mutating path (real PostGIS
+  // query + a `valuations` insert), so it gets a tighter global backstop
+  // on top of the per-IP one — see rate-limit.ts's clientIp() doc comment
+  // for why per-IP alone is bypassable.
+  if (
+    force &&
+    (isRateLimited(request, "valuation-force", 3, 10 * 60 * 1000) ||
+      isGloballyRateLimited("valuation-force", 20, 10 * 60 * 1000))
+  ) {
     return NextResponse.json(
       { error: "Too many recalculation requests. Please try again later." },
       { status: 429 },
@@ -71,7 +80,7 @@ async function computeValuation(request: Request, { id }: { id: string }) {
     .maybeSingle();
 
   if (listingError) {
-    return NextResponse.json({ error: listingError.message }, { status: 500 });
+    return serverErrorResponse("Failed to look up listing for valuation", listingError);
   }
   if (!listing) {
     return NextResponse.json({ error: "Listing not found" }, { status: 404 });
@@ -95,7 +104,7 @@ async function computeValuation(request: Request, { id }: { id: string }) {
       .maybeSingle();
 
     if (cachedError) {
-      return NextResponse.json({ error: cachedError.message }, { status: 500 });
+      return serverErrorResponse("Failed to read cached valuation", cachedError);
     }
     if (
       cached &&
@@ -122,7 +131,7 @@ async function computeValuation(request: Request, { id }: { id: string }) {
   );
 
   if (compsError) {
-    return NextResponse.json({ error: compsError.message }, { status: 500 });
+    return serverErrorResponse("Failed to compute comps for valuation", compsError);
   }
   if (!comps || comps.length < MIN_COMPS) {
     return NextResponse.json({
@@ -152,7 +161,7 @@ async function computeValuation(request: Request, { id }: { id: string }) {
     calculated_at: calculatedAt,
   });
   if (insertError) {
-    return NextResponse.json({ error: insertError.message }, { status: 500 });
+    return serverErrorResponse("Failed to store computed valuation", insertError);
   }
 
   return NextResponse.json({

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getResendClient, getResendFrom } from "@/lib/resend";
+import { serverErrorResponse } from "@/lib/api-error";
 import { extractFiltersAndBounds } from "@/app/search/url-state";
 import type { ListingFilters, SearchListing } from "@/types/listing";
 
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
     .neq("alert_frequency", "off");
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverErrorResponse("Failed to load saved searches for cron", error);
   }
 
   const now = Date.now();

@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Flake
 
-## Getting Started
+A real estate listings app built with Next.js (App Router), Supabase (Postgres + Auth + Storage), Mapbox, Resend, and the Anthropic API for natural-language search.
 
-First, run the development server:
+## Before you write any code
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This repo pins a Next.js version with breaking API/convention changes from what most models were trained on. Read `AGENTS.md` first — it points at the version-specific docs under `node_modules/next/dist/docs/`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Getting started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Install dependencies:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   pnpm install
+   ```
 
-## Learn More
+2. Copy `.env.local.example` to `.env.local` and fill in the values — each var is documented inline (Supabase project keys, Mapbox token, Resend API key, Anthropic key, admin password, etc.). Most features degrade gracefully when a given key is missing (e.g. AI search falls back to keyword matching without `ANTHROPIC_API_KEY`), but Supabase vars are required for the app to run at all.
 
-To learn more about Next.js, take a look at the following resources:
+3. Apply database migrations (requires `DATABASE_URL` from the Supabase dashboard):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   pnpm db:migrate
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. (Optional) Seed demo data:
 
-## Deploy on Vercel
+   ```bash
+   pnpm seed
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. Run the dev server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   pnpm dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000).
+
+## Scripts
+
+- `pnpm dev` / `pnpm build` / `pnpm start` — Next.js dev, build, and prod server
+- `pnpm lint` / `pnpm typecheck` — ESLint and `tsc --noEmit`
+- `pnpm test` — Vitest
+- `pnpm format` / `pnpm format:check` — Prettier
+- `pnpm db:migrate` — apply `supabase/migrations/*.sql` via `scripts/migrate.ts` (no Supabase CLI needed)
+- `pnpm seed` — populate demo listings/agents via `scripts/seed.ts`
+- `pnpm backfill-translations` — one-off batch job to backfill AI-translated content (see `src/lib/translate.ts`)
+
+## Project layout
+
+- `src/app` — routes, pages, and API handlers (App Router)
+- `src/components` — shared UI components
+- `src/lib` — server-side utilities (Supabase clients, auth, email, rate limiting, i18n helpers)
+- `src/i18n` — static UI-string dictionaries (en/sq)
+- `src/types` — shared TypeScript types
+- `supabase/migrations` — SQL migrations, applied in order by `scripts/migrate.ts`
+- `legal` — source markdown for the privacy policy, terms, and cookie policy pages
+
+## Admin
+
+`/admin` is gated by a single shared password (`ADMIN_PASSWORD`) rather than per-user accounts — see `src/lib/admin-auth.ts` for the rationale.

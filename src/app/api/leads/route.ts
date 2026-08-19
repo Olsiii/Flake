@@ -1,6 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { isRateLimited } from "@/lib/rate-limit";
+import { isGloballyRateLimited, isRateLimited } from "@/lib/rate-limit";
+import { serverErrorResponse } from "@/lib/api-error";
 import { brandedEmailHtml, escapeHtml } from "@/lib/email-template";
 import {
   getAgentNotificationEmail,
@@ -27,7 +28,14 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(request: Request) {
-  if (isRateLimited(request, "leads", 5, 10 * 60 * 1000)) {
+  // Per-IP first, then a global backstop that ignores headers entirely —
+  // without it, an attacker can rotate X-Forwarded-For to drive unlimited
+  // DB writes and Resend sends (see rate-limit.ts's clientIp() doc comment
+  // for why the per-IP check alone is bypassable).
+  if (
+    isRateLimited(request, "leads", 5, 10 * 60 * 1000) ||
+    isGloballyRateLimited("leads", 60, 10 * 60 * 1000)
+  ) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
       { status: 429 },
@@ -64,13 +72,10 @@ export async function POST(request: Request) {
       utm_content: body.utm_content || null,
     });
     if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
+      return serverErrorResponse("Failed to insert lead", insertError);
     }
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unexpected error" },
-      { status: 500 },
-    );
+    return serverErrorResponse("Failed to create lead", err);
   }
 
   // Best-effort: a lead is captured either way, email delivery shouldn't

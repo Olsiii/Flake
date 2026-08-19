@@ -1,7 +1,8 @@
 import { NextResponse, after } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getSupabaseServer } from "@/lib/supabase-server";
-import { isRateLimited } from "@/lib/rate-limit";
+import { isGloballyRateLimited, isRateLimited } from "@/lib/rate-limit";
+import { serverErrorResponse } from "@/lib/api-error";
 import { brandedEmailHtml, escapeHtml } from "@/lib/email-template";
 import {
   getAgentNotificationEmail,
@@ -27,7 +28,12 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(request: Request) {
-  if (isRateLimited(request, "tour-requests", 5, 10 * 60 * 1000)) {
+  // See src/app/api/leads/route.ts for why the global backstop is needed
+  // alongside the per-IP check.
+  if (
+    isRateLimited(request, "tour-requests", 5, 10 * 60 * 1000) ||
+    isGloballyRateLimited("tour-requests", 60, 10 * 60 * 1000)
+  ) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
       { status: 429 },
@@ -86,9 +92,9 @@ export async function POST(request: Request) {
       .eq("id", body.listingId)
       .maybeSingle();
     if (listingError) {
-      return NextResponse.json(
-        { error: listingError.message },
-        { status: 500 },
+      return serverErrorResponse(
+        "Failed to look up listing for tour request",
+        listingError,
       );
     }
     if (!listing) {
@@ -111,13 +117,10 @@ export async function POST(request: Request) {
       utm_content: body.utm_content || null,
     });
     if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
+      return serverErrorResponse("Failed to insert tour request", insertError);
     }
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unexpected error" },
-      { status: 500 },
-    );
+    return serverErrorResponse("Failed to create tour request", err);
   }
 
   // See src/app/api/leads/route.ts for why this needs `after()` and can't
