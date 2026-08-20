@@ -5,7 +5,28 @@ import type {
   ListingDetail,
   ListingImage,
   Neighborhood,
+  SearchListing,
 } from "@/types/listing";
+
+const SIMILAR_LISTINGS_LIMIT = 6;
+
+/** Same neighborhood first, then same city, ordered by price closeness —
+ * see similar_listings' migration comment. Never throws: a listing page
+ * shouldn't 500 because the "similar listings" shelf failed to load. */
+export async function getSimilarListings(
+  listingId: string,
+): Promise<SearchListing[]> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.rpc("similar_listings", {
+    p_listing_id: listingId,
+    p_limit: SIMILAR_LISTINGS_LIMIT,
+  });
+  if (error) {
+    console.error("getSimilarListings failed", error);
+    return [];
+  }
+  return (data ?? []) as SearchListing[];
+}
 
 /**
  * Composes a listing detail from four tables, joining neighborhoods via

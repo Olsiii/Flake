@@ -12,6 +12,7 @@ import { config } from "dotenv";
 import { faker } from "@faker-js/faker";
 import { getSupabaseAdmin } from "../src/lib/supabase-admin";
 import { slugify } from "../src/lib/slug";
+import { formatNumber } from "../src/lib/format";
 
 config({ path: ".env.local" });
 
@@ -624,6 +625,55 @@ function roundToHalf(n: number): number {
   return Math.round(n * 2) / 2;
 }
 
+const PROPERTY_TYPE_LABEL_SQ = {
+  house: "shtëpi",
+  apartment: "banesë",
+  office: "zyrë",
+  land: "tokë",
+} as const;
+
+/** Short, factual EN/SQ descriptions (beds/baths/size/location) instead of
+ * Faker Latin lorem ipsum, which reads as obviously fake filler text. */
+function buildDescriptions(params: {
+  propertyType: (typeof PROPERTY_TYPES)[number];
+  beds: number | null;
+  baths: number | null;
+  sqft: number | null;
+  lotSize: number | null;
+  yearBuilt: number | null;
+  neighborhood: string;
+  city: string;
+  hasGarageStorage: boolean;
+}): { en: string; sq: string } {
+  const { propertyType, beds, baths, sqft, lotSize, yearBuilt, neighborhood, city, hasGarageStorage } = params;
+  const isLand = propertyType === "land";
+  const isOffice = propertyType === "office";
+  const yearEn = yearBuilt ? `, built in ${yearBuilt}` : "";
+  const yearSq = yearBuilt ? `, ndërtuar në ${yearBuilt}` : "";
+
+  if (isLand) {
+    return {
+      en: `A ${formatNumber(lotSize!)} m² parcel of land in ${neighborhood}, ${city}, ready for a new build or investment.`,
+      sq: `Parcelë tokë prej ${formatNumber(lotSize!)} m² në ${neighborhood}, ${city}, gati për ndërtim të ri ose investim.`,
+    };
+  }
+
+  if (isOffice) {
+    return {
+      en: `A ${formatNumber(sqft!)} m² office space in ${neighborhood}, ${city}${yearEn}, suited for a small business or professional practice.`,
+      sq: `Hapësirë zyre prej ${formatNumber(sqft!)} m² në ${neighborhood}, ${city}${yearSq}, e përshtatshme për biznes të vogël ose praktikë profesionale.`,
+    };
+  }
+
+  const garageEn = hasGarageStorage ? " Includes a storage room in the garage." : "";
+  const garageSq = hasGarageStorage ? " Përfshin depo në garazh." : "";
+
+  return {
+    en: `A ${beds}-bedroom, ${baths}-bathroom ${propertyType} spanning ${formatNumber(sqft!)} m² in ${neighborhood}, ${city}${yearEn}.${garageEn}`,
+    sq: `Një ${PROPERTY_TYPE_LABEL_SQ[propertyType]} me ${beds} dhoma gjumi dhe ${baths} banjo, me sipërfaqe ${formatNumber(sqft!)} m² në ${neighborhood}, ${city}${yearSq}.${garageSq}`,
+  };
+}
+
 function buildAgent(a: (typeof AGENTS)[number]) {
   return {
     name: a.name,
@@ -682,13 +732,26 @@ function buildListing(agentId: string, cityInfo: (typeof CITIES)[number]) {
 
   const isHotHome = false; // assigned after generation, on a random subset
   const daysOnMarket = faker.number.int({ min: 1, max: 180 });
+  const hasGarageStorage = Math.random() < 0.5;
 
   const propertyTypeLabel = propertyType.replace("-", " ");
   const title = isLand
-    ? `${lotSize!.toLocaleString()} m² Lot in ${cityInfo.neighborhood}, ${cityInfo.city}`
+    ? `${formatNumber(lotSize!)} m² Lot in ${cityInfo.neighborhood}, ${cityInfo.city}`
     : isOffice
-      ? `${sqft!.toLocaleString()} m² Office in ${cityInfo.neighborhood}`
+      ? `${formatNumber(sqft!)} m² Office in ${cityInfo.neighborhood}`
       : `${beds} Bed, ${baths} Bath ${propertyTypeLabel} in ${cityInfo.neighborhood}`;
+
+  const descriptions = buildDescriptions({
+    propertyType,
+    beds,
+    baths,
+    sqft,
+    lotSize,
+    yearBuilt,
+    neighborhood: cityInfo.neighborhood,
+    city: cityInfo.city,
+    hasGarageStorage,
+  });
 
   // Prishtina's neighborhoods are each only a few hundred meters to ~1-2km
   // across, so a tight jitter keeps listings inside their named area —
@@ -702,7 +765,8 @@ function buildListing(agentId: string, cityInfo: (typeof CITIES)[number]) {
       Math.random() < 0.3 ? faker.string.alphanumeric(10).toUpperCase() : null,
     agent_id: agentId,
     title,
-    description: faker.lorem.paragraphs({ min: 2, max: 3 }, "\n\n"),
+    description: descriptions.en,
+    description_sq: descriptions.sq,
     price,
     status,
     property_type: propertyType,
@@ -719,7 +783,7 @@ function buildListing(agentId: string, cityInfo: (typeof CITIES)[number]) {
     hoa_fee: hoaFee,
     days_on_market: daysOnMarket,
     is_hot_home: isHotHome,
-    has_garage_storage: Math.random() < 0.5,
+    has_garage_storage: hasGarageStorage,
     neighborhoodName: cityInfo.neighborhood,
   };
 }

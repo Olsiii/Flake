@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getListingDetail } from "./data";
+import { getListingDetail, getSimilarListings } from "./data";
 import { Gallery } from "./gallery";
 import { ListingSummary } from "./listing-summary";
 import { ValuationCard } from "./valuation-card";
@@ -8,6 +8,7 @@ import { ListingDescription } from "./listing-description";
 import { NeighborhoodCard } from "./neighborhood-card";
 import { AgentCard } from "./agent-card";
 import { MobileContactBar } from "./mobile-contact-bar";
+import { SimilarListings } from "./similar-listings";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { BackToTop } from "@/components/back-to-top";
 import { SITE_URL } from "@/lib/site";
@@ -73,6 +74,8 @@ export default async function ListingPage({
   }
 
   if (!listing) notFound();
+
+  const similarListings = await getSimilarListings(listing.id);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -159,23 +162,27 @@ export default async function ListingPage({
         <Gallery images={listing.images} title={listing.title} />
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-8 pb-28 lg:pb-8 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
-          <div className="flex min-w-0 flex-col gap-8">
-            <ValuationCard listingId={listing.id} />
-            <ListingDescription listing={listing} />
-            {listing.neighborhood && (
-              <NeighborhoodCard neighborhood={listing.neighborhood} />
-            )}
-          </div>
+      <div className="pb-28 lg:pb-8">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+            <div className="flex min-w-0 flex-col gap-8">
+              <ValuationCard listingId={listing.id} />
+              <ListingDescription listing={listing} />
+              {listing.neighborhood && (
+                <NeighborhoodCard neighborhood={listing.neighborhood} />
+              )}
+            </div>
 
-          <div className="flex min-w-0 flex-col gap-6 lg:sticky lg:top-6">
-            <ListingSummary listing={listing} />
-            {listing.agent && (
-              <AgentCard agent={listing.agent} listingId={listing.id} />
-            )}
+            <div className="flex min-w-0 flex-col gap-6 lg:sticky lg:top-6">
+              <ListingSummary listing={listing} />
+              {listing.agent && (
+                <AgentCard agent={listing.agent} listingId={listing.id} />
+              )}
+            </div>
           </div>
         </div>
+
+        <SimilarListings listings={similarListings} />
       </div>
 
       {listing.agent && <MobileContactBar />}

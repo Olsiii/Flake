@@ -86,6 +86,10 @@ export const AI_DETECTABLE_FILTER_KEYS = [
   "propertyTypes",
   "minSqft",
   "maxSqft",
+  "minYearBuilt",
+  "maxYearBuilt",
+  "hoaAllowed",
+  "garageStorage",
   "city",
   "keyword",
 ] as const;

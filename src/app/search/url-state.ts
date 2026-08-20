@@ -177,6 +177,24 @@ export function describeDetectedFilter(
             `${formatNumber(filters.maxSqft)} m²`,
           )
         : null;
+    case "minYearBuilt":
+      return filters.minYearBuilt != null
+        ? t.search.summaryYearBuiltFrom.replace(
+            "{year}",
+            String(filters.minYearBuilt),
+          )
+        : null;
+    case "maxYearBuilt":
+      return filters.maxYearBuilt != null
+        ? t.search.summaryYearBuiltTo.replace(
+            "{year}",
+            String(filters.maxYearBuilt),
+          )
+        : null;
+    case "hoaAllowed":
+      return !filters.hoaAllowed ? t.search.summaryNoBuildingFee : null;
+    case "garageStorage":
+      return filters.garageStorage ? t.search.summaryGarageStorage : null;
     case "city":
       return filters.city;
     case "keyword":

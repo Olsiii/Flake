@@ -90,6 +90,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: CitySummary[];
       };
+      similar_listings: {
+        Args: { p_listing_id: string; p_limit?: number };
+        Returns: SearchListing[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
