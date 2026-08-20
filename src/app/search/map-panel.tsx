@@ -9,6 +9,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import { MapPinPopup } from "@/components/map-pin-popup";
 import { useLanguage } from "@/i18n/language-provider";
+import { formatNumber } from "@/lib/format";
 import type { MapBounds, SearchListing } from "@/types/listing";
 
 const SOURCE_ID = "listings";
@@ -41,8 +42,8 @@ function toFeatureCollection(
         id: l.id,
         priceLabel:
           l.status === "for-rent"
-            ? `€${Math.round(l.price).toLocaleString()}/mo`
-            : `€${Math.round(l.price).toLocaleString()}`,
+            ? `€${formatNumber(Math.round(l.price))}/mo`
+            : `€${formatNumber(Math.round(l.price))}`,
       },
     })),
   };

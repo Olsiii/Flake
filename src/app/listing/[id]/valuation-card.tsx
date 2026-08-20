@@ -3,12 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Skeleton } from "@/components/skeleton";
 import { useLanguage } from "@/i18n/language-provider";
-
-const priceFormatter = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
+import { priceFormatter } from "@/lib/format";
 
 interface ValuationState {
   status: "loading" | "unavailable" | "error" | "ready";

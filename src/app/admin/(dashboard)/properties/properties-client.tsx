@@ -3,12 +3,7 @@
 import { useMemo, useState } from "react";
 import type { AdminAgentOption, AdminPropertyRow } from "./page";
 import { PropertyModal } from "./property-modal";
-
-const priceFormatter = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
+import { priceFormatter } from "@/lib/format";
 
 function subtitle(row: AdminPropertyRow): string {
   const parts = [

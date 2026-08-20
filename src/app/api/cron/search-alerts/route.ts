@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getResendClient, getResendFrom } from "@/lib/resend";
 import { serverErrorResponse } from "@/lib/api-error";
 import { extractFiltersAndBounds } from "@/app/search/url-state";
+import { priceFormatter } from "@/lib/format";
 import type { ListingFilters, SearchListing } from "@/types/listing";
 
 export const maxDuration = 60;
@@ -170,12 +171,6 @@ async function sendDigestEmail({
 }): Promise<boolean> {
   const resend = getResendClient();
   if (!resend) return false;
-
-  const priceFormatter = new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  });
 
   const lines = listings
     .slice(0, 20)

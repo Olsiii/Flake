@@ -1,15 +1,10 @@
 import { AddToCollectionButton } from "@/components/add-to-collection-button";
 import { getDictionary, getServerLocale } from "@/i18n/server";
 import { SITE_URL } from "@/lib/site";
+import { formatNumber, priceFormatter } from "@/lib/format";
 import type { ListingDetail } from "@/types/listing";
 import { ShareButton } from "./share-button";
 import { ListingMap } from "./listing-map";
-
-const priceFormatter = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
 
 export async function ListingSummary({ listing }: { listing: ListingDetail }) {
   const [t, locale] = await Promise.all([getDictionary(), getServerLocale()]);
@@ -56,9 +51,7 @@ export async function ListingSummary({ listing }: { listing: ListingDetail }) {
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-700 dark:text-neutral-300">
         {listing.beds != null && <span>{listing.beds} {t.listing.beds}</span>}
         {listing.baths != null && <span>{listing.baths} {t.listing.baths}</span>}
-        {listing.sqft != null && (
-          <span>{listing.sqft.toLocaleString()} m²</span>
-        )}
+        {listing.sqft != null && <span>{formatNumber(listing.sqft)} m²</span>}
         <span>{STATUS_LABELS[listing.status]}</span>
         <span>{listing.days_on_market} {t.listing.daysOnMarket}</span>
       </div>

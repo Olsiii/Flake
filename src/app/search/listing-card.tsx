@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { AddToCollectionButton } from "@/components/add-to-collection-button";
 import { useLanguage } from "@/i18n/language-provider";
+import { formatNumber, priceFormatter } from "@/lib/format";
 import type { SearchListing } from "@/types/listing";
 
 /** Matches the `md:` breakpoint search-client.tsx uses to switch between
@@ -19,12 +20,6 @@ interface ListingCardProps {
   onSelect?: (id: string) => void;
   onToggleSave: (id: string) => void;
 }
-
-const priceFormatter = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
 
 export function ListingCard({
   listing,
@@ -138,7 +133,7 @@ export function ListingCard({
         <div className="mt-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">
           {listing.beds != null && `${listing.beds} ${t.search.bedsAbbrev}`}
           {listing.baths != null && ` · ${listing.baths} ${t.search.bathsAbbrev}`}
-          {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} m²`}
+          {listing.sqft != null && ` · ${formatNumber(listing.sqft)} m²`}
         </div>
         <div className="mt-1.5 truncate text-xs text-neutral-500">
           {listing.address}, {listing.city}, {listing.state}

@@ -7,12 +7,7 @@ import { ContactAgentForm } from "@/components/contact-agent-form";
 import { useLanguage } from "@/i18n/language-provider";
 import type { Dictionary } from "@/i18n/dictionaries/en";
 import type { SearchListing } from "@/types/listing";
-
-const priceFormatter = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
+import { priceFormatter } from "@/lib/format";
 
 function formatPrice(listing: SearchListing, t: Dictionary): string {
   const formatted = priceFormatter.format(listing.price);
