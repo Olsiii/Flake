@@ -10,8 +10,8 @@ export const QUIZ_REASONS = [
 export type QuizReason = (typeof QUIZ_REASONS)[number];
 
 export const QUIZ_AMENITIES = [
-  { value: "no-hoa", label: "No HOA" },
   { value: "garage", label: "Garage" },
+  { value: "garage-storage", label: "Storage room in garage" },
   { value: "pool", label: "Pool" },
   { value: "new-construction", label: "New construction" },
   { value: "move-in-ready", label: "Move-in ready" },
@@ -23,6 +23,8 @@ export interface QuizAnswers {
   maxPrice: number | null;
   minBeds: number | null;
   minBaths: number | null;
+  minSqft: number | null;
+  maxSqft: number | null;
   propertyTypes: PropertyType[];
   reason: QuizReason | null;
   city: string;
@@ -34,6 +36,8 @@ export const DEFAULT_QUIZ_ANSWERS: QuizAnswers = {
   maxPrice: null,
   minBeds: null,
   minBaths: null,
+  minSqft: null,
+  maxSqft: null,
   propertyTypes: [],
   reason: null,
   city: "",

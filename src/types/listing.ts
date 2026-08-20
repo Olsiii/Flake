@@ -51,6 +51,8 @@ export interface ListingFilters {
   minYearBuilt: number | null;
   maxYearBuilt: number | null;
   hoaAllowed: boolean;
+  /** false = don't filter; true = only listings with a garage storage room. */
+  garageStorage: boolean;
   sortBy: SortBy;
   /** Structured city match, set by AI-extracted filters. */
   city: string | null;
@@ -69,6 +71,7 @@ export const DEFAULT_FILTERS: ListingFilters = {
   minYearBuilt: null,
   maxYearBuilt: null,
   hoaAllowed: true,
+  garageStorage: false,
   sortBy: "newest",
   city: null,
   keyword: null,
@@ -162,6 +165,7 @@ export interface ListingDetail {
   hoa_fee: number | null;
   days_on_market: number;
   is_hot_home: boolean;
+  has_garage_storage: boolean;
   created_at: string;
   updated_at: string;
   images: ListingImage[];

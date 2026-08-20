@@ -10,7 +10,7 @@ import { getDictionary } from "@/i18n/server";
 import {
   CITY_PAGE_SIZE,
   getCityListings,
-  getNeighborhoodForCity,
+  getNeighborhoodsForCity,
   resolveCity,
 } from "./data";
 
@@ -53,9 +53,9 @@ export default async function CityPage({
   const t = await getDictionary();
 
   const page = parsePage((await searchParams).page);
-  const [{ listings, totalCount }, neighborhood] = await Promise.all([
+  const [{ listings, totalCount }, neighborhoods] = await Promise.all([
     getCityListings(city.city, city.state, page),
-    getNeighborhoodForCity(city.city, city.state),
+    getNeighborhoodsForCity(city.city, city.state),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / CITY_PAGE_SIZE));
@@ -81,13 +81,21 @@ export default async function CityPage({
         ).replace("{count}", String(totalCount))}
       </p>
 
-      {neighborhood && (
-        <Link
-          href={`/neighborhoods/${citySlug}/${neighborhood.slug}`}
-          className="text-accent-600 dark:text-accent-400 mt-4 inline-block text-sm font-medium hover:underline"
-        >
-          {t.cities.exploreNeighborhood.replace("{name}", neighborhood.name)}
-        </Link>
+      {neighborhoods.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+          {neighborhoods.map((neighborhood) => (
+            <Link
+              key={neighborhood.slug}
+              href={`/neighborhoods/${citySlug}/${neighborhood.slug}`}
+              className="text-accent-600 dark:text-accent-400 inline-block text-sm font-medium hover:underline"
+            >
+              {t.cities.exploreNeighborhood.replace(
+                "{name}",
+                neighborhood.name,
+              )}
+            </Link>
+          ))}
+        </div>
       )}
 
       <div className="mt-8">

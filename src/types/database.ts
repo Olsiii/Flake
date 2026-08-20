@@ -108,6 +108,7 @@ interface SearchListingsFilterArgs {
   p_min_year_built: number | null;
   p_max_year_built: number | null;
   p_hoa_allowed: boolean;
+  p_garage_storage: boolean;
   p_sort_by: SortBy;
 }
 

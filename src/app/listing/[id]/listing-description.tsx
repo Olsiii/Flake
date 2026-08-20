@@ -1,6 +1,7 @@
 import type { ListingDetail } from "@/types/listing";
 import { getDictionary, getServerLocale } from "@/i18n/server";
 import { localize } from "@/lib/localize";
+import { formatNumber } from "@/lib/format";
 
 function Fact({
   label,
@@ -55,17 +56,19 @@ export async function ListingDescription({
         />
         <Fact
           label={t.listing.lotSize}
-          value={
-            listing.lot_size ? `${listing.lot_size.toLocaleString()} m²` : "—"
-          }
+          value={listing.lot_size ? `${formatNumber(listing.lot_size)} m²` : "—"}
         />
         <Fact
           label={t.listing.buildingFee}
           value={
             listing.hoa_fee
-              ? `€${listing.hoa_fee.toLocaleString()}${t.search.perMonthSuffix}`
+              ? `€${formatNumber(listing.hoa_fee)}${t.search.perMonthSuffix}`
               : t.listing.none
           }
+        />
+        <Fact
+          label={t.listing.garageStorage}
+          value={listing.has_garage_storage ? t.common.yes : t.common.no}
         />
         {listing.mls_id && (
           <Fact label={t.listing.referenceNumber} value={listing.mls_id} />

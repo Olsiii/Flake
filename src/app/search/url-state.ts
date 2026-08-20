@@ -7,6 +7,7 @@ import {
   type SortBy,
 } from "@/types/listing";
 import type { Dictionary } from "@/i18n/dictionaries/en";
+import { formatNumber, priceFormatter } from "@/lib/format";
 
 function propertyTypeLabel(type: PropertyType, t: Dictionary): string {
   return {
@@ -40,6 +41,7 @@ export function filtersToParams(
   if (filters.maxYearBuilt != null)
     params.set("maxYearBuilt", String(filters.maxYearBuilt));
   if (!filters.hoaAllowed) params.set("hoaAllowed", "0");
+  if (filters.garageStorage) params.set("garageStorage", "1");
   if (filters.sortBy !== "newest") params.set("sortBy", filters.sortBy);
   if (filters.city) params.set("city", filters.city);
   if (filters.keyword) params.set("keyword", filters.keyword);
@@ -78,6 +80,7 @@ export function paramsToFilters(params: URLSearchParams): {
     minYearBuilt: num("minYearBuilt"),
     maxYearBuilt: num("maxYearBuilt"),
     hoaAllowed: params.get("hoaAllowed") !== "0",
+    garageStorage: params.get("garageStorage") === "1",
     sortBy: (params.get("sortBy") as SortBy) || DEFAULT_FILTERS.sortBy,
     city: params.get("city") || null,
     keyword: params.get("keyword") || null,
@@ -94,13 +97,6 @@ export function paramsToFilters(params: URLSearchParams): {
 
   return { filters, bounds };
 }
-
-export const priceFormatter = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-  notation: "compact",
-});
 
 /** Short human-readable summary of active filters, for the saved-searches list. */
 export function summarizeFilters(filters: ListingFilters, t: Dictionary): string {
@@ -129,10 +125,11 @@ export function summarizeFilters(filters: ListingFilters, t: Dictionary): string
     );
   if (filters.minSqft != null || filters.maxSqft != null) {
     parts.push(
-      `${filters.minSqft?.toLocaleString() ?? "0"}–${filters.maxSqft?.toLocaleString() ?? "∞"} m²`,
+      `${filters.minSqft != null ? formatNumber(filters.minSqft) : "0"}–${filters.maxSqft != null ? formatNumber(filters.maxSqft) : "∞"} m²`,
     );
   }
   if (!filters.hoaAllowed) parts.push(t.search.summaryNoBuildingFee);
+  if (filters.garageStorage) parts.push(t.search.summaryGarageStorage);
   if (filters.city) parts.push(filters.city);
   if (filters.keyword) parts.push(`"${filters.keyword}"`);
 
@@ -171,13 +168,13 @@ export function describeDetectedFilter(
         : null;
     case "minSqft":
       return filters.minSqft != null
-        ? `${filters.minSqft.toLocaleString()}+ m²`
+        ? `${formatNumber(filters.minSqft)}+ m²`
         : null;
     case "maxSqft":
       return filters.maxSqft != null
         ? t.search.summaryUnder.replace(
             "{value}",
-            `${filters.maxSqft.toLocaleString()} m²`,
+            `${formatNumber(filters.maxSqft)} m²`,
           )
         : null;
     case "city":

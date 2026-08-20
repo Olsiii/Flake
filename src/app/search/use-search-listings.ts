@@ -23,6 +23,7 @@ function filterParams(filters: ListingFilters) {
     p_min_year_built: filters.minYearBuilt,
     p_max_year_built: filters.maxYearBuilt,
     p_hoa_allowed: filters.hoaAllowed,
+    p_garage_storage: filters.garageStorage,
     p_sort_by: filters.sortBy,
     p_city: filters.city,
     p_keyword: filters.keyword,

@@ -37,17 +37,17 @@ export async function getCityListings(
   return { listings, totalCount: listings[0]?.total_count ?? 0 };
 }
 
-export async function getNeighborhoodForCity(
+export async function getNeighborhoodsForCity(
   city: string,
   state: string,
-): Promise<{ name: string; slug: string } | null> {
+): Promise<{ name: string; slug: string }[]> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("neighborhoods")
     .select("name, slug")
     .eq("city", city)
     .eq("state", state)
-    .maybeSingle();
+    .order("name");
   if (error) throw error;
-  return data;
+  return data ?? [];
 }

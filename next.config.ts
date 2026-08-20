@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
       ...(dynamicSupabaseHost
         ? [{ protocol: "https" as const, hostname: dynamicSupabaseHost }]
         : []),
+      // Placeholder apartment photos (scripts/seed.ts) until real listing
+      // photography replaces them.
+      { protocol: "https" as const, hostname: "images.unsplash.com" },
     ],
   },
 };

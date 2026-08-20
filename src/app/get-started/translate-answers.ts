@@ -21,9 +21,11 @@ export function translateAnswersToFilters(
     maxPrice: answers.maxPrice,
     minBeds: answers.minBeds,
     minBaths: answers.minBaths,
+    minSqft: answers.minSqft,
+    maxSqft: answers.maxSqft,
     propertyTypes: answers.propertyTypes,
     city: answers.city.trim() || null,
-    hoaAllowed: !answers.amenities.includes("no-hoa"),
+    garageStorage: answers.amenities.includes("garage-storage"),
     minYearBuilt: answers.amenities.includes("new-construction")
       ? currentYear - NEW_CONSTRUCTION_YEARS
       : null,

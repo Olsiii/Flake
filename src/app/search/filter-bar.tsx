@@ -10,7 +10,8 @@ import {
   type PropertyType,
 } from "@/types/listing";
 import { SaveSearchButton } from "./save-search-button";
-import { priceFormatter } from "./url-state";
+import { priceFormatter } from "@/lib/format";
+import { FormattedNumberInput } from "@/components/formatted-number-input";
 import { useLanguage } from "@/i18n/language-provider";
 import type { Dictionary } from "@/i18n/dictionaries/en";
 
@@ -67,7 +68,8 @@ function moreSummary(filters: ListingFilters, t: Dictionary): string | null {
     Number(filters.maxSqft != null) +
     Number(filters.minYearBuilt != null) +
     Number(filters.maxYearBuilt != null) +
-    Number(!filters.hoaAllowed);
+    Number(!filters.hoaAllowed) +
+    Number(filters.garageStorage);
   return count > 0 ? t.search.moreCount.replace("{count}", String(count)) : null;
 }
 
@@ -95,6 +97,14 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
     onChange({ ...filters, [key]: value });
   }
 
+  // Clearing more than one field at once must go through a single onChange
+  // call — calling `set()` repeatedly in a row each spreads the same stale
+  // `filters` closure, so only the last call's field actually ends up
+  // changed and the rest silently stay put.
+  function setMany(update: Partial<ListingFilters>) {
+    onChange({ ...filters, ...update });
+  }
+
   function togglePropertyType(type: PropertyType) {
     const next = filters.propertyTypes.includes(type)
       ? filters.propertyTypes.filter((pt) => pt !== type)
@@ -114,23 +124,22 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
         {(close) => (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <NumberInput
+              <FormattedNumberInput
                 placeholder={t.common.min}
                 value={filters.minPrice}
                 onChange={(v) => set("minPrice", v)}
+                className="input-sm w-full"
               />
               <span className="text-neutral-400">–</span>
-              <NumberInput
+              <FormattedNumberInput
                 placeholder={t.common.max}
                 value={filters.maxPrice}
                 onChange={(v) => set("maxPrice", v)}
+                className="input-sm w-full"
               />
             </div>
             <PillActions
-              onClear={() => {
-                set("minPrice", null);
-                set("maxPrice", null);
-              }}
+              onClear={() => setMany({ minPrice: null, maxPrice: null })}
               onDone={close}
               t={t}
             />
@@ -180,10 +189,7 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
               </label>
             </div>
             <PillActions
-              onClear={() => {
-                set("minBeds", null);
-                set("minBaths", null);
-              }}
+              onClear={() => setMany({ minBeds: null, minBaths: null })}
               onDone={close}
               t={t}
             />
@@ -235,16 +241,18 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                 {t.search.squareMeters}
               </span>
               <div className="flex items-center gap-2">
-                <NumberInput
+                <FormattedNumberInput
                   placeholder={t.common.min}
                   value={filters.minSqft}
                   onChange={(v) => set("minSqft", v)}
+                  className="input-sm w-full"
                 />
                 <span className="text-neutral-400">–</span>
-                <NumberInput
+                <FormattedNumberInput
                   placeholder={t.common.max}
                   value={filters.maxSqft}
                   onChange={(v) => set("maxSqft", v)}
+                  className="input-sm w-full"
                 />
               </div>
             </div>
@@ -288,14 +296,39 @@ export function FilterBar({ filters, bounds, onChange }: FilterBarProps) {
                 />
               </button>
             </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                {t.search.garageStorage}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={filters.garageStorage}
+                onClick={() => set("garageStorage", !filters.garageStorage)}
+                className={`relative flex h-7 w-12 shrink-0 items-center rounded-full px-1 transition-colors ${
+                  filters.garageStorage
+                    ? "bg-accent-600"
+                    : "bg-neutral-300 dark:bg-neutral-700"
+                }`}
+              >
+                <span
+                  className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                    filters.garageStorage ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
             <PillActions
-              onClear={() => {
-                set("minSqft", null);
-                set("maxSqft", null);
-                set("minYearBuilt", null);
-                set("maxYearBuilt", null);
-                set("hoaAllowed", true);
-              }}
+              onClear={() =>
+                setMany({
+                  minSqft: null,
+                  maxSqft: null,
+                  minYearBuilt: null,
+                  maxYearBuilt: null,
+                  hoaAllowed: true,
+                  garageStorage: false,
+                })
+              }
               onDone={close}
               t={t}
             />

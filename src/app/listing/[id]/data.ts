@@ -91,6 +91,7 @@ export async function getListingDetail(
       ),
     ),
     is_hot_home: listing.is_hot_home,
+    has_garage_storage: listing.has_garage_storage,
     created_at: listing.created_at,
     updated_at: listing.updated_at,
     images: (images ?? []) as ListingImage[],

@@ -12,6 +12,7 @@ import {
 } from "@/types/quiz";
 import { useUser } from "@/hooks/use-user";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
+import { FormattedNumberInput } from "@/components/formatted-number-input";
 import { filtersToParams } from "../search/url-state";
 import { translateAnswersToFilters } from "./translate-answers";
 import { useLanguage } from "@/i18n/language-provider";
@@ -50,8 +51,8 @@ export function QuizClient() {
   };
 
   const AMENITY_LABELS: Record<(typeof QUIZ_AMENITIES)[number]["value"], string> = {
-    "no-hoa": t.quiz.amenityNoHoa,
     garage: t.quiz.amenityGarage,
+    "garage-storage": t.quiz.amenityGarageStorage,
     pool: t.quiz.amenityPool,
     "new-construction": t.quiz.amenityNewConstruction,
     "move-in-ready": t.quiz.amenityMoveInReady,
@@ -108,29 +109,17 @@ export function QuizClient() {
         {step === 0 && (
           <StepShell title={t.quiz.whatsYourBudget}>
             <div className="flex items-center gap-2">
-              <input
-                type="number"
-                inputMode="numeric"
+              <FormattedNumberInput
                 placeholder={t.common.min}
-                value={answers.minPrice ?? ""}
-                onChange={(e) =>
-                  patch({
-                    minPrice: e.target.value ? Number(e.target.value) : null,
-                  })
-                }
+                value={answers.minPrice}
+                onChange={(minPrice) => patch({ minPrice })}
                 className={`${inputClass} w-28`}
               />
               <span className="text-neutral-400">–</span>
-              <input
-                type="number"
-                inputMode="numeric"
+              <FormattedNumberInput
                 placeholder={t.common.max}
-                value={answers.maxPrice ?? ""}
-                onChange={(e) =>
-                  patch({
-                    maxPrice: e.target.value ? Number(e.target.value) : null,
-                  })
-                }
+                value={answers.maxPrice}
+                onChange={(maxPrice) => patch({ maxPrice })}
                 className={`${inputClass} w-28`}
               />
             </div>
@@ -178,6 +167,24 @@ export function QuizClient() {
                   ))}
                 </select>
               </label>
+            </div>
+            <div className="mt-4">
+              <span className="mb-1 block text-sm">{t.search.squareMeters}</span>
+              <div className="flex items-center gap-2">
+                <FormattedNumberInput
+                  placeholder={t.common.min}
+                  value={answers.minSqft}
+                  onChange={(minSqft) => patch({ minSqft })}
+                  className={`${inputClass} w-28`}
+                />
+                <span className="text-neutral-400">–</span>
+                <FormattedNumberInput
+                  placeholder={t.common.max}
+                  value={answers.maxSqft}
+                  onChange={(maxSqft) => patch({ maxSqft })}
+                  className={`${inputClass} w-28`}
+                />
+              </div>
             </div>
           </StepShell>
         )}
