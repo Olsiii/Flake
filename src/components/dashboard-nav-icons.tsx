@@ -73,6 +73,26 @@ export function PlanIcon() {
   );
 }
 
+export function AddListingIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+      <path
+        d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8.5Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="18.5" cy="8.5" r="4" className="fill-brand-500" />
+      <path
+        d="M18.5 6.8v3.4M16.8 8.5h3.4"
+        stroke="white"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function CollectionsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">

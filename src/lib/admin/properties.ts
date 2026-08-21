@@ -118,7 +118,7 @@ async function upsertNeighborhood(
       name,
       city: payload.city,
       state: payload.state,
-      slug: slugify(name),
+      slug: await findAvailableNeighborhoodSlug(supabase, name, payload.city),
       local_insights: payload.highlights,
       ...fields,
     })
@@ -126,6 +126,32 @@ async function upsertNeighborhood(
     .single();
   if (insertError) throw insertError;
   return inserted.id;
+}
+
+/** neighborhoods.slug is unique across the whole table (routing is
+ * /neighborhoods/[citySlug]/[slug], resolved by a global slug lookup then
+ * a city check — see getNeighborhoodBySlug), so two different cities can't
+ * both have a neighborhood named e.g. "Lakrishte" at the plain slug. The
+ * (name, city) lookup above only catches an exact repeat in the same city
+ * — a same-named neighborhood in a *different* city still collides on
+ * slug and needs a disambiguated one. */
+async function findAvailableNeighborhoodSlug(
+  supabase: SupabaseClient,
+  name: string,
+  city: string,
+): Promise<string> {
+  const base = slugify(name);
+  const candidates = [base, `${base}-${slugify(city)}`];
+  for (const candidate of candidates) {
+    const { data, error } = await supabase
+      .from("neighborhoods")
+      .select("id")
+      .eq("slug", candidate)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return candidate;
+  }
+  return `${base}-${slugify(city)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
 async function replaceMedia(

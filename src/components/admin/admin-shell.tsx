@@ -13,6 +13,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: "properties", label: "Properties", href: "/admin/properties", icon: PropertiesIcon },
+  { id: "submissions", label: "Submissions", href: "/admin/submissions", icon: SubmissionsIcon },
 ];
 
 /** Dark fixed sidebar + light content area + thin top bar, matching the
@@ -104,6 +105,32 @@ function PropertiesIcon({ active }: { active: boolean }) {
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function SubmissionsIcon({ active }: { active: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={`h-4.5 w-4.5 shrink-0 ${active ? "text-neutral-950" : "text-current"}`}
+    >
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M8 12h8M8 16h5M8 8h3"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
       />
     </svg>
   );

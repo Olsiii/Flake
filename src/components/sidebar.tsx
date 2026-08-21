@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/i18n/language-provider";
+import { useUser } from "@/hooks/use-user";
 import {
+  AddListingIcon,
   CollectionsIcon,
   HeartIcon,
   PlanIcon,
@@ -13,6 +15,7 @@ import {
 
 export function Sidebar() {
   const { t } = useLanguage();
+  const { user } = useUser();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -42,7 +45,17 @@ export function Sidebar() {
       href: "/dashboard?tab=collections",
       icon: CollectionsIcon,
     },
-  ] as const;
+    ...(user
+      ? [
+          {
+            id: "add-listing",
+            label: t.sidebar.addListing,
+            href: "/dashboard?modal=add-listing",
+            icon: AddListingIcon,
+          },
+        ]
+      : []),
+  ];
   const tab = searchParams.get("tab") ?? "saved-listings";
   const onDashboard = pathname.startsWith("/dashboard");
 
@@ -51,7 +64,11 @@ export function Sidebar() {
       <nav className="flex flex-1 flex-col items-center gap-10">
         {SIDEBAR_ITEMS.map((item) => {
           const active =
-            item.id === "search" ? !onDashboard : onDashboard && tab === item.id;
+            item.id === "search"
+              ? !onDashboard
+              : item.id === "add-listing"
+                ? searchParams.get("modal") === "add-listing"
+                : onDashboard && tab === item.id;
           const Icon = item.icon;
           return (
             <Link

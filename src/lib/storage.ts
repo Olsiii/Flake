@@ -11,3 +11,12 @@ export function getListingImagesBucket() {
 export function getListingImagePublicUrl(key: string): string {
   return getListingImagesBucket().getPublicUrl(key).data.publicUrl;
 }
+
+/** True if `url` points into this bucket under `keyPrefix` (e.g.
+ * "submissions/") — used to reject media URLs that didn't come through our
+ * own signed-upload flow, so a caller can't point a listing/submission at
+ * arbitrary attacker-hosted content. */
+export function isOwnStorageUrl(url: string, keyPrefix: string): boolean {
+  const base = getListingImagePublicUrl(keyPrefix);
+  return url.startsWith(base);
+}

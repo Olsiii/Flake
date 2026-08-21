@@ -363,6 +363,7 @@ export const en = {
     updates: "Updates",
     plan: "Plan",
     collections: "Collections",
+    addListing: "Add listing",
   },
   collections: {
     couldntLoad: "Couldn't load this collection:",

@@ -8,6 +8,9 @@ interface MediaGridProps {
   media: PropertyMediaInput[];
   onChange: (next: PropertyMediaInput[]) => void;
   listingId: string;
+  /** Which sign endpoint to upload through — the admin form and the
+   * user-facing submission form use different auth gates. */
+  signUrl?: string;
 }
 
 const ACCEPTED_TYPES = [
@@ -19,7 +22,12 @@ const ACCEPTED_TYPES = [
   "video/quicktime",
 ];
 
-export function MediaGrid({ media, onChange, listingId }: MediaGridProps) {
+export function MediaGrid({
+  media,
+  onChange,
+  listingId,
+  signUrl = "/api/admin/uploads/sign",
+}: MediaGridProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,7 +37,7 @@ export function MediaGrid({ media, onChange, listingId }: MediaGridProps) {
       setError(`${file.name}: unsupported file type`);
       return null;
     }
-    const signRes = await fetch("/api/admin/uploads/sign", {
+    const signRes = await fetch(signUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ listingId, contentType: file.type }),

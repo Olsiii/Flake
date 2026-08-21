@@ -5,6 +5,7 @@ import { CollectionsTab } from "./collections-tab";
 import { SavedListingsTab } from "./saved-listings-tab";
 import { SavedSearchesTab } from "./saved-searches-tab";
 import { TourRequestsTab } from "./tour-requests-tab";
+import { AddListingModal } from "./add-listing-modal";
 import { useLanguage } from "@/i18n/language-provider";
 
 const TAB_IDS_LIST = [
@@ -39,6 +40,11 @@ export function DashboardClient() {
     router.replace(`/dashboard?tab=${next}`, { scroll: false });
   }
 
+  const showAddListing = searchParams.get("modal") === "add-listing";
+  function closeAddListing() {
+    router.replace(`/dashboard?tab=${tab}`, { scroll: false });
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8">
       <h1 className="text-h1">{t.dashboard.title}</h1>
@@ -66,6 +72,13 @@ export function DashboardClient() {
         {tab === "saved-searches" && <SavedSearchesTab />}
         {tab === "tour-requests" && <TourRequestsTab />}
       </div>
+
+      {showAddListing && (
+        <AddListingModal
+          onClose={closeAddListing}
+          onSubmitted={closeAddListing}
+        />
+      )}
     </div>
   );
 }

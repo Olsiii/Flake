@@ -369,6 +369,7 @@ export const sq: Dictionary = {
     updates: "Përditësime",
     plan: "Plani",
     collections: "Koleksionet",
+    addListing: "Shto shpallje",
   },
   collections: {
     couldntLoad: "Nuk mundëm ta ngarkojmë këtë koleksion:",
