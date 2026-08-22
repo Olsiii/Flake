@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/i18n/language-provider";
+import { useUser } from "@/hooks/use-user";
 import {
+  AddListingIcon,
   CollectionsIcon,
   HeartIcon,
   PlanIcon,
@@ -11,7 +13,7 @@ import {
   UpdatesIcon,
 } from "@/components/dashboard-nav-icons";
 
-/** Mobile equivalent of the desktop Sidebar — same five destinations, same
+/** Mobile equivalent of the desktop Sidebar — same destinations, same
  * active-state logic, fixed to the bottom of the viewport instead of the
  * left edge. Sidebar already hides below `sm:`; this only shows below it,
  * so exactly one of the two is ever visible. Global (not dashboard-only)
@@ -19,6 +21,7 @@ import {
  * every page, not just inside a logged-in section. */
 export function MobileTabBar() {
   const { t } = useLanguage();
+  const { user } = useUser();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -48,6 +51,16 @@ export function MobileTabBar() {
       href: "/dashboard?tab=collections",
       icon: CollectionsIcon,
     },
+    ...(user
+      ? [
+          {
+            id: "add-listing",
+            label: t.sidebar.addListing,
+            href: "/dashboard?modal=add-listing",
+            icon: AddListingIcon,
+          },
+        ]
+      : []),
   ] as const;
 
   const tab = searchParams.get("tab") ?? "saved-listings";
@@ -67,7 +80,11 @@ export function MobileTabBar() {
     <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] sm:hidden">
       {TAB_ITEMS.map((item) => {
         const active =
-          item.id === "search" ? !onDashboard : onDashboard && tab === item.id;
+          item.id === "search"
+            ? !onDashboard
+            : item.id === "add-listing"
+              ? searchParams.get("modal") === "add-listing"
+              : onDashboard && tab === item.id;
         const Icon = item.icon;
         return (
           <Link

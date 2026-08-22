@@ -215,7 +215,7 @@ export function TopNavbar() {
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={t.nav.toggleMenu}
               aria-expanded={mobileOpen}
-              className="flex h-10 w-10 items-center justify-center rounded-md text-neutral-700 hover:bg-neutral-100"
+              className="flex h-11 w-11 items-center justify-center rounded-md text-neutral-700 hover:bg-neutral-100"
             >
               <MenuIcon open={mobileOpen} />
             </button>

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { getSupabaseServer } from "@/lib/supabase-server";
+import { BackButton } from "./back-button";
 import type { ReactNode } from "react";
 
 async function getHeroImage(): Promise<string | null> {
@@ -17,18 +18,25 @@ async function getHeroImage(): Promise<string | null> {
 /**
  * Split-screen shell shared by /sign-in and /sign-up: ~25% form column /
  * ~75% full-bleed image column on desktop (≥768px), image column removed
- * entirely (not resized) below that breakpoint. The right panel uses a
- * real listing photo when one's available, falling back to a plain brand
- * surface — same "degrade, don't break" pattern as the rest of the app's
- * optional imagery (e.g. AgentCard's missing-photo state).
+ * entirely (not resized) below that breakpoint. The form column also
+ * carries a `md:min-w-[420px]` floor — below ~1680px viewport width, 25%
+ * is narrower than the form content's own `sm:min-w-[340px]` + padding,
+ * so without this floor the form silently overflows its column and gets
+ * painted over by the image column (next sibling, later in DOM order).
+ * The image column shrinks below 75% to make room instead. The right
+ * panel uses a real listing photo when one's available, falling back to
+ * a plain brand surface — same "degrade, don't break" pattern as the
+ * rest of the app's optional imagery (e.g. AgentCard's missing-photo
+ * state).
  */
 export async function AuthSplitLayout({ children }: { children: ReactNode }) {
   const heroImage = await getHeroImage();
 
   return (
     <div className="flex min-h-dvh w-full flex-col md:flex-row">
-      <div className="bg-brand-500 flex w-full min-w-0 flex-col items-start px-8 py-16 sm:px-12 md:w-1/4 md:shrink-0 md:px-10 md:py-14">
+      <div className="bg-brand-500 flex w-full min-w-0 flex-col items-start px-8 py-16 sm:px-12 md:w-1/4 md:min-w-[420px] md:shrink-0 md:px-10 md:py-14">
         <div className="mx-auto flex w-full min-w-0 max-w-[400px] flex-col items-start gap-8 sm:min-w-[340px] md:mx-0">
+          <BackButton />
           <Link href="/">
             {/* eslint-disable-next-line @next/next/no-img-element -- fixed-size mark, no responsive/optimization needs */}
             <img

@@ -23,6 +23,19 @@ const MapPanel = dynamic(() => import("./map-panel").then((m) => m.MapPanel), {
   ssr: false,
 });
 
+/** Covers all of Kosovo with margin. Used to seed `bounds` so search still
+ * runs before the map reports its real viewport (avoiding a "no listings"
+ * flash on every load) — and, when there's no Mapbox token at all,
+ * permanently: MapPanel then never mounts a real map, so nothing would
+ * ever call `onBoundsChange`, and bounds would stay null forever, meaning
+ * search would never run at all rather than just showing a plain list. */
+const KOSOVO_BOUNDS: MapBounds = {
+  minLng: 20.02,
+  minLat: 41.84,
+  maxLng: 21.85,
+  maxLat: 43.3,
+};
+
 function SearchClientInner() {
   const { t } = useLanguage();
   const router = useRouter();
@@ -37,7 +50,9 @@ function SearchClientInner() {
   const [filters, setFilters] = useState<ListingFilters>(
     searchParams.size > 0 ? initial.filters : DEFAULT_FILTERS,
   );
-  const [bounds, setBounds] = useState<MapBounds | null>(null);
+  const [bounds, setBounds] = useState<MapBounds | null>(
+    initial.bounds ?? KOSOVO_BOUNDS,
+  );
   const [polygonGeoJson, setPolygonGeoJson] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);

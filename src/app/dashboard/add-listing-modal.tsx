@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PROPERTY_TYPES, type PropertyType } from "@/types/listing";
 import type { SubmissionPayload } from "@/types/listing-submission";
 import { MediaGrid } from "@/app/admin/(dashboard)/properties/media-grid";
+import { FormattedNumberInput } from "@/components/formatted-number-input";
 
 const EMPTY_PAYLOAD: SubmissionPayload = {
   title: "",
@@ -159,12 +160,9 @@ export function AddListingModal({
                 </label>
                 <label className="label">
                   Price (€)
-                  <input
-                    required
-                    type="number"
-                    min={0}
-                    value={form.price || ""}
-                    onChange={(e) => set("price", Number(e.target.value))}
+                  <FormattedNumberInput
+                    value={form.price || null}
+                    onChange={(v) => set("price", v ?? 0)}
                     className="input bg-white text-neutral-900 placeholder:text-neutral-400"
                   />
                 </label>
